@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true
+  },
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "**/*"
+  ]
+}
