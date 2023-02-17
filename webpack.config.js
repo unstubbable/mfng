@@ -1,11 +1,12 @@
 import path from 'path';
 import url from 'url';
+import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 
 /**
  * @type {import('webpack').Configuration}
  */
 export default {
-  entry: `./src/index.ts`,
+  entry: `./src/index.tsx`,
   target: `node`,
   output: {
     filename: `index.cjs`,
@@ -15,10 +16,13 @@ export default {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         loader: `swc-loader`,
         exclude: [/node_modules/],
       },
     ],
+  },
+  resolve: {
+    plugins: [new ResolveTypeScriptPlugin()],
   },
 };
