@@ -7,3 +7,4 @@
 /tsconfig.eslint.json
 /.vscode/extensions.json
 /.vscode/settings.json
+/dist

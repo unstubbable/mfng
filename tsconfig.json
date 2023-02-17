@@ -4,6 +4,9 @@
     "noEmit": true,
     "resolveJsonModule": true
   },
+  "exclude": [
+    "dist"
+  ],
   "extends": "./tsconfig.base.json",
   "include": [
     "**/*"

@@ -9,5 +9,11 @@
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-typescript.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-typescript-eslint.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-vscode.json"
-  ]
+  ],
+  "patches": {
+    ".eslintignore": [{"value": ["/dist"]}],
+    ".gitignore": [{"value": ["/dist"]}],
+    ".prettierignore": [{"value": ["/dist"]}],
+    "tsconfig.json": [{"value": {"exclude": ["dist"]}}]
+  }
 }
