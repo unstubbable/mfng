@@ -3,6 +3,7 @@ export async function convertStreamToString(
 ): Promise<string> {
   let result = ``;
   const reader = readableStream.getReader();
+  const textDecoder = new TextDecoder();
 
   while (true) {
     const {done, value} = await reader.read();
@@ -11,6 +12,6 @@ export async function convertStreamToString(
       return result;
     }
 
-    result += new TextDecoder().decode(value);
+    result += textDecoder.decode(value, {stream: true});
   }
 }
