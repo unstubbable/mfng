@@ -1,5 +1,6 @@
 import path from 'path';
 import url from 'url';
+import CopyPlugin from 'copy-webpack-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 
 /**
@@ -52,6 +53,7 @@ const clientConfig = {
       `dist/client`,
     ),
   },
+  plugins: [new CopyPlugin({patterns: [{from: `static`}]})],
 };
 
 export default [serverConfig, clientConfig];

@@ -37,6 +37,7 @@
     "aws-cdk-lib": "^2.65.0",
     "aws-simple": "^18.0.1",
     "constructs": "^10.1.256",
+    "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",

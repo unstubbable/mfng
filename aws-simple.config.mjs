@@ -11,7 +11,7 @@ export default () => ({
     {
       type: `file`,
       publicPath: `/favicon.ico`,
-      path: `static/favicon.ico`,
+      path: `dist/client/favicon.ico`,
     },
     {
       type: `function`,
