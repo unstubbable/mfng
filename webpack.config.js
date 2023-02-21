@@ -35,7 +35,7 @@ const serverConfig = {
   },
   resolve: {
     ...baseConfig.resolve,
-    conditionNames: [`react-server`],
+    conditionNames: [`react-server`, `node`, `import`, `require`],
   },
 };
 
