@@ -17,4 +17,6 @@ const jsxStream = ReactServerDOMClient.createFromReadableStream<JSX.Element>(
   initialRscResponseStream,
 );
 
-ReactDOMClient.hydrateRoot(document, <ServerRoot jsxStream={jsxStream} />);
+React.startTransition(() => {
+  ReactDOMClient.hydrateRoot(document, <ServerRoot jsxStream={jsxStream} />);
+});
