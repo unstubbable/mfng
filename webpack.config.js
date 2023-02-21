@@ -18,6 +18,7 @@ const baseConfig = {
   resolve: {
     plugins: [new ResolveTypeScriptPlugin()],
   },
+  devtool: `source-map`,
 };
 
 /**
