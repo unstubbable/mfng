@@ -7,7 +7,11 @@
     "importsNotUsedAsValues": "error",
     "isolatedModules": true,
     "jsx": "react",
-    "module": "node16",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "module": "esnext",
     "moduleResolution": "node16",
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
@@ -17,7 +21,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
+    "skipLibCheck": true,
     "strict": true,
-    "target": "es2022"
+    "target": "esnext",
+    "types": [
+      "@cloudflare/workers-types"
+    ]
   }
 }

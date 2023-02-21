@@ -18,7 +18,22 @@
     ".gitignore": [{"value": ["/dist"]}],
     ".npmrc": [{"value": "legacy-peer-deps=true"}],
     ".prettierignore": [{"value": ["/dist"]}],
+    "tsconfig.base.json": [
+      {
+        "value": {
+          "compilerOptions": {
+            "skipLibCheck": true,
+            "lib": ["dom", "esnext"],
+            "module": "esnext",
+            "target": "esnext",
+            "types": ["@cloudflare/workers-types"]
+          }
+        }
+      }
+    ],
     "tsconfig.json": [{"value": {"exclude": ["dist"]}}],
-    "tsconfig.eslint.json": [{"value": {"include": ["types/**/*.d.ts"]}}]
+    "tsconfig.eslint.json": [
+      {"value": {"include": ["types/**/*.d.ts", "functions/**/*"]}}
+    ]
   }
 }

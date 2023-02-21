@@ -31,6 +31,22 @@
   "editor.rulers": [
     80
   ],
+  "files.exclude": {
+    ".editorconfig": true,
+    ".eslintignore": true,
+    ".eslintrc.json": true,
+    ".gitignore": true,
+    ".node-version": true,
+    ".prettierignore": true,
+    ".prettierrc.json": true,
+    ".swcrc": true,
+    ".vscode": true,
+    ".vscode/extensions.json": true,
+    ".vscode/settings.json": true,
+    "tsconfig.base.json": true,
+    "tsconfig.eslint.json": true,
+    "tsconfig.json": true
+  },
   "json.schemaDownload.enable": true,
   "json.schemas": [
     {
