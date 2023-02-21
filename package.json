@@ -6,7 +6,7 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode production",
     "build:dev": "webpack --watch --mode development",
     "ci": "run-p compile:check format:check lint",
     "compile:check": "tsc",
