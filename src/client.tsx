@@ -3,12 +3,6 @@ import ReactDOMClient from 'react-dom/client';
 import ReactServerDOMClient from 'react-server-dom-webpack/client';
 import {ServerRoot} from './server-root.js';
 
-declare global {
-  interface Window {
-    initialRscResponse: string[];
-  }
-}
-
 const initialRscResponseStream = new ReadableStream({
   start(controller) {
     const textEncoder = new TextEncoder();

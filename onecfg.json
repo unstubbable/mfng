@@ -14,6 +14,7 @@
     ".eslintignore": [{"value": ["/dist"]}],
     ".gitignore": [{"value": ["/dist"]}],
     ".prettierignore": [{"value": ["/dist"]}],
-    "tsconfig.json": [{"value": {"exclude": ["dist"]}}]
+    "tsconfig.json": [{"value": {"exclude": ["dist"]}}],
+    "tsconfig.eslint.json": [{"value": {"include": ["types/**/*.d.ts"]}}]
   }
 }
