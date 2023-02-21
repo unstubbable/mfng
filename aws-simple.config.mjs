@@ -4,6 +4,11 @@
 export default () => ({
   routes: [
     {
+      type: `folder`,
+      publicPath: `/assets/*`,
+      path: `dist/client`,
+    },
+    {
       type: `function`,
       httpMethod: `GET`,
       publicPath: `/*`,
