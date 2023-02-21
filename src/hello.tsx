@@ -1,5 +1,7 @@
 import * as React from 'react';
+import 'server-only';
 
+// Imagine this being a fetch that can only be executed from the server.
 async function fetchSubject(): Promise<string> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 

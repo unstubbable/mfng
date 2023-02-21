@@ -20,7 +20,8 @@
     "htmlescape": "^1.1.1",
     "react": "^18.3.0-next-189f70e17-20230216",
     "react-dom": "^18.3.0-next-189f70e17-20230216",
-    "react-server-dom-webpack": "^18.3.0-next-189f70e17-20230216"
+    "react-server-dom-webpack": "^18.3.0-next-189f70e17-20230216",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@swc/core": "^1.3.22",

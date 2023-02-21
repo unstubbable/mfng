@@ -32,6 +32,10 @@ const serverConfig = {
     path: path.join(path.dirname(url.fileURLToPath(import.meta.url)), `dist`),
     libraryTarget: `commonjs`,
   },
+  resolve: {
+    ...baseConfig.resolve,
+    conditionNames: [`react-server`],
+  },
 };
 
 /**
