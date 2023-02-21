@@ -9,6 +9,11 @@ export default () => ({
       path: `dist/client`,
     },
     {
+      type: `file`,
+      publicPath: `/favicon.ico`,
+      path: `static/favicon.ico`,
+    },
+    {
       type: `function`,
       httpMethod: `GET`,
       publicPath: `/*`,
