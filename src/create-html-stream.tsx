@@ -1,6 +1,7 @@
 import * as React from 'react';
 import ReactDOMServer from 'react-dom/server.browser';
 import ReactServerDOMClient from 'react-server-dom-webpack/client';
+import {createBufferedTransformStream} from './create-buffered-transform-stream.js';
 import {createInitialRscResponseTransformStream} from './create-initial-rsc-response-transform-stream.js';
 import {ServerRoot} from './server-root.js';
 
@@ -16,7 +17,7 @@ export async function createHtmlStream(
     {bootstrapScripts: [`/main.js`]},
   );
 
-  return htmlStream.pipeThrough(
-    createInitialRscResponseTransformStream(rscStream2),
-  );
+  return htmlStream
+    .pipeThrough(createBufferedTransformStream())
+    .pipeThrough(createInitialRscResponseTransformStream(rscStream2));
 }
