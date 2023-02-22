@@ -13,7 +13,7 @@ export async function createHtmlStream(
     <ServerRoot
       jsxStream={ReactServerDOMClient.createFromReadableStream(rscStream1)}
     />,
-    {bootstrapScripts: [`/assets/main.js`]},
+    {bootstrapScripts: [`/main.js`]},
   );
 
   return htmlStream.pipeThrough(

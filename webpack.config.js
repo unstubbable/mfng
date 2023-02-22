@@ -3,6 +3,8 @@ import url from 'url';
 import CopyPlugin from 'copy-webpack-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 
+const dev = process.env.MODE === `development`;
+
 /**
  * @type {import('webpack').Configuration}
  */
@@ -20,6 +22,7 @@ const baseConfig = {
     plugins: [new ResolveTypeScriptPlugin()],
   },
   devtool: `source-map`,
+  mode: dev ? `development` : `production`,
 };
 
 /**
@@ -28,16 +31,17 @@ const baseConfig = {
 const serverConfig = {
   ...baseConfig,
   entry: `./src/index.tsx`,
-  target: `node`,
   output: {
-    filename: `index.cjs`,
+    filename: `index.js`,
     path: path.join(path.dirname(url.fileURLToPath(import.meta.url)), `dist`),
-    libraryTarget: `commonjs`,
+    libraryTarget: `module`,
+    chunkFormat: `module`,
   },
   resolve: {
     ...baseConfig.resolve,
     conditionNames: [`react-server`, `node`, `import`, `require`],
   },
+  experiments: {outputModule: true},
 };
 
 /**
