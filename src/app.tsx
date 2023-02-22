@@ -6,6 +6,8 @@ export function App(): JSX.Element {
   return (
     <html>
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Async Server Components Demo</title>
       </head>
       <body style={{fontFamily: `sans-serif`}}>
