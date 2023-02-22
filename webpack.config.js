@@ -42,6 +42,10 @@ const serverConfig = {
     conditionNames: [`react-server`, `node`, `import`, `require`],
   },
   experiments: {outputModule: true},
+  performance: {
+    maxAssetSize: 1_000_000,
+    maxEntrypointSize: 1_000_000,
+  },
 };
 
 /**
