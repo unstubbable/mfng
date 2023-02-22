@@ -9,7 +9,7 @@
     "build": "webpack",
     "ci": "run-p compile:check format:check lint",
     "compile:check": "tsc",
-    "dev": "MODE=development wrangler dev --local",
+    "dev": "MODE=development wrangler dev --experimental-local",
     "deploy": "wrangler publish",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
