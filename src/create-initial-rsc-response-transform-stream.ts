@@ -6,8 +6,10 @@ const closingBodyHtmlText = `</body></html>`;
 export function createInitialRscResponseTransformStream(
   rscStream: ReadableStream<Uint8Array>,
 ): ReadableWritablePair<Uint8Array, Uint8Array> {
-  let deferredClosingBodyHtmlText = false;
-  let rscStreamFinished: Promise<void> | undefined;
+  let removedClosingBodyHtmlText = false;
+  let insertingRscStreamScripts: Promise<void> | undefined;
+  let finishedInsertingRscStreamScripts = false;
+
   const textDecoder = new TextDecoder();
   const textEncoder = new TextEncoder();
 
@@ -15,15 +17,20 @@ export function createInitialRscResponseTransformStream(
     transform(chunk, controller) {
       const text = textDecoder.decode(chunk);
 
-      if (text.endsWith(closingBodyHtmlText)) {
+      if (
+        text.endsWith(closingBodyHtmlText) &&
+        !finishedInsertingRscStreamScripts
+      ) {
         const [withoutClosingBodyHtmlText] = text.split(closingBodyHtmlText);
+
         controller.enqueue(textEncoder.encode(withoutClosingBodyHtmlText));
-        deferredClosingBodyHtmlText = true;
+
+        removedClosingBodyHtmlText = true;
       } else {
         controller.enqueue(chunk);
       }
 
-      if (!rscStreamFinished) {
+      if (!insertingRscStreamScripts) {
         const reader = rscStream.getReader();
 
         controller.enqueue(
@@ -32,13 +39,15 @@ export function createInitialRscResponseTransformStream(
           ),
         );
 
-        rscStreamFinished = new Promise(async (resolve) => {
+        insertingRscStreamScripts = new Promise(async (resolve) => {
           try {
             while (true) {
               const result = await reader.read();
 
               if (result.done) {
-                if (deferredClosingBodyHtmlText) {
+                finishedInsertingRscStreamScripts = true;
+
+                if (removedClosingBodyHtmlText) {
                   controller.enqueue(textEncoder.encode(closingBodyHtmlText));
                 }
 
@@ -63,7 +72,7 @@ export function createInitialRscResponseTransformStream(
     },
 
     flush() {
-      return rscStreamFinished;
+      return insertingRscStreamScripts;
     },
   });
 }
