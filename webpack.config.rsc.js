@@ -40,4 +40,5 @@ export default {
       },
     ],
   },
+  externals: [`__STATIC_CONTENT_MANIFEST`],
 };
