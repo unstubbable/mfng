@@ -58,7 +58,7 @@ const clientConfig = {
   entry: `./src/client.tsx`,
   output: {
     filename: `main.js`,
-    path: path.join(__dirname, `dist`),
+    path: path.join(__dirname, `dist/client`),
   },
   plugins: [
     new CopyPlugin({patterns: [{from: `static`}]}),
