@@ -17,7 +17,7 @@
     "dev:rsc": "MODE=development wrangler dev -c src/rsc-worker/wrangler.toml --local",
     "start:html": "MODE=development wrangler dev -c src/html-worker/wrangler.toml",
     "start:rsc": "MODE=development wrangler dev -c src/rsc-worker/wrangler.toml",
-    "deploy": "concurrently -s all -n html,rsc -k 'npm run deploy:html' 'npm run deploy:rsc'",
+    "deploy": "npm run deploy:html && npm run deploy:rsc",
     "deploy:html": "wrangler publish -c src/html-worker/wrangler.toml",
     "deploy:rsc": "wrangler publish -c src/rsc-worker/wrangler.toml",
     "format:check": "prettier --check .",
