@@ -1,0 +1,14 @@
+name = "mfng-rsc"
+main = "../../dist/rsc-worker.js"
+compatibility_date = "2023-02-21"
+
+[dev]
+port = 3001
+
+[build]
+command = "npm run build:rsc"
+watch_dir = ["..", "../../node_modules"]
+
+[assets]
+bucket = "../../dist"
+serve_single_page_app = false

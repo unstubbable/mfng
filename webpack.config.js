@@ -1,14 +1,16 @@
 import path from 'path';
 import url from 'url';
 import CopyPlugin from 'copy-webpack-plugin';
+import ReactFlightWebpackPlugin from 'react-server-dom-webpack/plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 
 const dev = process.env.MODE === `development`;
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
  * @type {import('webpack').Configuration}
  */
-const baseConfig = {
+export const baseConfig = {
   module: {
     rules: [
       {
@@ -30,16 +32,16 @@ const baseConfig = {
  */
 const serverConfig = {
   ...baseConfig,
-  entry: `./src/index.tsx`,
+  entry: `./src/html-worker/index.ts`,
   output: {
-    filename: `index.js`,
-    path: path.join(path.dirname(url.fileURLToPath(import.meta.url)), `dist`),
+    filename: `html-worker.js`,
+    path: path.join(__dirname, `dist`),
     libraryTarget: `module`,
     chunkFormat: `module`,
   },
   resolve: {
     ...baseConfig.resolve,
-    conditionNames: [`react-server`, `node`, `import`, `require`],
+    conditionNames: [`workerd`, `node`, `import`, `require`],
   },
   experiments: {outputModule: true},
   performance: {
@@ -56,12 +58,18 @@ const clientConfig = {
   entry: `./src/client.tsx`,
   output: {
     filename: `main.js`,
-    path: path.join(
-      path.dirname(url.fileURLToPath(import.meta.url)),
-      `dist/client`,
-    ),
+    path: path.join(__dirname, `dist`),
   },
-  plugins: [new CopyPlugin({patterns: [{from: `static`}]})],
+  plugins: [
+    new CopyPlugin({patterns: [{from: `static`}]}),
+    new ReactFlightWebpackPlugin({
+      isServer: false,
+      clientReferences: {
+        directory: `./src/client-components`,
+        include: /\.tsx$/,
+      },
+    }),
+  ],
 };
 
 export default [serverConfig, clientConfig];

@@ -1,0 +1,18 @@
+name = "mfng"
+main = "../../dist/html-worker.js"
+compatibility_date = "2023-02-21"
+
+[dev]
+port = 3000
+
+[build]
+command = "npm run build:html"
+watch_dir = ["..", "../../node_modules"]
+
+[assets]
+bucket = "../../dist"
+serve_single_page_app = true
+
+[[services]]
+binding = "RSC"
+service = "mfng-rsc"

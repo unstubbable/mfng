@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Counter} from './client-components/counter.js';
 import {Hello} from './hello.js';
 import {Suspended} from './suspended.js';
 
@@ -8,7 +9,7 @@ export function App(): JSX.Element {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Async Server Components Demo</title>
+        <title>Server Components with Streaming SSR Demo</title>
       </head>
       <body style={{fontFamily: `sans-serif`}}>
         <span style={{fontSize: `10px`}}>
@@ -29,6 +30,7 @@ export function App(): JSX.Element {
           {/* @ts-expect-error */}
           <Suspended />
         </React.Suspense>
+        <Counter />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 declare module 'react-server-dom-webpack' {
-  export interface WebpackSSRMap {
-    [clientId: string]: {
-      [clientExportName: string]: ClientReferenceMetadata;
+  export interface WebpackMap {
+    [filepath: string]: {
+      [name: string]: ClientReferenceMetadata;
     };
   }
 

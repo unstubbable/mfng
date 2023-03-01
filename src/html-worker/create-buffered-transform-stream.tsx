@@ -1,4 +1,4 @@
-import {nextMacroTask} from './next-macro-task.js';
+import {nextMacroTask} from '../next-macro-task.js';
 
 export function createBufferedTransformStream(): ReadableWritablePair<
   Uint8Array,

@@ -1,6 +1,6 @@
-declare module 'react-server-dom-webpack/server.browser' {
+declare module 'react-server-dom-webpack/server' {
   import type {ReactElement} from 'react';
-  import type {WebpackSSRMap} from 'react-server-dom-webpack';
+  import type {WebpackMap} from 'react-server-dom-webpack';
 
   export type ReactModel =
     | ReactElement
@@ -37,7 +37,7 @@ declare module 'react-server-dom-webpack/server.browser' {
 
   export function renderToReadableStream(
     model: ReactModel,
-    webpackMap: WebpackSSRMap | null,
+    webpackMap: WebpackMap | null,
     options?: RenderToReadableStreamOptions,
   ): ReadableStream<Uint8Array>;
 }
