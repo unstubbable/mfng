@@ -62,6 +62,7 @@ const clientConfig = {
   output: {
     filename: `main.js`,
     path: path.join(__dirname, `dist/client`),
+    clean: !dev,
   },
   plugins: [
     new CopyPlugin({patterns: [{from: `static`}]}),
