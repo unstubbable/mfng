@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "htmlescape": "^1.1.1",
-    "react": "18.3.0-next-6ff1733e6-20230225",
-    "react-dom": "18.3.0-next-6ff1733e6-20230225",
+    "react": "18.3.0-next-41110021f-20230301",
+    "react-dom": "18.3.0-next-41110021f-20230301",
     "react-markdown": "^8.0.5",
-    "react-server-dom-webpack": "18.3.0-next-6ff1733e6-20230225",
+    "react-server-dom-webpack": "18.3.0-next-41110021f-20230301",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
