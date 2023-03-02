@@ -48,6 +48,9 @@ const serverConfig = {
     maxAssetSize: 1_000_000,
     maxEntrypointSize: 1_000_000,
   },
+  optimization: dev
+    ? undefined
+    : {concatenateModules: false, usedExports: false, moduleIds: `hashed`},
 };
 
 /**
@@ -70,6 +73,7 @@ const clientConfig = {
       },
     }),
   ],
+  optimization: dev ? undefined : {moduleIds: `hashed`},
 };
 
 export default [serverConfig, clientConfig];
