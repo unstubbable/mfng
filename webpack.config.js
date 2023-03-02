@@ -72,6 +72,8 @@ const clientConfig = {
         directory: `./src/client-components`,
         include: /\.tsx$/,
       },
+      clientManifestFilename: `../react-client-manifest.json`,
+      ssrManifestFilename: `../react-ssr-manifest.json`,
     }),
   ],
   optimization: dev ? undefined : {moduleIds: `hashed`},
