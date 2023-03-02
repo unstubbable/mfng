@@ -8,11 +8,21 @@ export interface BuyButtonProps {
 }
 
 export function BuyButton({children, buy}: BuyButtonProps): JSX.Element {
-  const handleClick = async () => {
-    const result = await buy();
+  const [isPending, setIsPending] = React.useState(false);
 
+  const handleClick = async () => {
+    setIsPending(true);
+    const result = await buy();
+    setIsPending(false);
     console.log(result);
   };
 
-  return <button onClick={handleClick}>{children}</button>;
+  return (
+    <div>
+      <p>This is a client component that triggers a server action.</p>
+      <button onClick={handleClick} disabled={isPending}>
+        {children}
+      </button>
+    </div>
+  );
 }

@@ -32,8 +32,8 @@ export function App(): JSX.Element {
           {/* @ts-expect-error */}
           <Suspended />
         </React.Suspense>
-        <BuyButton buy={buy}>Buy now</BuyButton>
         <Counter />
+        <BuyButton buy={buy}>Buy now</BuyButton>
       </body>
     </html>
   );
