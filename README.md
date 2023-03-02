@@ -12,5 +12,7 @@ server components to let them fetch their data in the server?
 - [x] client components loaded as separate chunks
 - [x] server actions
 - [ ] routing
-- [ ] stylesheets
 - [ ] (lazy) microfrontend compositon demo
+- [ ] stylesheets
+- [ ] support poisened imports
+- [ ] server references manifest
