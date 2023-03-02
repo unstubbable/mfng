@@ -1,6 +1,8 @@
 import * as React from 'react';
+import {BuyButton} from './client-components/buy-button.js';
 import {Counter} from './client-components/counter.js';
 import {Hello} from './hello.js';
+import {buy} from './server-actions/buy.js';
 import {Suspended} from './suspended.js';
 
 export function App(): JSX.Element {
@@ -26,10 +28,11 @@ export function App(): JSX.Element {
         </span>
         {/* @ts-expect-error */}
         <Hello />
-        <React.Suspense fallback="Loading...">
+        <React.Suspense fallback={<p>Loading...</p>}>
           {/* @ts-expect-error */}
           <Suspended />
         </React.Suspense>
+        <BuyButton buy={buy}>Buy now</BuyButton>
         <Counter />
       </body>
     </html>

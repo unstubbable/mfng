@@ -2,6 +2,7 @@ import path from 'path';
 import url from 'url';
 import {baseConfig} from './webpack.config.js';
 
+const dev = process.env.MODE === `development`;
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
@@ -41,4 +42,6 @@ export default {
     ],
   },
   externals: [`__STATIC_CONTENT_MANIFEST`],
+  // Do not mangle exports so that server references can be imported by name.
+  optimization: dev ? undefined : {mangleExports: false},
 };

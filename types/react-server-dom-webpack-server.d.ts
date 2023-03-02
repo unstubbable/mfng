@@ -37,7 +37,7 @@ declare module 'react-server-dom-webpack/server' {
 
   export function renderToReadableStream(
     model: ReactModel,
-    webpackMap: WebpackMap | null,
+    webpackMap?: WebpackMap | null,
     options?: RenderToReadableStreamOptions,
   ): ReadableStream<Uint8Array>;
 }

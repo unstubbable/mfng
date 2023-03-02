@@ -1,19 +1,24 @@
 declare module 'react-server-dom-webpack/client.browser' {
   import type {Thenable} from 'react';
-  import type {WebpackMap} from 'react-server-dom-webpack';
+  import type {ServerRef, WebpackMap} from 'react-server-dom-webpack';
 
-  export interface CreateFromReadableStreamOptions {
+  export interface ReactServerDomClientOptions {
     callServer?: CallServerCallback;
   }
 
-  export type CallServerCallback = <TArgs, TResult>(
-    {filepath: string, name: string},
-    args: TArgs,
-  ) => Promise<TResult>;
+  export type CallServerCallback = (
+    ref: ServerRef,
+    args: unknown,
+  ) => Thenable<unknown>;
+
+  export function createFromFetch<T>(
+    promiseForResponse: Promise<Response>,
+    options?: ReactServerDomClientOptions,
+  ): Thenable<T>;
 
   export function createFromReadableStream<T>(
     stream: ReadableStream,
-    options?: CreateFromReadableStreamOptions,
+    options?: ReactServerDomClientOptions,
   ): Thenable<T>;
 }
 

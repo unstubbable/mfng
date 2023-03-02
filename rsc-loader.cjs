@@ -1,5 +1,6 @@
 const loaderUtils = require(`loader-utils`);
 const {pathToFileURL} = require(`url`);
+const webpack = require(`webpack`);
 
 /**
  * @this {import('webpack').LoaderContext<{}>}
@@ -38,9 +39,18 @@ async function rscLoader(content) {
     loadModule,
   );
 
-  return typeof result.source === `string`
-    ? result.source
-    : new TextDecoder().decode(result.source);
+  const sourceCode =
+    typeof result.source === `string`
+      ? result.source
+      : new TextDecoder().decode(result.source);
+
+  // Patch the server reference filepath values to use webpack's module id
+  // instead of the file URL, so that it can be imported from within the RSC
+  // worker bundle.
+  return sourceCode.replace(
+    /\$\$filepath: \{value: "[^"]+"\}/,
+    () => `$$filepath: {value: ${webpack.RuntimeGlobals.moduleId}}`,
+  );
 }
 
 module.exports = rscLoader;

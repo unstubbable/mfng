@@ -11,4 +11,9 @@ declare module 'react-server-dom-webpack' {
     name: string;
     async: boolean;
   }
+
+  export interface ServerRef {
+    id: string;
+    name: string;
+  }
 }
