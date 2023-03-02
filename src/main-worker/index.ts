@@ -1,12 +1,16 @@
 import {createHtmlStream} from './create-html-stream.js';
 
-export interface HtmlWorkerEnv {
+export interface MainWorkerEnv {
   RSC: Fetcher;
 }
 
-export default <ExportedHandler<HtmlWorkerEnv>>{
+export default <ExportedHandler<MainWorkerEnv>>{
   async fetch(request, env) {
     const rscResponse = await env.RSC.fetch(request);
+
+    if (request.headers.get(`accept`) === `text/x-component`) {
+      return rscResponse;
+    }
 
     if (!rscResponse.body) {
       throw new Error(`Empty body received from RSC worker.`);

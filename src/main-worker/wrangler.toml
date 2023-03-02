@@ -1,12 +1,12 @@
 name = "mfng"
-main = "../../dist/html-worker.js"
+main = "../../dist/main-worker.js"
 compatibility_date = "2023-02-21"
 
 [dev]
 port = 3000
 
 [build]
-command = "npm run build:html"
+command = "npm run build:main"
 watch_dir = ["..", "../../node_modules"]
 
 [assets]

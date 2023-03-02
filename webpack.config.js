@@ -32,9 +32,9 @@ export const baseConfig = {
  */
 const serverConfig = {
   ...baseConfig,
-  entry: `./src/html-worker/index.ts`,
+  entry: `./src/main-worker/index.ts`,
   output: {
-    filename: `html-worker.js`,
+    filename: `main-worker.js`,
     path: path.join(__dirname, `dist`),
     libraryTarget: `module`,
     chunkFormat: `module`,
