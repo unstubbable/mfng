@@ -50,7 +50,7 @@ const serverConfig = {
   },
   optimization: dev
     ? undefined
-    : {concatenateModules: false, usedExports: false, moduleIds: `hashed`},
+    : {concatenateModules: false, usedExports: false, moduleIds: `named`},
 };
 
 /**
@@ -76,7 +76,7 @@ const clientConfig = {
       ssrManifestFilename: `../react-ssr-manifest.json`,
     }),
   ],
-  optimization: dev ? undefined : {moduleIds: `hashed`},
+  optimization: dev ? undefined : {moduleIds: `named`},
 };
 
 export default [serverConfig, clientConfig];
