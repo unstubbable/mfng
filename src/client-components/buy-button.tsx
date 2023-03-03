@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import type {buy} from '../server-actions/buy.js';
+import {useEphemeralState} from './use-ephemeral-state.js';
 
 export interface BuyButtonProps {
   readonly buy: typeof buy;
@@ -10,12 +11,12 @@ export interface BuyButtonProps {
 export function BuyButton({buy}: BuyButtonProps): JSX.Element {
   const [quantity, setQuantity] = React.useState(1);
   const [isPending, setIsPending] = React.useState(false);
+  const [result, setResult] = useEphemeralState<string>(undefined, 3000);
 
   const handleClick = async () => {
     setIsPending(true);
-    const result = await buy(quantity);
+    setResult(await buy(quantity));
     setIsPending(false);
-    console.log(result);
   };
 
   return (
@@ -33,6 +34,7 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
       <button onClick={handleClick} disabled={isPending}>
         Buy now
       </button>
+      {result && <p style={{color: `forestgreen`}}>{result}</p>}
     </div>
   );
 }
