@@ -63,7 +63,18 @@ const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
 
   const args = (await request.json()) as unknown[];
   const actionPromise = action.apply(null, args);
-  const rscStream = ReactServerDOMServer.renderToReadableStream(actionPromise);
+
+  const rscStream = ReactServerDOMServer.renderToReadableStream(
+    actionPromise,
+    null,
+    {
+      onError: (error) => {
+        console.error(error);
+
+        return error instanceof Error ? error.message : `Unknown Error`;
+      },
+    },
+  );
 
   return new Response(rscStream, {
     headers: {'content-type': `text/x-component`},

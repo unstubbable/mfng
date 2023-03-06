@@ -8,15 +8,29 @@ export interface BuyButtonProps {
   readonly buy: typeof buy;
 }
 
+interface Result {
+  readonly status: 'success' | 'error';
+  readonly message: string;
+}
+
 export function BuyButton({buy}: BuyButtonProps): JSX.Element {
   const [quantity, setQuantity] = React.useState(1);
   const [isPending, setIsPending] = React.useState(false);
-  const [result, setResult] = useEphemeralState<string>(undefined, 3000);
+  const [result, setResult] = useEphemeralState<Result>(undefined, 3000);
 
   const handleClick = async () => {
     setIsPending(true);
-    setResult(await buy(quantity));
-    setIsPending(false);
+
+    try {
+      setResult({status: `success`, message: await buy(quantity)});
+    } catch (error) {
+      setResult({
+        status: `error`,
+        message: isErrorWithDigest(error) ? error.digest : `Unknown Error`,
+      });
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -34,7 +48,19 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
       <button onClick={handleClick} disabled={isPending}>
         Buy now
       </button>
-      {result && <p style={{color: `forestgreen`}}>{result}</p>}
+      {result && (
+        <p
+          style={{
+            color: result.status === `success` ? `forestgreen` : `orangered`,
+          }}
+        >
+          {result.message}
+        </p>
+      )}
     </div>
   );
+}
+
+function isErrorWithDigest(error: unknown): error is Error & {digest: string} {
+  return error instanceof Error && `digest` in error;
 }
