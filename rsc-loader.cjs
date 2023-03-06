@@ -48,8 +48,9 @@ async function rscLoader(content) {
   // instead of the file URL, so that it can be imported from within the RSC
   // worker bundle.
   return sourceCode.replace(
-    /\$\$filepath: \{value: "[^"]+"\}/,
-    () => `$$filepath: {value: ${webpack.RuntimeGlobals.moduleId}}`,
+    /(\$\$typeof: \{value: Symbol.for\("react.server.reference"\)\},\$\$id: \{value: )"[^#]+#([^"]*)"/,
+    (_match, prefix, exportName) =>
+      `${prefix}${webpack.RuntimeGlobals.moduleId}+"#${exportName}"`,
   );
 }
 

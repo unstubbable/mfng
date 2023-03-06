@@ -1,13 +1,13 @@
 declare module 'react-server-dom-webpack/client.browser' {
   import type {Thenable} from 'react';
-  import type {ServerRef, WebpackMap} from 'react-server-dom-webpack';
+  import type {WebpackMap} from 'react-server-dom-webpack';
 
   export interface ReactServerDomClientOptions {
     callServer?: CallServerCallback;
   }
 
   export type CallServerCallback = (
-    ref: ServerRef,
+    id: string,
     args: unknown,
   ) => Thenable<unknown>;
 

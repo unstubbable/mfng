@@ -1,7 +1,7 @@
 import {getAssetFromKV} from '@cloudflare/kv-asset-handler';
 import staticContentManifest from '__STATIC_CONTENT_MANIFEST';
 import * as React from 'react';
-import type {ServerRef, WebpackMap} from 'react-server-dom-webpack';
+import type {WebpackMap} from 'react-server-dom-webpack';
 import type {ReactModel} from 'react-server-dom-webpack/server';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
 import {App} from '../app.js';
@@ -12,7 +12,7 @@ export interface RscWorkerEnv {
   __STATIC_CONTENT: {};
 }
 
-declare var __webpack_require__: (id: string) => Record<string, unknown>;
+declare var __webpack_require__: (moduleId: string) => Record<string, unknown>;
 
 const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   request,
@@ -42,14 +42,18 @@ const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
 const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   request,
 ) => {
-  const rscActionHeader = request.headers.get(`x-rsc-action`);
+  const serverReferenceId = request.headers.get(`x-rsc-action`);
+  const [moduleId, exportName] = serverReferenceId?.split(`#`) ?? [];
 
-  if (!rscActionHeader) {
+  if (!moduleId || !exportName) {
+    console.error(
+      `Invalid server reference ID: ${JSON.stringify(serverReferenceId)}`,
+    );
+
     return new Response(null, {status: 400});
   }
 
-  const {id, name} = JSON.parse(rscActionHeader) as ServerRef;
-  const action = __webpack_require__(id)[name];
+  const action = __webpack_require__(moduleId)[exportName];
 
   if (!isValidServerReference(action)) {
     console.error(action, `is not a valid server reference.`);
