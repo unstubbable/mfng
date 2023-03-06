@@ -21,6 +21,7 @@ function fetchJsxStream(pathname: string): React.Thenable<JSX.Element> {
 
   return ReactServerDOMClient.createFromFetch(
     fetch(pathname, {headers: {accept: `text/x-component`}}),
+    {callServer},
   );
 }
 
