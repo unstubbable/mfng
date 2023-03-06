@@ -45,4 +45,8 @@ declare module 'react' {
   export type Usable<T> = Thenable<T> | React.Context<T>;
 
   function use<T>(usable: Usable<T>): T;
+
+  function cache<T extends Function>(
+    fn: T,
+  ): (...args: Parameters<T>) => ReturnType<T>;
 }
