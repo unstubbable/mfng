@@ -18,6 +18,10 @@ export const baseConfig = {
         loader: `swc-loader`,
         exclude: [/node_modules/],
       },
+      {
+        test: /\.md$/,
+        type: `asset/source`,
+      },
     ],
   },
   resolve: {

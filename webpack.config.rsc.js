@@ -10,7 +10,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
  */
 export default {
   ...baseConfig,
-  entry: `./src/rsc-worker/index.ts`,
+  entry: `./src/rsc-worker/index.tsx`,
   output: {
     filename: `rsc-worker.js`,
     path: path.join(__dirname, `dist`),
@@ -31,6 +31,7 @@ export default {
   },
   module: {
     rules: [
+      ...(baseConfig.module?.rules || []),
       {
         test: /\.tsx?$/,
         use: [

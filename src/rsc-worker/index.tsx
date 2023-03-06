@@ -2,9 +2,9 @@ import {getAssetFromKV} from '@cloudflare/kv-asset-handler';
 import staticContentManifest from '__STATIC_CONTENT_MANIFEST';
 import * as React from 'react';
 import type {WebpackMap} from 'react-server-dom-webpack';
-import type {ReactModel} from 'react-server-dom-webpack/server';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
 import {App} from '../app.js';
+import {isValidServerReference} from './is-valid-server-reference.js';
 
 const assetManifest = JSON.parse(staticContentManifest);
 
@@ -19,7 +19,7 @@ const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   env,
   ctx,
 ) => {
-  const {origin} = new URL(request.url);
+  const {origin, pathname} = new URL(request.url);
   const manifestUrl = new URL(`react-client-manifest.json`, origin);
 
   const moduleMapResponse = await getAssetFromKV(
@@ -30,7 +30,7 @@ const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   const moduleMap = (await moduleMapResponse.json()) as WebpackMap;
 
   const rscStream = ReactServerDOMServer.renderToReadableStream(
-    React.createElement(App),
+    <App pathname={pathname} />,
     moduleMap,
   );
 
@@ -81,7 +81,7 @@ const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   });
 };
 
-export default <ExportedHandler<RscWorkerEnv>>{
+const handler: ExportedHandler<RscWorkerEnv> = {
   async fetch(request, env, ctx) {
     if (request.method === `GET`) {
       return handleGet(request, env, ctx);
@@ -95,13 +95,4 @@ export default <ExportedHandler<RscWorkerEnv>>{
   },
 };
 
-function isValidServerReference(
-  action: unknown,
-): action is (...args: unknown[]) => Promise<ReactModel> {
-  // TODO: Check against a server reference manifest.
-  return (
-    typeof action === `function` &&
-    `$$typeof` in action &&
-    action.$$typeof === Symbol.for(`react.server.reference`)
-  );
-}
+export default handler;
