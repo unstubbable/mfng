@@ -11,7 +11,8 @@ server components to let them fetch their data in the server?
 - [x] streaming
 - [x] client components loaded as separate chunks
 - [x] server actions
-- [ ] routing
+- [x] simple routing
+- [ ] advanced routing (maybe use `react-router`?)
 - [ ] (lazy) microfrontend compositon demo
 - [ ] stylesheets
 - [ ] support poisened imports
