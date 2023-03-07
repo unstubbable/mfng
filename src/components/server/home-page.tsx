@@ -1,23 +1,21 @@
 import * as React from 'react';
 import {buy} from '../../server-actions/buy.js';
 import {BuyButton} from '../client/buy-button.js';
-import {Link} from '../client/link.js';
 import {Hello} from './hello.js';
 import {Suspended} from './suspended.js';
 
 export function HomePage(): JSX.Element {
   return (
     <main>
-      {/* @ts-expect-error */}
+      {/* @ts-expect-error (async component) */}
       <Hello />
       <React.Suspense fallback={<p>Loading...</p>}>
-        {/* @ts-expect-error */}
+        {/* @ts-expect-error (async component) */}
         <Suspended />
       </React.Suspense>
-      <BuyButton buy={buy} />
-      <p>
-        <Link pathname="/another-page">Navigate to another page</Link>
-      </p>
+      <React.Suspense>
+        <BuyButton buy={buy} />
+      </React.Suspense>
     </main>
   );
 }

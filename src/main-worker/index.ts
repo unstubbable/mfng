@@ -19,7 +19,8 @@ export default <ExportedHandler<MainWorkerEnv>>{
       throw new Error(`Empty body received from RSC worker.`);
     }
 
-    const htmlStream = await createHtmlStream(rscResponse.body);
+    const {pathname} = new URL(request.url);
+    const htmlStream = await createHtmlStream(pathname, rscResponse.body);
 
     return new Response(htmlStream, {
       headers: {'content-type': `text/html; charset=utf-8`},

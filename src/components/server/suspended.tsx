@@ -1,9 +1,10 @@
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
+import {wait} from './wait.js';
 // import 'server-only'; // https://twitter.com/unstubbable/status/1630897868155305984
 
 async function fetchContent(): Promise<string> {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await wait(1500);
 
   return `This is a suspended server component.`;
 }

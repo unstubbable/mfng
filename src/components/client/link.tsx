@@ -15,6 +15,10 @@ export function Link({children, pathname}: LinkProps): JSX.Element {
     history.push(pathname);
   };
 
+  if (history.location.pathname === pathname) {
+    return <>{children}</>;
+  }
+
   return (
     <a href={pathname} onClick={handleClick}>
       {children}

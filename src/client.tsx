@@ -4,7 +4,6 @@ import ReactDOMClient from 'react-dom/client';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
 import {callServer} from './call-server.js';
 import {ClientRoot} from './components/client/client-root.js';
-import {HistoryContext} from './hooks/use-history.js';
 
 const initialPathname = location.pathname;
 
@@ -28,8 +27,9 @@ function fetchJsxStream(pathname: string): React.Thenable<JSX.Element> {
 React.startTransition(() => {
   ReactDOMClient.hydrateRoot(
     document,
-    <HistoryContext.Provider value={createBrowserHistory()}>
-      <ClientRoot fetchJsxStream={React.cache(fetchJsxStream)} />
-    </HistoryContext.Provider>,
+    <ClientRoot
+      history={createBrowserHistory()}
+      fetchJsxStream={React.cache(fetchJsxStream)}
+    />,
   );
 });

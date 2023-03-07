@@ -1,6 +1,7 @@
 import * as React from 'react';
-import {AnotherPage} from './another-page.js';
-import {HomePage} from './home-page.js';
+import {NavigationContainer} from '../client/navigation-container.js';
+import {Navigation} from './navigation.js';
+import {Router} from './router.js';
 
 export interface AppProps {
   readonly pathname: string;
@@ -27,7 +28,15 @@ export function App({pathname}: AppProps): JSX.Element {
           felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus
           elementum semper nisi.
         </span>
-        {pathname === `/another-page` ? <AnotherPage /> : <HomePage />}
+
+        <Navigation />
+        <React.Suspense>
+          <NavigationContainer>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <Router pathname={pathname} />
+            </React.Suspense>
+          </NavigationContainer>
+        </React.Suspense>
       </body>
     </html>
   );
