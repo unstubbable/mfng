@@ -9,6 +9,8 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     environment: Cloudflare Workers
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
