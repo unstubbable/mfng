@@ -1,0 +1,20 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: Cloudflare Workers
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install
+        run: npm i
+      - name: Start and test
+        run: npm run start-and-test
+      - name: Deploy
+        run: npm run deploy
