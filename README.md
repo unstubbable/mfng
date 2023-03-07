@@ -12,7 +12,9 @@ server components to let them fetch their data in the server?
 - [x] client components loaded as separate chunks
 - [x] server actions
 - [x] simple routing
-- [ ] advanced routing (maybe use `react-router`?)
+- [ ] advanced routing (~~maybe use `react-router`?~~ I don't think think is
+      feasable since the concepts of RSC and React Router do not really line
+      up.)
 - [ ] (lazy) microfrontend compositon demo
 - [ ] stylesheets
 - [ ] support poisened imports
