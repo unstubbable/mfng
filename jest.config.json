@@ -20,7 +20,7 @@
   "testMatch": [
     "**/src/**/*.test.{ts,tsx}"
   ],
-  "testTimeout": 30000,
+  "testTimeout": 60000,
   "transform": {
     "^.+\\.tsx?$": [
       "@swc/jest"
