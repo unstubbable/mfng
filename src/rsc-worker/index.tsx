@@ -83,15 +83,16 @@ const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
 
 const handler: ExportedHandler<RscWorkerEnv> = {
   async fetch(request, env, ctx) {
-    if (request.method === `GET`) {
-      return handleGet(request, env, ctx);
+    switch (request.method) {
+      case `HEAD`:
+        return new Response(null, {status: 200});
+      case `GET`:
+        return handleGet(request, env, ctx);
+      case `POST`:
+        return handlePost(request, env, ctx);
+      default:
+        return new Response(null, {status: 405});
     }
-
-    if (request.method === `POST`) {
-      return handlePost(request, env, ctx);
-    }
-
-    return new Response(null, {status: 405});
   },
 };
 

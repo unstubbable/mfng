@@ -8,7 +8,10 @@ export default <ExportedHandler<MainWorkerEnv>>{
   async fetch(request, env) {
     const rscResponse = await env.RSC.fetch(request);
 
-    if (request.headers.get(`accept`) === `text/x-component`) {
+    if (
+      request.headers.get(`accept`) === `text/x-component` ||
+      request.method === `HEAD`
+    ) {
       return rscResponse;
     }
 
