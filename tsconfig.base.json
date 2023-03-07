@@ -25,7 +25,8 @@
     "strict": true,
     "target": "esnext",
     "types": [
-      "@cloudflare/workers-types"
+      "@cloudflare/workers-types",
+      "jest"
     ]
   }
 }

@@ -1,5 +1,7 @@
 /.prettierrc.json
 /.eslintrc.json
+/coverage
+/jest.config.json
 /package-lock.json
 /.swcrc
 /tsconfig.base.json

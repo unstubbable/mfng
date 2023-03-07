@@ -43,6 +43,7 @@
     ".vscode": true,
     ".vscode/extensions.json": true,
     ".vscode/settings.json": true,
+    "jest.config.json": true,
     "tsconfig.base.json": true,
     "tsconfig.eslint.json": true,
     "tsconfig.json": true

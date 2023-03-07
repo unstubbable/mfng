@@ -3,6 +3,7 @@
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-editorconfig.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-eslint.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-git.json",
+    "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-jest.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-node.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-prettier.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-swc.json",
@@ -18,6 +19,7 @@
     ".gitignore": [{"value": ["/dist"]}],
     ".npmrc": [{"value": "legacy-peer-deps=true"}],
     ".prettierignore": [{"value": ["/dist"]}],
+    "jest.config.json": [{"value": {"testTimeout": 30000}}],
     "tsconfig.base.json": [
       {
         "value": {
@@ -26,7 +28,7 @@
             "lib": ["dom", "esnext"],
             "module": "esnext",
             "target": "esnext",
-            "types": ["@cloudflare/workers-types"]
+            "types": ["@cloudflare/workers-types", "jest"]
           }
         }
       }
