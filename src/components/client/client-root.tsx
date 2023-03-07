@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {useHistory} from '../hooks/use-history.js';
+import {useHistory} from '../../hooks/use-history.js';
 
 export interface ClientRootProps {
   readonly fetchJsxStream: (pathname: string) => React.Thenable<JSX.Element>;

@@ -1,6 +1,6 @@
 import {createMemoryHistory} from 'history';
 import * as React from 'react';
-import {HistoryContext} from './hooks/use-history.js';
+import {HistoryContext} from '../../hooks/use-history.js';
 
 export interface ServerRootProps {
   readonly jsxStream: React.Thenable<JSX.Element>;

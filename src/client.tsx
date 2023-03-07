@@ -3,7 +3,7 @@ import * as React from 'react';
 import ReactDOMClient from 'react-dom/client';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
 import {callServer} from './call-server.js';
-import {ClientRoot} from './client-components/client-root.js';
+import {ClientRoot} from './components/client/client-root.js';
 import {HistoryContext} from './hooks/use-history.js';
 
 const initialPathname = location.pathname;

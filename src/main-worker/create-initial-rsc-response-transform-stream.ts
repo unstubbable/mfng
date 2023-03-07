@@ -1,5 +1,5 @@
 import {sanitize} from 'htmlescape';
-import {nextMacroTask} from '../next-macro-task.js';
+import {nextMacroTask} from './next-macro-task.js';
 
 const closingBodyHtmlText = `</body></html>`;
 

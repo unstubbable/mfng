@@ -1,7 +1,7 @@
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
+import {Link} from '../client/link.js';
 import content from './another-page.md';
-import {Link} from './client-components/link.js';
 
 export function AnotherPage(): JSX.Element {
   return (

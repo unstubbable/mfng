@@ -3,7 +3,7 @@ import staticContentManifest from '__STATIC_CONTENT_MANIFEST';
 import * as React from 'react';
 import type {WebpackMap} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
-import {App} from '../app.js';
+import {App} from '../components/server/app.js';
 import {isValidServerReference} from './is-valid-server-reference.js';
 
 const assetManifest = JSON.parse(staticContentManifest);

@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {BuyButton} from './client-components/buy-button.js';
-import {Link} from './client-components/link.js';
+import {buy} from '../../server-actions/buy.js';
+import {BuyButton} from '../client/buy-button.js';
+import {Link} from '../client/link.js';
 import {Hello} from './hello.js';
-import {buy} from './server-actions/buy.js';
 import {Suspended} from './suspended.js';
 
 export function HomePage(): JSX.Element {

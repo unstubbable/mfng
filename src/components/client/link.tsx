@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {useHistory} from '../hooks/use-history.js';
+import {useHistory} from '../../hooks/use-history.js';
 
 export type LinkProps = React.PropsWithChildren<{
   readonly pathname: string;

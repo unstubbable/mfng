@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import {useEphemeralState} from '../hooks/use-ephemeral-state.js';
-import type {buy} from '../server-actions/buy.js';
+import {useEphemeralState} from '../../hooks/use-ephemeral-state.js';
+import type {buy} from '../../server-actions/buy.js';
 
 export interface BuyButtonProps {
   readonly buy: typeof buy;

@@ -73,7 +73,7 @@ const clientConfig = {
     new ReactFlightWebpackPlugin({
       isServer: false,
       clientReferences: {
-        directory: `./src/client-components`,
+        directory: `./src/components/client`,
         include: /\.tsx$/,
       },
       clientManifestFilename: `../react-client-manifest.json`,
