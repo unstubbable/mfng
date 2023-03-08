@@ -1,42 +1,41 @@
-import {getAssetFromKV} from '@cloudflare/kv-asset-handler';
-import staticContentManifest from '__STATIC_CONTENT_MANIFEST';
 import * as React from 'react';
 import type {WebpackMap} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
-import {App} from '../components/server/app.js';
-import {PathnameServerContextName} from '../pathname-server-context.js';
+import {App} from '../../components/server/app.js';
+import {PathnameServerContextName} from '../../pathname-server-context.js';
+import type {EnvWithStaticContent} from '../get-json-from-kv.js';
+import {getJsonFromKv} from '../get-json-from-kv.js';
 import {isValidServerReference} from './is-valid-server-reference.js';
-
-const assetManifest = JSON.parse(staticContentManifest);
-
-export interface RscWorkerEnv {
-  __STATIC_CONTENT: {};
-}
 
 declare var __webpack_require__: (moduleId: string) => Record<string, unknown>;
 
-const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
+const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   request,
   env,
   ctx,
 ) => {
-  const {origin, pathname} = new URL(request.url);
-  const manifestUrl = new URL(`react-client-manifest.json`, origin);
+  const [reactClientManifest, cssManifest] = await Promise.all([
+    getJsonFromKv(`react-client-manifest.json`, {request, env, ctx}),
+    getJsonFromKv(`client/css-manifest.json`, {request, env, ctx}),
+  ]);
 
-  const moduleMapResponse = await getAssetFromKV(
-    {request: new Request(manifestUrl), waitUntil: ctx.waitUntil.bind(ctx)},
-    {ASSET_NAMESPACE: env.__STATIC_CONTENT, ASSET_MANIFEST: assetManifest},
-  );
-
-  const moduleMap = (await moduleMapResponse.json()) as WebpackMap;
+  const mainCssHref = (cssManifest as Record<string, string>)[`main.css`];
 
   const rscStream = ReactServerDOMServer.renderToReadableStream(
-    <App />,
-    moduleMap,
+    <>
+      <link
+        rel="stylesheet"
+        href={mainCssHref}
+        // @ts-expect-error
+        precedence="default"
+      />
+      <App />
+    </>,
+    reactClientManifest as WebpackMap,
     {
       context: [
         [`WORKAROUND`, null], // TODO: First value has a bug where the value is not set on the second request: https://github.com/facebook/react/issues/24849
-        [PathnameServerContextName, pathname],
+        [PathnameServerContextName, new URL(request.url).pathname],
       ],
     },
   );
@@ -46,9 +45,7 @@ const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   });
 };
 
-const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
-  request,
-) => {
+const handlePost: ExportedHandlerFetchHandler = async (request) => {
   const serverReferenceId = request.headers.get(`x-rsc-action`);
   const [moduleId, exportName] = serverReferenceId?.split(`#`) ?? [];
 
@@ -88,7 +85,7 @@ const handlePost: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   });
 };
 
-const handler: ExportedHandler<RscWorkerEnv> = {
+const handler: ExportedHandler<EnvWithStaticContent> = {
   async fetch(request, env, ctx) {
     switch (request.method) {
       case `HEAD`:

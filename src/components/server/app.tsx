@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {PathnameServerContext} from '../../pathname-server-context.js';
 import {NavigationContainer} from '../client/navigation-container.js';
+import './app.css';
+import styles from './app.module.css';
 import {Navigation} from './navigation.js';
 import {Router} from './router.js';
 
@@ -14,8 +16,8 @@ export function App(): JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{`Server Components with Streaming SSR Demo ${pathname}`}</title>
       </head>
-      <body style={{fontFamily: `sans-serif`}}>
-        <span style={{fontSize: `10px`}}>
+      <body>
+        <span className={styles.smallText}>
           This is a first big chunk to prevent Safari from buffering the whole
           response before starting to render. Lorem ipsum dolor sit amet,
           consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean

@@ -28,7 +28,8 @@
             "lib": ["dom", "esnext"],
             "module": "esnext",
             "target": "esnext",
-            "types": ["@cloudflare/workers-types", "jest"]
+            "types": ["@cloudflare/workers-types", "jest"],
+            "plugins": [{"name": "typescript-plugin-css-modules"}]
           }
         }
       }

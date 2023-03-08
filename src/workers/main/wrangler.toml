@@ -1,5 +1,5 @@
 name = "mfng"
-main = "../../dist/main-worker.js"
+main = "../../../dist/main-worker.js"
 compatibility_date = "2023-02-21"
 
 [dev]
@@ -7,10 +7,10 @@ port = 3000
 
 [build]
 command = "npm run build:main"
-watch_dir = ["..", "../../node_modules"]
+watch_dir = ["../..", "../../../node_modules"]
 
 [assets]
-bucket = "../../dist/client"
+bucket = "../../../dist/client"
 serve_single_page_app = true
 
 [[services]]

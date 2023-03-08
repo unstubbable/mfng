@@ -1,9 +1,9 @@
 import * as React from 'react';
 import type {RenderToReadableStreamOptions} from 'react-dom/server';
 import ReactDOMServer from 'react-dom/server.browser';
-import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
-import '../components/server/app.js'; // Ensure that the app code is included in the worker bundle.
-import {ServerRoot} from '../components/server/server-root.js';
+import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
+import '../../components/server/app.js'; // Ensure that the app code is included in the worker bundle.
+import {ServerRoot} from '../../components/server/server-root.js';
 import {createBufferedTransformStream} from './create-buffered-transform-stream.js';
 import {createInitialRscResponseTransformStream} from './create-initial-rsc-response-transform-stream.js';
 

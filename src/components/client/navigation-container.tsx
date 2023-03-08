@@ -1,6 +1,8 @@
 'use client';
 
+import classNames from 'classnames';
 import * as React from 'react';
+import styles from './navigation-container.module.css';
 import {NavigationContext} from './navigation-context.js';
 
 export function NavigationContainer({
@@ -10,5 +12,9 @@ export function NavigationContainer({
 
   React.use(promise);
 
-  return <div style={{opacity: isPending ? 0.6 : 1}}>{children}</div>;
+  return (
+    <div className={classNames(styles.container, {[styles.muted!]: isPending})}>
+      {children}
+    </div>
+  );
 }

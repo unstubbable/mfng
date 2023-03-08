@@ -16,6 +16,6 @@ server components to let them fetch their data in the server?
       feasable since the concepts of RSC and React Router do not really line
       up.)
 - [ ] (lazy) microfrontend compositon demo
-- [ ] stylesheets
+- [x] stylesheets
 - [ ] support poisened imports
 - [ ] server references manifest

@@ -3,6 +3,7 @@
 import * as React from 'react';
 import {useEphemeralState} from '../../hooks/use-ephemeral-state.js';
 import type {buy} from '../../server-actions/buy.js';
+import styles from './buy-button.module.css';
 
 export interface BuyButtonProps {
   readonly buy: typeof buy;
@@ -50,9 +51,11 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
       </button>
       {result && (
         <p
-          style={{
-            color: result.status === `success` ? `forestgreen` : `orangered`,
-          }}
+          className={
+            result.status === `success`
+              ? styles.successResult
+              : styles.errorResult
+          }
         >
           {result.message}
         </p>

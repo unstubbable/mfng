@@ -8,11 +8,11 @@ describe(`main worker`, () => {
   beforeAll(async () => {
     [rscWorker, mainWorker] = await Promise.all([
       unstable_dev(`dist/rsc-worker.js`, {
-        config: `src/rsc-worker/wrangler.toml`,
+        config: `src/workers/rsc/wrangler.toml`,
         experimental: {disableExperimentalWarning: true},
       }),
       unstable_dev(`dist/main-worker.js`, {
-        config: `src/main-worker/wrangler.toml`,
+        config: `src/workers/main/wrangler.toml`,
         experimental: {disableExperimentalWarning: true},
       }),
     ]);
