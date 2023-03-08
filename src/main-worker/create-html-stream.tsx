@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type {RenderToReadableStreamOptions} from 'react-dom/server';
 import ReactDOMServer from 'react-dom/server.browser';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
 import '../components/server/app.js'; // Ensure that the app code is included in the worker bundle.
@@ -8,6 +9,7 @@ import {createInitialRscResponseTransformStream} from './create-initial-rsc-resp
 
 export async function createHtmlStream(
   rscStream: ReadableStream<Uint8Array>,
+  options: RenderToReadableStreamOptions,
 ): Promise<ReadableStream<Uint8Array>> {
   const [rscStream1, rscStream2] = rscStream.tee();
 
@@ -15,7 +17,7 @@ export async function createHtmlStream(
     <ServerRoot
       jsxStream={ReactServerDOMClient.createFromReadableStream(rscStream1)}
     />,
-    {bootstrapScripts: [`/main.js`]},
+    options,
   );
 
   return htmlStream

@@ -3,6 +3,7 @@ import url from 'url';
 import CopyPlugin from 'copy-webpack-plugin';
 import ReactFlightWebpackPlugin from 'react-server-dom-webpack/plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
+import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
 
 const dev = process.env.MODE === `development`;
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -52,6 +53,7 @@ const serverConfig = {
     maxAssetSize: 1_000_000,
     maxEntrypointSize: 1_000_000,
   },
+  externals: [`__STATIC_CONTENT_MANIFEST`],
   optimization: dev
     ? undefined
     : {concatenateModules: false, usedExports: false, moduleIds: `named`},
@@ -64,7 +66,7 @@ const clientConfig = {
   ...baseConfig,
   entry: `./src/client.tsx`,
   output: {
-    filename: `main.js`,
+    filename: dev ? `main.js` : `main.[contenthash:8].js`,
     path: path.join(__dirname, `dist/client`),
     clean: !dev,
   },
@@ -78,6 +80,10 @@ const clientConfig = {
       },
       clientManifestFilename: `../react-client-manifest.json`,
       ssrManifestFilename: `../react-ssr-manifest.json`,
+    }),
+    new WebpackManifestPlugin({
+      publicPath: `/`,
+      filter: (file) => file.path.endsWith(`.js`),
     }),
   ],
   optimization: dev ? undefined : {moduleIds: `named`},
