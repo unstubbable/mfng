@@ -29,8 +29,8 @@ export function App(): JSX.Element {
         </span>
 
         <PathnameServerContext.Provider value={pathname}>
-          <Navigation />
           <React.Suspense>
+            <Navigation />
             <NavigationContainer>
               <React.Suspense fallback={<div>Loading...</div>}>
                 <Router />
