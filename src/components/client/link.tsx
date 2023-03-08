@@ -1,21 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import {useHistory} from '../../hooks/use-history.js';
+import {PathnameServerContext} from '../../pathname-server-context.js';
+import {NavigationContext} from './navigation-context.js';
 
 export type LinkProps = React.PropsWithChildren<{
   readonly pathname: string;
 }>;
 
 export function Link({children, pathname}: LinkProps): JSX.Element {
-  const history = useHistory();
+  const {push} = React.useContext(NavigationContext);
+  const currentPathname = React.useContext(PathnameServerContext);
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
     event.preventDefault();
-    history.push(pathname);
+    push(pathname);
   };
 
-  if (history.location.pathname === pathname) {
+  if (currentPathname === pathname) {
     return <>{children}</>;
   }
 

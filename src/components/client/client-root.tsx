@@ -2,7 +2,6 @@
 
 import type {History} from 'history';
 import * as React from 'react';
-import {HistoryContext} from '../../hooks/use-history.js';
 import {NavigationContext} from './navigation-context.js';
 
 export interface ClientRootProps {
@@ -28,12 +27,10 @@ export function ClientRoot({
   const jsxStreamPromise = fetchJsxStream(pathname);
 
   return (
-    <HistoryContext.Provider value={history}>
-      <NavigationContext.Provider
-        value={{isPending, promise: jsxStreamPromise}}
-      >
-        {React.use(jsxStreamPromise)}
-      </NavigationContext.Provider>
-    </HistoryContext.Provider>
+    <NavigationContext.Provider
+      value={{isPending, promise: jsxStreamPromise, push: history.push}}
+    >
+      {React.use(jsxStreamPromise)}
+    </NavigationContext.Provider>
   );
 }

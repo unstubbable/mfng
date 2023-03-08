@@ -1,19 +1,18 @@
 import * as React from 'react';
+import {PathnameServerContext} from '../../pathname-server-context.js';
 import {NavigationContainer} from '../client/navigation-container.js';
 import {Navigation} from './navigation.js';
 import {Router} from './router.js';
 
-export interface AppProps {
-  readonly pathname: string;
-}
+export function App(): JSX.Element {
+  const pathname = React.useContext(PathnameServerContext);
 
-export function App({pathname}: AppProps): JSX.Element {
   return (
     <html>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Server Components with Streaming SSR Demo</title>
+        <title>{`Server Components with Streaming SSR Demo ${pathname}`}</title>
       </head>
       <body style={{fontFamily: `sans-serif`}}>
         <span style={{fontSize: `10px`}}>
@@ -29,14 +28,16 @@ export function App({pathname}: AppProps): JSX.Element {
           elementum semper nisi.
         </span>
 
-        <Navigation />
-        <React.Suspense>
-          <NavigationContainer>
-            <React.Suspense fallback={<div>Loading...</div>}>
-              <Router pathname={pathname} />
-            </React.Suspense>
-          </NavigationContainer>
-        </React.Suspense>
+        <PathnameServerContext.Provider value={pathname}>
+          <Navigation />
+          <React.Suspense>
+            <NavigationContainer>
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <Router />
+              </React.Suspense>
+            </NavigationContainer>
+          </React.Suspense>
+        </PathnameServerContext.Provider>
       </body>
     </html>
   );

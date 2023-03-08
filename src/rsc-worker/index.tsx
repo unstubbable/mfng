@@ -4,6 +4,7 @@ import * as React from 'react';
 import type {WebpackMap} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
 import {App} from '../components/server/app.js';
+import {PathnameServerContextName} from '../pathname-server-context.js';
 import {isValidServerReference} from './is-valid-server-reference.js';
 
 const assetManifest = JSON.parse(staticContentManifest);
@@ -30,8 +31,14 @@ const handleGet: ExportedHandlerFetchHandler<RscWorkerEnv> = async (
   const moduleMap = (await moduleMapResponse.json()) as WebpackMap;
 
   const rscStream = ReactServerDOMServer.renderToReadableStream(
-    <App pathname={pathname} />,
+    <App />,
     moduleMap,
+    {
+      context: [
+        [`WORKAROUND`, null], // TODO: First value has a bug where the value is not set on the second request: https://github.com/facebook/react/issues/24849
+        [PathnameServerContextName, pathname],
+      ],
+    },
   );
 
   return new Response(rscStream, {

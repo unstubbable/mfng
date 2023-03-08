@@ -44,9 +44,23 @@ declare module 'react' {
 
   export type Usable<T> = Thenable<T> | React.Context<T>;
 
+  export type ServerContextJSONValue =
+    | string
+    | boolean
+    | number
+    | null
+    | undefined
+    | readonly ServerContextJSONValue[]
+    | {[key: string]: ServerContextJSONValue};
+
   function use<T>(usable: Usable<T>): T;
 
   function cache<T extends Function>(
     fn: T,
   ): (...args: Parameters<T>) => ReturnType<T>;
+
+  function createServerContext<T extends ServerContextJSONValue>(
+    globalName: string,
+    defaultValue: T,
+  ): React.Context<T>;
 }
