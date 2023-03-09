@@ -11,13 +11,9 @@
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-typescript-eslint.json",
     "https://raw.githubusercontent.com/clebert/onecfg-lib/main/lib/onecfg-vscode.json"
   ],
-  "defines": {
-    ".npmrc": {"format": "text"}
-  },
   "patches": {
     ".eslintignore": [{"value": ["/dist"]}],
     ".gitignore": [{"value": ["/dist"]}],
-    ".npmrc": [{"value": "legacy-peer-deps=true"}],
     ".prettierignore": [{"value": ["/dist"]}],
     "jest.config.json": [{"value": {"testTimeout": 60000}}],
     "tsconfig.base.json": [
