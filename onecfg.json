@@ -25,9 +25,7 @@
         "value": {
           "compilerOptions": {
             "skipLibCheck": true,
-            "lib": ["dom", "esnext"],
-            "module": "esnext",
-            "target": "esnext",
+            "lib": ["dom"],
             "types": ["@cloudflare/workers-types", "jest"],
             "plugins": [{"name": "typescript-plugin-css-modules"}]
           }

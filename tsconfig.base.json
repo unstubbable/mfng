@@ -8,10 +8,9 @@
     "isolatedModules": true,
     "jsx": "react",
     "lib": [
-      "dom",
-      "esnext"
+      "dom"
     ],
-    "module": "esnext",
+    "module": "node16",
     "moduleResolution": "node16",
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
@@ -28,7 +27,7 @@
     "pretty": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext",
+    "target": "es2022",
     "types": [
       "@cloudflare/workers-types",
       "jest"
