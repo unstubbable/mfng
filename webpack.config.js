@@ -11,16 +11,28 @@ const dev = process.env.MODE === `development`;
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
- * @type {import('webpack').RuleSetUseItem}
+ * @type {import('webpack').RuleSetRule}
  */
-export const cssLoader = {
-  loader: `css-loader`,
-  options: {
-    modules: {
-      localIdentName: dev ? `[local]__[hash:base64:5]` : `[hash:base64:7]`,
-      auto: true,
+export const cssRule = {
+  test: /\.css$/,
+  use: [
+    MiniCssExtractPlugin.loader,
+    {
+      loader: `css-loader`,
+      options: {
+        modules: {
+          localIdentName: dev ? `[local]__[hash:base64:5]` : `[hash:base64:7]`,
+          auto: true,
+        },
+      },
     },
-  },
+    {
+      loader: `postcss-loader`,
+      options: {
+        postcssOptions: {plugins: [`autoprefixer`]},
+      },
+    },
+  ],
 };
 
 /**
@@ -42,7 +54,7 @@ const serverConfig = {
     rules: [
       {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
       {test: /\.md$/, type: `asset/source`},
-      {test: /\.css$/, use: [MiniCssExtractPlugin.loader, cssLoader]},
+      cssRule,
     ],
   },
   plugins: [
@@ -91,7 +103,7 @@ const clientConfig = {
   module: {
     rules: [
       {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
-      {test: /\.css$/, use: [MiniCssExtractPlugin.loader, cssLoader]},
+      cssRule,
     ],
   },
   plugins: [

@@ -2,7 +2,7 @@ import path from 'path';
 import url from 'url';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
-import {cssLoader} from './webpack.config.js';
+import {cssRule} from './webpack.config.js';
 
 const dev = process.env.MODE === `development`;
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -41,7 +41,7 @@ export default {
         exclude: [/node_modules/],
       },
       {test: /\.md$/, type: `asset/source`},
-      {test: /\.css$/, use: [MiniCssExtractPlugin.loader, cssLoader]},
+      cssRule,
     ],
   },
   plugins: [
