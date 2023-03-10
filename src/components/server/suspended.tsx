@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import {Markdown} from './markdown.js';
 import {wait} from './wait.js';
 // import 'server-only'; // https://twitter.com/unstubbable/status/1630897868155305984
 
@@ -12,5 +12,5 @@ async function fetchContent(): Promise<string> {
 export async function Suspended(): Promise<JSX.Element> {
   const content = await fetchContent();
 
-  return <ReactMarkdown>{content}</ReactMarkdown>;
+  return <Markdown text={content} />;
 }

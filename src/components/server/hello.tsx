@@ -1,11 +1,11 @@
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import {Markdown} from './markdown.js';
 import {wait} from './wait.js';
 // import 'server-only'; // https://twitter.com/unstubbable/status/1630897868155305984
 
 // Imagine this being a fetch that can only be executed from the server.
 async function fetchSubject(): Promise<string> {
-  await wait(300);
+  await wait(100);
 
   return `world`;
 }
@@ -13,5 +13,5 @@ async function fetchSubject(): Promise<string> {
 export async function Hello(): Promise<JSX.Element> {
   const subject = await fetchSubject();
 
-  return <ReactMarkdown>{`# Hello, *${subject}*!`}</ReactMarkdown>;
+  return <Markdown text={`# Hello, *${subject}*!`} />;
 }

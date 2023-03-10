@@ -1,7 +1,6 @@
 import path from 'path';
 import url from 'url';
 import CopyPlugin from 'copy-webpack-plugin';
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ReactFlightWebpackPlugin from 'react-server-dom-webpack/plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
@@ -29,7 +28,9 @@ export const cssRule = {
     {
       loader: `postcss-loader`,
       options: {
-        postcssOptions: {plugins: [`autoprefixer`]},
+        postcssOptions: {
+          plugins: [`tailwindcss`, `autoprefixer`, ...(dev ? [] : [`cssnano`])],
+        },
       },
     },
   ],
@@ -79,12 +80,7 @@ const serverConfig = {
   externals: [`__STATIC_CONTENT_MANIFEST`],
   optimization: dev
     ? undefined
-    : {
-        concatenateModules: false,
-        usedExports: false,
-        moduleIds: `named`,
-        minimizer: [`...`, new CssMinimizerPlugin()],
-      },
+    : {concatenateModules: false, usedExports: false, moduleIds: `named`},
 };
 
 /**

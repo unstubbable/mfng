@@ -22,8 +22,7 @@
           "compilerOptions": {
             "skipLibCheck": true,
             "lib": ["dom"],
-            "types": ["@cloudflare/workers-types", "jest"],
-            "plugins": [{"name": "typescript-plugin-css-modules"}]
+            "types": ["@cloudflare/workers-types", "jest"]
           }
         }
       }

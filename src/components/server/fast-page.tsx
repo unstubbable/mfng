@@ -1,11 +1,12 @@
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import {Main} from '../shared/main.js';
 import content from './fast-page-content.md';
+import {Markdown} from './markdown.js';
 
 export function FastPage(): JSX.Element {
   return (
-    <main>
-      <ReactMarkdown>{content}</ReactMarkdown>
-    </main>
+    <Main>
+      <Markdown text={content} />
+    </Main>
   );
 }

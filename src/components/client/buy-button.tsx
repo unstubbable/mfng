@@ -1,9 +1,9 @@
 'use client';
 
+import {clsx} from 'clsx';
 import * as React from 'react';
 import {useEphemeralState} from '../../hooks/use-ephemeral-state.js';
 import type {buy} from '../../server-actions/buy.js';
-import styles from './buy-button.module.css';
 
 export interface BuyButtonProps {
   readonly buy: typeof buy;
@@ -36,7 +36,9 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
 
   return (
     <div>
-      <p>This is a client component that triggers a server action.</p>
+      <p className="my-2">
+        This is a client component that triggers a server action.
+      </p>
       <input
         type="number"
         value={quantity}
@@ -44,18 +46,23 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
         min={1}
         max={99}
         onChange={({target}) => setQuantity(parseInt(target.value, 10))}
+        className="bg-zinc-100 p-1 outline-cyan-500"
       />
       {` `}
-      <button onClick={handleClick} disabled={isPending}>
+      <button
+        onClick={handleClick}
+        disabled={isPending}
+        className="rounded-full bg-cyan-500 py-1 px-4 text-white"
+        type="button"
+      >
         Buy now
       </button>
       {result && (
         <p
-          className={
-            result.status === `success`
-              ? styles.successResult
-              : styles.errorResult
-          }
+          className={clsx(
+            `my-2`,
+            result.status === `success` ? `text-cyan-600` : `text-red-600`,
+          )}
         >
           {result.message}
         </p>
