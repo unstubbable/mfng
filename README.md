@@ -19,3 +19,15 @@ server components to let them fetch their data in the server?
 - [x] stylesheets
 - [ ] support poisened imports
 - [ ] server references manifest
+
+## Getting Started
+
+```sh
+npm install
+```
+
+```sh
+npm run dev
+```
+
+Open http://localhost:3000
