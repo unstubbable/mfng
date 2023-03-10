@@ -6,9 +6,9 @@ server components to let them fetch their data in the server?
 
 ## Features
 
+- [x] streaming fast
 - [x] react server components
 - [x] server-side rendering
-- [x] streaming
 - [x] client components loaded as separate chunks
 - [x] server actions
 - [x] simple routing
