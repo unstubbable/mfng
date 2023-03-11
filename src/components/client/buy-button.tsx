@@ -23,7 +23,9 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
     setIsPending(true);
 
     try {
-      setResult({status: `success`, message: await buy(quantity)});
+      const {message, printInnerWidth} = await buy(quantity);
+      setResult({status: `success`, message});
+      printInnerWidth();
     } catch (error) {
       setResult({
         status: `error`,

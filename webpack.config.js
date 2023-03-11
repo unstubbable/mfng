@@ -106,10 +106,10 @@ const clientConfig = {
     new CopyPlugin({patterns: [{from: `static`}]}),
     new ReactFlightWebpackPlugin({
       isServer: false,
-      clientReferences: {
-        directory: `./src/components/client`,
-        include: /\.tsx$/,
-      },
+      clientReferences: [
+        {directory: `./src/components/client`, include: /\.tsx$/},
+        {directory: `./src/client-functions`, include: /\.ts$/},
+      ],
       clientManifestFilename: `../react-client-manifest.json`,
       ssrManifestFilename: `../react-ssr-manifest.json`,
     }),

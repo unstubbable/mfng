@@ -45,7 +45,11 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   });
 };
 
-const handlePost: ExportedHandlerFetchHandler = async (request) => {
+const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
+  request,
+  env,
+  ctx,
+) => {
   const serverReferenceId = request.headers.get(`x-rsc-action`);
   const [moduleId, exportName] = serverReferenceId?.split(`#`) ?? [];
 
@@ -68,9 +72,14 @@ const handlePost: ExportedHandlerFetchHandler = async (request) => {
   const args = (await request.json()) as unknown[];
   const actionPromise = action.apply(null, args);
 
+  const reactClientManifest = await getJsonFromKv(
+    `react-client-manifest.json`,
+    {request, env, ctx},
+  );
+
   const rscStream = ReactServerDOMServer.renderToReadableStream(
     actionPromise,
-    null,
+    reactClientManifest as WebpackMap,
     {
       onError: (error) => {
         console.error(error);
