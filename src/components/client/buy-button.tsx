@@ -52,7 +52,7 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
       <button
         onClick={handleClick}
         disabled={isPending}
-        className="rounded-full bg-cyan-500 py-1 px-4 text-white"
+        className="rounded-full bg-cyan-500 py-1 px-4 text-white disabled:bg-zinc-300"
         type="button"
       >
         Buy now
