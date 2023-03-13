@@ -11,7 +11,7 @@ export interface BuyButtonProps {
 
 interface Result {
   readonly status: 'success' | 'error';
-  readonly message: string;
+  readonly message: React.ReactNode;
 }
 
 export function BuyButton({buy}: BuyButtonProps): JSX.Element {
