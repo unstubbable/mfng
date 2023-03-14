@@ -1,6 +1,5 @@
 'use client';
 
-import {clsx} from 'clsx';
 import * as React from 'react';
 import {useEphemeralState} from '../../hooks/use-ephemeral-state.js';
 import type {buy} from '../../server-actions/buy.js';
@@ -9,37 +8,24 @@ export interface BuyButtonProps {
   readonly buy: typeof buy;
 }
 
-interface Result {
-  readonly status: 'success' | 'error';
-  readonly message: React.ReactNode;
-}
-
 export function BuyButton({buy}: BuyButtonProps): JSX.Element {
   const [quantity, setQuantity] = React.useState(1);
-  const [isPending, setIsPending] = React.useState(false);
-  const [result, setResult] = useEphemeralState<Result>(undefined, 3000);
+  const [isPending, startTransition] = React.useTransition();
 
-  const handleClick = async () => {
-    setIsPending(true);
+  const [result, setResult] = useEphemeralState<Promise<React.ReactNode>>(
+    undefined,
+    3000,
+  );
 
-    try {
-      const {message, printInnerWidth} = await buy(quantity);
-      setResult({status: `success`, message});
-      printInnerWidth();
-    } catch (error) {
-      setResult({
-        status: `error`,
-        message: isErrorWithDigest(error) ? error.digest : `Unknown Error`,
-      });
-    } finally {
-      setIsPending(false);
-    }
+  const handleClick = () => {
+    startTransition(() => setResult(buy(quantity)));
   };
 
   return (
     <div>
       <p className="my-2">
-        This is a client component that triggers a server action.
+        This is a client component that triggers a server action, which in turn
+        responds with serialized React element that's rendered below the button.
       </p>
       <input
         type="number"
@@ -59,20 +45,8 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
       >
         Buy now
       </button>
-      {result && (
-        <p
-          className={clsx(
-            `my-2`,
-            result.status === `success` ? `text-cyan-600` : `text-red-600`,
-          )}
-        >
-          {result.message}
-        </p>
-      )}
+      {/* Promises can now be rendered directly. */}
+      {result as React.ReactNode}
     </div>
   );
-}
-
-function isErrorWithDigest(error: unknown): error is Error & {digest: string} {
-  return error instanceof Error && `digest` in error;
 }

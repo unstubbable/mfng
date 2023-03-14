@@ -1,14 +1,9 @@
 'use server';
 
 import * as React from 'react';
-import {printInnerWidth} from '../client-functions/print-inner-width.js';
+import {Notification} from '../components/shared/notification.js';
 
-export interface BuyResult {
-  readonly message: React.ReactNode;
-  readonly printInnerWidth: () => void;
-}
-
-export async function buy(quantity: number): Promise<BuyResult> {
+export async function buy(quantity: number): Promise<React.ReactNode> {
   const itemOrItems = quantity === 1 ? `item` : `items`;
 
   try {
@@ -16,15 +11,16 @@ export async function buy(quantity: number): Promise<BuyResult> {
       setTimeout(Math.random() > 0.2 ? resolve : reject, 500),
     );
 
-    return {
-      message: (
-        <span>
-          Bought <strong>{quantity}</strong> {itemOrItems}.
-        </span>
-      ),
-      printInnerWidth,
-    };
+    return (
+      <Notification status="success">
+        Bought <strong>{quantity}</strong> {itemOrItems}.
+      </Notification>
+    );
   } catch {
-    throw new Error(`Could not buy ${quantity} ${itemOrItems}, try again.`);
+    return (
+      <Notification status="error">
+        Could not buy <strong>{quantity}</strong> {itemOrItems}, try again.
+      </Notification>
+    );
   }
 }

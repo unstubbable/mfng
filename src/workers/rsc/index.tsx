@@ -81,15 +81,6 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   const rscStream = ReactServerDOMServer.renderToReadableStream(
     actionPromise,
     reactClientManifest as ClientManifest,
-    {
-      onError: (error) => {
-        console.error(error);
-
-        // TODO: Sending the error message as digest kind of defeats the purpose
-        // of having a digest to mask the error in production.
-        return error instanceof Error ? error.message : `Unknown Error`;
-      },
-    },
   );
 
   return new Response(rscStream, {
