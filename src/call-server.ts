@@ -1,12 +1,15 @@
-import type {Thenable} from 'react';
+import type {ReactServerValue} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
 
-export function callServer(id: string, args: unknown): Thenable<unknown> {
+export async function callServer(
+  id: string,
+  args: ReactServerValue,
+): Promise<unknown> {
   return ReactServerDOMClient.createFromFetch(
     fetch(`/`, {
       method: `POST`,
       headers: {'accept': `text/x-component`, 'x-rsc-action': id},
-      body: JSON.stringify(args),
+      body: await ReactServerDOMClient.encodeReply(args),
     }),
   );
 }

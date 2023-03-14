@@ -1,18 +1,10 @@
 declare module 'react-server-dom-webpack/server' {
-  import type {ReactElement} from 'react';
-  import type {WebpackMap} from 'react-server-dom-webpack';
-
-  export type ReactModel =
-    | ReactElement
-    | LazyComponent<any, any>
-    | string
-    | boolean
-    | number
-    | symbol
-    | null
-    | Iterable<ReactModel>
-    | {[key: string]: ReactModel}
-    | Promise<ReactModel>;
+  import type {ReactElement, Thenable} from 'react';
+  import type {
+    ClientManifest,
+    ReactClientValue,
+    ReactServerValue,
+  } from 'react-server-dom-webpack';
 
   export type LazyComponent<T, P> = {
     $$typeof: symbol | number;
@@ -36,8 +28,10 @@ declare module 'react-server-dom-webpack/server' {
     | {[key: string]: ServerContextJSONValue};
 
   export function renderToReadableStream(
-    model: ReactModel,
-    webpackMap?: WebpackMap | null,
+    model: ReactClientValue,
+    webpackMap?: ClientManifest | null,
     options?: RenderToReadableStreamOptions,
   ): ReadableStream<Uint8Array>;
+
+  export function decodeReply(body: string | FormData): Thenable<unknown[]>;
 }

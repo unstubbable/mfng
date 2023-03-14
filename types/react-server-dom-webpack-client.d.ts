@@ -1,6 +1,10 @@
 declare module 'react-server-dom-webpack/client.browser' {
   import type {Thenable} from 'react';
-  import type {WebpackMap} from 'react-server-dom-webpack';
+  import type {
+    ClientManifest,
+    ReactServerValue,
+    ServerReference,
+  } from 'react-server-dom-webpack';
 
   export interface ReactServerDomClientOptions {
     callServer?: CallServerCallback;
@@ -8,7 +12,7 @@ declare module 'react-server-dom-webpack/client.browser' {
 
   export type CallServerCallback = (
     id: string,
-    args: unknown,
+    args: ReactServerValue,
   ) => Thenable<unknown>;
 
   export function createFromFetch<T>(
@@ -20,14 +24,18 @@ declare module 'react-server-dom-webpack/client.browser' {
     stream: ReadableStream,
     options?: ReactServerDomClientOptions,
   ): Thenable<T>;
+
+  export function encodeReply(
+    value: ReactServerValue,
+  ): Promise<string | FormData>;
 }
 
 declare module 'react-server-dom-webpack/client.edge' {
   import type {Thenable} from 'react';
-  import type {WebpackMap} from 'react-server-dom-webpack';
+  import type {SSRManifest} from 'react-server-dom-webpack';
 
   export interface CreateFromReadableStreamOptions {
-    moduleMap?: WebpackMap;
+    moduleMap?: SSRManifest;
   }
 
   export function createFromReadableStream<T>(

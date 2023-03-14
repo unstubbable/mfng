@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type {WebpackMap} from 'react-server-dom-webpack';
+import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
 import {App} from '../../components/server/app.js';
 import {PathnameServerContextName} from '../../pathname-server-context.js';
@@ -31,7 +31,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
       />
       <App />
     </>,
-    reactClientManifest as WebpackMap,
+    reactClientManifest as ClientManifest,
     {
       context: [
         [`WORKAROUND`, null], // TODO: First value has a bug where the value is not set on the second request: https://github.com/facebook/react/issues/24849
@@ -69,7 +69,8 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     return new Response(null, {status: 500});
   }
 
-  const args = (await request.json()) as unknown[];
+  const body = await request.text();
+  const args = await ReactServerDOMServer.decodeReply(body);
   const actionPromise = action.apply(null, args);
 
   const reactClientManifest = await getJsonFromKv(
@@ -79,11 +80,13 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
 
   const rscStream = ReactServerDOMServer.renderToReadableStream(
     actionPromise,
-    reactClientManifest as WebpackMap,
+    reactClientManifest as ClientManifest,
     {
       onError: (error) => {
         console.error(error);
 
+        // TODO: Sending the error message as digest kind of defeats the purpose
+        // of having a digest to mask the error in production.
         return error instanceof Error ? error.message : `Unknown Error`;
       },
     },
