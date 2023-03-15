@@ -4,12 +4,7 @@
     "noEmit": true,
     "resolveJsonModule": true
   },
-  "exclude": [
-    "coverage",
-    "dist"
-  ],
+  "exclude": ["coverage", "dist"],
   "extends": "./tsconfig.base.json",
-  "include": [
-    "**/*"
-  ]
+  "include": ["**/*"]
 }

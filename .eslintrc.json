@@ -1,12 +1,8 @@
 {
-  "extends": [
-    "prettier"
-  ],
+  "extends": ["prettier"],
   "overrides": [
     {
-      "files": [
-        "**/*.cjs"
-      ],
+      "files": ["**/*.cjs"],
       "parserOptions": {
         "sourceType": "script"
       },
@@ -17,36 +13,23 @@
       }
     },
     {
-      "files": [
-        "**/*.mjs"
-      ],
+      "files": ["**/*.mjs"],
       "parserOptions": {
         "sourceType": "module"
       }
     },
     {
-      "files": [
-        "**/*.md"
-      ],
+      "files": ["**/*.md"],
       "processor": "markdown/markdown"
     },
     {
-      "files": [
-        "**/*.md/*.js",
-        "**/*.md/*.jsx"
-      ],
+      "files": ["**/*.md/*.js", "**/*.md/*.jsx"],
       "rules": {
-        "quotes": [
-          "error",
-          "single"
-        ]
+        "quotes": ["error", "single"]
       }
     },
     {
-      "files": [
-        "src/**/*.ts",
-        "src/**/*.tsx"
-      ],
+      "files": ["src/**/*.ts", "src/**/*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": "tsconfig.eslint.json"
@@ -75,10 +58,7 @@
           }
         ],
         "@typescript-eslint/promise-function-async": "error",
-        "@typescript-eslint/quotes": [
-          "error",
-          "backtick"
-        ],
+        "@typescript-eslint/quotes": ["error", "backtick"],
         "@typescript-eslint/require-await": "error",
         "no-shadow": "off",
         "quotes": "off"
@@ -92,11 +72,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "import",
-    "markdown",
-    "@typescript-eslint"
-  ],
+  "plugins": ["import", "markdown", "@typescript-eslint"],
   "root": true,
   "rules": {
     "complexity": "error",
@@ -147,10 +123,7 @@
     "no-shadow": "error",
     "object-shorthand": "error",
     "prefer-const": "error",
-    "quotes": [
-      "error",
-      "backtick"
-    ],
+    "quotes": ["error", "backtick"],
     "sort-imports": [
       "error",
       {

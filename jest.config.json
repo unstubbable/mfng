@@ -9,21 +9,14 @@
       "statements": 100
     }
   },
-  "extensionsToTreatAsEsm": [
-    ".ts",
-    ".tsx"
-  ],
+  "extensionsToTreatAsEsm": [".ts", ".tsx"],
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
   "restoreMocks": true,
-  "testMatch": [
-    "**/src/**/*.test.{ts,tsx}"
-  ],
+  "testMatch": ["**/src/**/*.test.{ts,tsx}"],
   "testTimeout": 60000,
   "transform": {
-    "^.+\\.tsx?$": [
-      "@swc/jest"
-    ]
+    "^.+\\.tsx?$": ["@swc/jest"]
   }
 }

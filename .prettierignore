@@ -1,12 +1,4 @@
-/.prettierrc.json
-/.eslintrc.json
 /coverage
-/jest.config.json
 /package-lock.json
 /.swcrc
-/tsconfig.base.json
-/tsconfig.json
-/tsconfig.eslint.json
-/.vscode/extensions.json
-/.vscode/settings.json
 /dist

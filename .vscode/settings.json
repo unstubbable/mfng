@@ -28,34 +28,6 @@
     "source.fixAll.eslint": true
   },
   "editor.formatOnSave": true,
-  "editor.rulers": [
-    80
-  ],
-  "files.exclude": {
-    ".editorconfig": true,
-    ".eslintignore": true,
-    ".eslintrc.json": true,
-    ".gitignore": true,
-    ".node-version": true,
-    ".prettierignore": true,
-    ".prettierrc.json": true,
-    ".swcrc": true,
-    ".vscode": true,
-    ".vscode/extensions.json": true,
-    ".vscode/settings.json": true,
-    "jest.config.json": true,
-    "tsconfig.base.json": true,
-    "tsconfig.eslint.json": true,
-    "tsconfig.json": true
-  },
-  "json.schemaDownload.enable": true,
-  "json.schemas": [
-    {
-      "fileMatch": [
-        "onecfg*.json"
-      ],
-      "url": "https://raw.githubusercontent.com/clebert/onecfg-rust/main/schema.json"
-    }
-  ],
+  "editor.rulers": [80],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
