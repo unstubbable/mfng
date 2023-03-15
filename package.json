@@ -1,7 +1,7 @@
 {
   "name": "mfng",
   "version": "1.0.0",
-  "description": "Microfrontends Next Generation",
+  "description": "Micro Frontends Next Generation - An RSC Playground",
   "license": "MIT",
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
