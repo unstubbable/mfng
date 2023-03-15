@@ -5,9 +5,11 @@ compatibility_date = "2023-02-21"
 [dev]
 port = 3001
 
+# Deactivate build command to prevent wrangler from restarting the build on any
+# code change. Instead we start the build separately (in watch mode).
 [build]
-command = "npm run build:rsc"
-watch_dir = ["../..", "../../../node_modules"]
+command = ""
+watch_dir = []
 
 [assets]
 bucket = "../../../dist"
