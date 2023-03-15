@@ -6,16 +6,15 @@ describe(`main worker`, () => {
   let mainWorker: UnstableDevWorker;
 
   beforeAll(async () => {
-    [rscWorker, mainWorker] = await Promise.all([
-      unstable_dev(`dist/rsc-worker.js`, {
-        config: `src/workers/rsc/wrangler.toml`,
-        experimental: {disableExperimentalWarning: true},
-      }),
-      unstable_dev(`dist/main-worker.js`, {
-        config: `src/workers/main/wrangler.toml`,
-        experimental: {disableExperimentalWarning: true},
-      }),
-    ]);
+    rscWorker = await unstable_dev(`dist/rsc-worker.js`, {
+      config: `src/workers/rsc/wrangler.toml`,
+      experimental: {disableExperimentalWarning: true},
+    });
+
+    mainWorker = await unstable_dev(`dist/main-worker.js`, {
+      config: `src/workers/main/wrangler.toml`,
+      experimental: {disableExperimentalWarning: true},
+    });
   });
 
   afterAll(async () => {

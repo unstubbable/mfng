@@ -16,6 +16,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Install
         run: npm i
+      - name: Build
+        run: npm run build
       - name: Test
         run: npm t
       - name: Deploy
