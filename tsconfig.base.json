@@ -21,6 +21,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "types": ["@cloudflare/workers-types", "jest"]
+    "types": ["@cloudflare/workers-types", "jest"],
+    "incremental": true,
+    "composite": true
   }
 }
