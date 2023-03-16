@@ -32,7 +32,7 @@ declare module 'react-server-dom-webpack' {
   export type ReactClientValue =
     // Server Elements and Lazy Components are unwrapped on the Server
     | ReactElement
-    | LazyExoticComponent<ReactClientValue>
+    // | LazyExoticComponent<ReactClientValue> // TODO: this is invalid and widens the type to any
     // References are passed by their value
     | ClientReferenceMetadata
     | ServerReference
