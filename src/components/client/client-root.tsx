@@ -1,5 +1,3 @@
-'use client';
-
 import type {History} from 'history';
 import * as React from 'react';
 import {NavigationContext} from './navigation-context.js';
