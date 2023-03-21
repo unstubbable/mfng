@@ -29,7 +29,7 @@
       }
     },
     {
-      "files": ["src/**/*.ts", "src/**/*.tsx"],
+      "files": ["src/**/*.ts", "src/**/*.tsx", "*.ts"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": "tsconfig.eslint.json"

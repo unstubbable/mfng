@@ -1,0 +1,6 @@
+{
+  "language": "typescript",
+  "app": "npx ts-node --esm --swc stack.ts",
+  "projectId": "f1d076b5-5437-4559-bcb1-08458ce84a07",
+  "sendCrashReports": "false"
+}

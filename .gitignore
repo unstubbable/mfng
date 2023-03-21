@@ -2,3 +2,5 @@
 /node_modules
 /dist
 tsconfig.tsbuildinfo
+terraform.*.tfstate*
+/cdktf.out
