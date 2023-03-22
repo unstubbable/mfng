@@ -11,7 +11,7 @@ server?
 
 ## Features
 
-- [x] Fast streaming
+- [x] Streaming fast
 - [x] React server components
 - [x] Server-side rendering
 - [x] Client components loaded as separate chunks
