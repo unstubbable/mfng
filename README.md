@@ -16,7 +16,7 @@ server?
 - [x] Server-side rendering
 - [x] Client components loaded as separate chunks
 - [x] Server actions
-- [x] Simple routing
+- [x] Suspensy routing
 - [x] Development server
 - [x] Production builds
 - [x] Serverless deployment (using
