@@ -1,13 +1,14 @@
 import * as React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tailwindcss/tailwind.css';
-import {PathnameServerContext} from '../../pathname-server-context.js';
+import {LocationServerContext} from '../../location-server-context.js';
 import {NavigationContainer} from '../client/navigation-container.js';
 import {Navigation} from '../shared/navigation.js';
 import {Router} from './router.js';
 
 export function App(): JSX.Element {
-  const pathname = React.useContext(PathnameServerContext);
+  const location = React.useContext(LocationServerContext);
+  const {pathname} = new URL(location);
 
   return (
     <html>
@@ -17,14 +18,14 @@ export function App(): JSX.Element {
         <title>{`Server Components with Streaming SSR Demo ${pathname}`}</title>
       </head>
       <body>
-        <PathnameServerContext.Provider value={pathname}>
+        <LocationServerContext.Provider value={location}>
           <React.Suspense>
             <Navigation />
             <NavigationContainer>
               <Router />
             </NavigationContainer>
           </React.Suspense>
-        </PathnameServerContext.Provider>
+        </LocationServerContext.Provider>
       </body>
     </html>
   );

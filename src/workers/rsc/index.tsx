@@ -2,7 +2,7 @@ import * as React from 'react';
 import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server';
 import {App} from '../../components/server/app.js';
-import {PathnameServerContextName} from '../../pathname-server-context.js';
+import {LocationServerContextName} from '../../location-server-context.js';
 import type {EnvWithStaticContent} from '../get-json-from-kv.js';
 import {getJsonFromKv} from '../get-json-from-kv.js';
 import {isValidServerReference} from './is-valid-server-reference.js';
@@ -35,7 +35,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     {
       context: [
         [`WORKAROUND`, null], // TODO: First value has a bug where the value is not set on the second request: https://github.com/facebook/react/issues/24849
-        [PathnameServerContextName, new URL(request.url).pathname],
+        [LocationServerContextName, request.url],
       ],
     },
   );

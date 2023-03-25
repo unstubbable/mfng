@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {PathnameServerContext} from '../../pathname-server-context.js';
+import {LocationServerContext} from '../../location-server-context.js';
 import {Link} from '../client/link.js';
 
 export type NavigationItemProps = React.PropsWithChildren<{
@@ -10,9 +10,9 @@ export function NavigationItem({
   children,
   pathname,
 }: NavigationItemProps): JSX.Element {
-  const currentPathname = React.useContext(PathnameServerContext);
+  const location = React.useContext(LocationServerContext);
 
-  if (pathname === currentPathname) {
+  if (pathname === new URL(location).pathname) {
     return (
       <span className="inline-block rounded-md bg-zinc-800 py-1 px-3 text-zinc-50">
         {children}
