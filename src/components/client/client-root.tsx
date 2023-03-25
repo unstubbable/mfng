@@ -1,28 +1,28 @@
-import type {History} from 'history';
+import type {History, Location} from 'history';
 import * as React from 'react';
 import {NavigationContext} from './navigation-context.js';
 
 export interface ClientRootProps {
   readonly history: History;
-  readonly fetchJsxStream: (pathname: string) => React.Thenable<JSX.Element>;
+  readonly fetchJsxStream: (location: Location) => React.Thenable<JSX.Element>;
 }
 
 export function ClientRoot({
   history,
   fetchJsxStream,
 }: ClientRootProps): JSX.Element {
-  const [pathname, setPathname] = React.useState(history.location.pathname);
+  const [location, setLocation] = React.useState(history.location);
   const [isPending, startTransition] = React.useTransition();
 
   React.useEffect(
     () =>
-      history.listen(({location}) =>
-        startTransition(() => setPathname(location.pathname)),
+      history.listen(({location: newLocation}) =>
+        startTransition(() => setLocation(newLocation)),
       ),
     [],
   );
 
-  const jsxStreamPromise = fetchJsxStream(pathname);
+  const jsxStreamPromise = fetchJsxStream(location);
 
   return (
     <NavigationContext.Provider
