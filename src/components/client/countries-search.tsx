@@ -6,7 +6,7 @@ import {NavigationContext} from './navigation-context.js';
 
 export function CountriesSearch(): JSX.Element {
   const location = React.useContext(LocationServerContext);
-  const {push} = React.useContext(NavigationContext);
+  const {replace} = React.useContext(NavigationContext);
   const [, startTransition] = React.useTransition();
 
   const [query, setQuery] = React.useState(
@@ -19,7 +19,7 @@ export function CountriesSearch(): JSX.Element {
     setQuery(newQuery);
 
     startTransition(() => {
-      push({
+      replace({
         search: newQuery ? new URLSearchParams({q: newQuery}).toString() : ``,
       });
     });

@@ -26,7 +26,12 @@ export function ClientRoot({
 
   return (
     <NavigationContext.Provider
-      value={{isPending, promise: jsxStreamPromise, push: history.push}}
+      value={{
+        isPending,
+        promise: jsxStreamPromise,
+        push: history.push,
+        replace: history.replace,
+      }}
     >
       {React.use(jsxStreamPromise)}
     </NavigationContext.Provider>
