@@ -2,13 +2,26 @@ import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
 import type webpack from 'webpack';
-import webpackRscServerLoader from './webpack-rsc-server-loader.js';
+import type {
+  ClientReferencesForClientMap,
+  WebpackRscServerLoaderOptions,
+} from './webpack-rsc-server-loader.cjs';
+import {webpackRscServerLoader} from './webpack-rsc-server-loader.cjs';
 
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-async function callLoader(input: string): Promise<string | Buffer> {
+async function callLoader(
+  filename: string,
+  clientReferenceMap: ClientReferencesForClientMap,
+): Promise<string | Buffer> {
+  const input = await fs.readFile(path.resolve(currentDirname, filename));
+
   return new Promise((resolve, reject) => {
-    const context: Partial<webpack.LoaderContext<{}>> = {
+    const context: Partial<
+      webpack.LoaderContext<WebpackRscServerLoaderOptions>
+    > = {
+      getOptions: () => ({clientReferencesForClientMap: clientReferenceMap}),
+      resourcePath: path.resolve(currentDirname, filename),
       cacheable: jest.fn(),
       callback: (error, content) => {
         if (error) {
@@ -25,55 +38,48 @@ async function callLoader(input: string): Promise<string | Buffer> {
       },
     };
 
-    const result = webpackRscServerLoader.call(
-      context as webpack.LoaderContext<{}>,
-      input,
+    void webpackRscServerLoader.call(
+      context as webpack.LoaderContext<WebpackRscServerLoaderOptions>,
+      input.toString(`utf-8`),
     );
-
-    if (result) {
-      reject(
-        new Error(
-          `Expected webpackRscServerLoader to return void, received ${result} instead.`,
-        ),
-      );
-    }
   });
 }
 
 describe.only(`webpackRscServerLoader`, () => {
   test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
-    const input = await fs.readFile(
-      path.resolve(currentDirname, `__fixtures__/client-components.js`),
-    );
+    const clientReferenceMap: ClientReferencesForClientMap = new Map();
+    const filename = `__fixtures__/client-components.js`;
+    const output = await callLoader(filename, clientReferenceMap);
 
-    const output = await callLoader(input.toString(`utf-8`));
+    const idPrefix = path.relative(
+      process.cwd(),
+      path.resolve(currentDirname, filename),
+    );
 
     expect(output).toEqual(
       `
 'use client';
 
 export const ComponentA = {
-  $$type: Symbol.for("react.client.reference"),
-  $$id: eval("'ComponentA'")
+  $$typeof: Symbol.for("react.client.reference"),
+  $$id: "${idPrefix}#ComponentA"
 };
 export const ComponentB = {
-  $$type: Symbol.for("react.client.reference"),
-  $$id: eval("'ComponentB'")
+  $$typeof: Symbol.for("react.client.reference"),
+  $$id: "${idPrefix}#ComponentB"
 };
 export const ComponentC = {
-  $$type: Symbol.for("react.client.reference"),
-  $$id: eval("'ComponentC'")
+  $$typeof: Symbol.for("react.client.reference"),
+  $$id: "${idPrefix}#ComponentC"
 };
 `.trim(),
     );
   });
 
   test(`does not change modules without a 'use client' directive`, async () => {
-    const input = await fs.readFile(
-      path.resolve(currentDirname, `__fixtures__/server-component.js`),
-    );
-
-    const output = await callLoader(input.toString(`utf-8`));
+    const clientReferenceMap: ClientReferencesForClientMap = new Map();
+    const filename = `__fixtures__/server-component.js`;
+    const output = await callLoader(filename, clientReferenceMap);
 
     expect(output).toEqual(
       `

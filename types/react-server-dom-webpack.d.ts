@@ -17,8 +17,8 @@ declare module 'react-server-dom-webpack' {
   }
 
   export interface ClientReferenceMetadata {
-    id: string;
-    chunks: string[];
+    id: string | number;
+    chunks: (string | number)[];
     name: string;
   }
 

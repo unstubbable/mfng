@@ -8,6 +8,10 @@ export interface BuyButtonProps {
   readonly buy: typeof buy;
 }
 
+export function Foo(): null {
+  return null;
+}
+
 export function BuyButton({buy}: BuyButtonProps): JSX.Element {
   const [quantity, setQuantity] = React.useState(1);
   const [isPending, startTransition] = React.useTransition();

@@ -1,6 +1,4 @@
 import * as React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import 'tailwindcss/tailwind.css';
 import {LocationServerContext} from '../../location-server-context.js';
 import {NavigationContainer} from '../client/navigation-container.js';
 import {Navigation} from '../shared/navigation.js';

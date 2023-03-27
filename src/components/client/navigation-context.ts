@@ -1,3 +1,5 @@
+'use client';
+
 import type {To} from 'history';
 import * as React from 'react';
 

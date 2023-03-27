@@ -78,9 +78,6 @@ const serverConfig = {
     maxEntrypointSize: 1_000_000,
   },
   externals: [`__STATIC_CONTENT_MANIFEST`],
-  optimization: dev
-    ? undefined
-    : {concatenateModules: false, usedExports: false, moduleIds: `named`},
 };
 
 /**
@@ -122,7 +119,6 @@ const clientConfig = {
   ],
   devtool: `source-map`,
   mode: dev ? `development` : `production`,
-  optimization: dev ? undefined : {moduleIds: `named`},
 };
 
 export default [serverConfig, clientConfig];

@@ -1,3 +1,4 @@
+import type {SSRManifest} from 'react-server-dom-webpack';
 import type {EnvWithStaticContent} from '../get-json-from-kv.js';
 import {getJsonFromKv} from '../get-json-from-kv.js';
 import {createHtmlStream} from './create-html-stream.js';
@@ -21,14 +22,14 @@ export default <ExportedHandler<MainWorkerEnv>>{
       throw new Error(`Empty body received from RSC worker.`);
     }
 
-    const manifest = await getJsonFromKv(`js-manifest.json`, {
-      request,
-      env,
-      ctx,
-    });
+    const [reactSsrManifest, jsManifest] = await Promise.all([
+      getJsonFromKv(`react-ssr-manifest.json`, {request, env, ctx}),
+      getJsonFromKv(`js-manifest.json`, {request, env, ctx}),
+    ]);
 
     const htmlStream = await createHtmlStream(rscResponse.body, {
-      bootstrapScripts: [(manifest as Record<string, string>)[`main.js`]!],
+      reactSsrManifest: reactSsrManifest as SSRManifest,
+      bootstrapScripts: [(jsManifest as Record<string, string>)[`main.js`]!],
     });
 
     return new Response(htmlStream, {

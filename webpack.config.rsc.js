@@ -8,6 +8,11 @@ const dev = process.env.MODE === `development`;
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
+ * @type {Map<string, import('./lib/bundler/webpack-rsc-server-loader.cjs').ModuleExportsInfo>}
+ */
+const clientReferenceMap = new Map();
+
+/**
  * @type {import('webpack').Configuration}
  */
 export default {
@@ -27,15 +32,18 @@ export default {
     maxAssetSize: 1_000_000,
     maxEntrypointSize: 1_000_000,
   },
-  resolveLoader: {
-    modules: [`node_modules`, __dirname],
-  },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         use: [
-          {loader: path.resolve(__dirname, `rsc-loader.cjs`)},
+          {
+            loader: path.resolve(
+              __dirname,
+              `lib/bundler/webpack-rsc-server-loader.cjs`,
+            ),
+            options: {clientReferenceMap},
+          },
           `swc-loader`,
         ],
         exclude: [/node_modules/],
@@ -50,6 +58,4 @@ export default {
   devtool: `source-map`,
   mode: dev ? `development` : `production`,
   externals: [`__STATIC_CONTENT_MANIFEST`],
-  // Do not mangle exports so that server references can be imported by name.
-  optimization: dev ? undefined : {mangleExports: false},
 };

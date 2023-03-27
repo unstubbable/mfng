@@ -16,8 +16,10 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
 ) => {
   const [reactClientManifest, cssManifest] = await Promise.all([
     getJsonFromKv(`react-client-manifest.json`, {request, env, ctx}),
-    getJsonFromKv(`client/css-manifest.json`, {request, env, ctx}),
+    getJsonFromKv(`css-manifest.json`, {request, env, ctx}),
   ]);
+
+  console.log(JSON.stringify({reactClientManifest}));
 
   const mainCssHref = (cssManifest as Record<string, string>)[`main.css`];
 

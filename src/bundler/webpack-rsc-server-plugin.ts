@@ -12,22 +12,19 @@ import {
 } from './server-reference.js';
 
 export interface WebpackRscServerPluginOptions {
-  readonly clientModulesCache: Map<string, ModuleExportsInfo>;
-  readonly serverModulesCache: Map<string, ModuleExportsInfo>;
+  readonly clientReferenceMap: Map<string, ModuleExportsInfo>;
 }
 
 export interface ModuleExportsInfo {
-  readonly id: string | number;
-  readonly exportNames: Map<string, string>;
+  readonly moduleResource: string;
+  readonly exportName: string;
 }
 
 export class WebpackRscServerPlugin {
-  private clientModulesCache: Map<string, ModuleExportsInfo>;
-  private serverModulesCache: Map<string, ModuleExportsInfo>;
+  private clientReferenceMap: Map<string, ModuleExportsInfo>;
 
   constructor(options: WebpackRscServerPluginOptions) {
-    this.clientModulesCache = options.clientModulesCache;
-    this.serverModulesCache = options.serverModulesCache;
+    this.clientReferenceMap = options.clientReferenceMap;
   }
 
   apply(compiler: Webpack.Compiler): void {
@@ -94,17 +91,20 @@ export class WebpackRscServerPlugin {
               );
 
               if (clientReferenceDependency) {
-                this.clientModulesCache.set(
-                  clientReferenceDependency.normalModule.resource,
-                  {
-                    id: compilation.chunkGraph.getModuleId(module),
-                    exportNames: getExportNames(
-                      module,
-                      compilation.moduleGraph,
-                      chunk.runtime,
-                    ),
-                  },
-                );
+                for (const [, exportName] of getExportNames(
+                  module,
+                  compilation.moduleGraph,
+                  chunk.runtime,
+                )) {
+                  this.clientReferenceMap.set(
+                    clientReferenceDependency.normalModule.resource,
+                    {
+                      moduleResource:
+                        clientReferenceDependency.normalModule.resource,
+                      exportName,
+                    },
+                  );
+                }
               }
             }
           },

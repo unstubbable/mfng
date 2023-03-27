@@ -11,6 +11,7 @@
     "build": "concurrently -c auto 'npm run build:*'",
     "ci": "concurrently -c auto -n compile,format,lint 'npm run compile' 'npm run format:check' 'npm run lint'",
     "compile": "tsc --build",
+    "compile:emit": "tsc --build tsconfig.emit.json",
     "deploy:main": "wrangler publish -c src/workers/main/wrangler.toml",
     "deploy:rsc": "wrangler publish -c src/workers/rsc/wrangler.toml",
     "predeploy": "npm run build",
@@ -21,8 +22,7 @@
     "lint": "eslint .",
     "start:main": "wrangler dev -c src/workers/main/wrangler.toml -l",
     "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l",
-    "prestart": "npm run build",
-    "start": "concurrently -c auto -k 'npm run build:* -- --watch' 'npm run start:*'",
+    "start": "concurrently -c auto -k 'npm run start:*'",
     "test": "jest --no-coverage"
   },
   "dependencies": {
@@ -70,6 +70,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-markdown": "^3.0.0",
     "jest": "^29.5.0",
+    "jest-config": "^29.5.0",
     "loader-utils": "^3.2.1",
     "memory-fs": "^0.5.0",
     "mini-css-extract-plugin": "^2.7.3",

@@ -3,6 +3,8 @@ import {createBrowserHistory, createPath} from 'history';
 import * as React from 'react';
 import ReactDOMClient from 'react-dom/client';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'tailwindcss/tailwind.css';
 import {callServer} from './call-server.js';
 import {ClientRoot} from './components/client/client-root.js';
 
