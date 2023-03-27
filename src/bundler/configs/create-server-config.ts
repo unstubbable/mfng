@@ -4,6 +4,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 import type {Configuration} from 'webpack';
 import type {ClientReferencesForClientMap} from '../webpack-rsc-server-loader.cjs';
+import {WebpackRscServerPlugin} from '../webpack-rsc-server-plugin.js';
 import {createCssRule} from './create-css-rule.js';
 
 export interface CreateServerConfigOptions {
@@ -55,6 +56,7 @@ export function createServerConfig(
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `rsc-main.css`, runtime: false}),
+      new WebpackRscServerPlugin({}),
     ],
     devtool: `source-map`,
     mode,

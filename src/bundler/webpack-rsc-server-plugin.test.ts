@@ -3,8 +3,6 @@ import url from 'url';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
-import {toPlainObject} from './to-plain-object.js';
-import type {ModuleExportsInfo} from './webpack-rsc-server-plugin.js';
 import {WebpackRscServerPlugin} from './webpack-rsc-server-plugin.js';
 
 const fs = new MemoryFS();
@@ -44,15 +42,10 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
   });
 }
 
-describe.skip(`WebpackRscPlugin`, () => {
+describe(`WebpackRscPlugin`, () => {
   let buildConfig: webpack.Configuration;
-  let clientReferenceMap: Map<string, ModuleExportsInfo>;
-  let serverModulesCache: Map<string, ModuleExportsInfo>;
 
   beforeEach(() => {
-    clientReferenceMap = new Map();
-    serverModulesCache = new Map();
-
     buildConfig = {
       entry: path.resolve(currentDirname, `__fixtures__/main.js`),
       output: {
@@ -70,7 +63,7 @@ describe.skip(`WebpackRscPlugin`, () => {
           },
         ],
       },
-      plugins: [new WebpackRscServerPlugin({clientReferenceMap})],
+      plugins: [new WebpackRscServerPlugin({})],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },
@@ -81,38 +74,6 @@ describe.skip(`WebpackRscPlugin`, () => {
   describe(`in development mode`, () => {
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `development`};
-    });
-
-    test(`the generated bundle has replacement code for client references`, async () => {
-      await runWebpack(buildConfig);
-
-      const outputFile = fs.readFileSync(
-        path.resolve(currentDirname, `dist/bundle.js`),
-        `utf-8`,
-      );
-
-      expect(outputFile).toMatch(
-        `
-/***/ "./src/bundler/__fixtures__/client-component.js":
-/*!******************************************************!*\\
-  !*** ./src/bundler/__fixtures__/client-component.js ***!
-  \\******************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ClientComponent": () => (/* binding */ ClientComponent)
-/* harmony export */ });
-// @ts-nocheck
-'use client';
-
-const ClientComponent = {
-  $$type: Symbol.for("react.client.reference"),
-  $$id: "./src/bundler/__fixtures__/client-component.js#ClientComponent"
-};
-
-/***/ }),`,
-      );
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {
@@ -140,61 +101,19 @@ __webpack_require__.r(__webpack_exports__);
 async function serverFunction() {
   return Promise.resolve(\`server\`);
 }
-Object.defineProperties(
-	serverFunction,
-	{
-		$$typeof: {value: Symbol.for("react.server.reference")},
-		$$id: {value: "./src/bundler/__fixtures__/server-function.js#serverFunction"},
-	}
-);
+Object.defineProperties(serverFunction, {
+	$$typeof: {value: Symbol.for("react.server.reference")},
+	$$id: {value: "./src/bundler/__fixtures__/server-function.js#serverFunction"},
+});
 
 /***/ })`,
       );
-    });
-
-    test(`the clientReferenceMap includes all client modules`, async () => {
-      await runWebpack(buildConfig);
-
-      expect(toPlainObject(clientReferenceMap)).toEqual({
-        [`${currentDirname}/__fixtures__/client-component.js`]: {
-          exportNames: {ClientComponent: `ClientComponent`},
-          id: `./src/bundler/__fixtures__/client-component.js`,
-        },
-      });
-    });
-
-    test(`the serverModulesCache includes all server modules`, async () => {
-      await runWebpack(buildConfig);
-
-      expect(toPlainObject(serverModulesCache)).toEqual({
-        [`${currentDirname}/__fixtures__/server-function.js`]: {
-          id: `./src/bundler/__fixtures__/server-function.js`,
-          exportNames: [`serverFunction`],
-        },
-      });
     });
   });
 
   describe(`in production mode`, () => {
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-    });
-
-    test(`the generated bundle has replacement code for client references`, async () => {
-      await runWebpack(buildConfig);
-
-      const outputFile = fs.readFileSync(
-        path.resolve(currentDirname, `dist/bundle.js`),
-        `utf-8`,
-      );
-
-      expect(pretty(outputFile)).toMatch(
-        `
-    298: (e, r, t) => {
-      t.d(r, { H: () => o });
-      const o = { $$type: Symbol.for("react.client.reference"), $$id: "298#H" };
-    }`,
-      );
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {
@@ -205,55 +124,20 @@ Object.defineProperties(
         `utf-8`,
       );
 
-      expect(outputFile).toMatch(
+      expect(pretty(outputFile)).toMatch(
         `
-  /***/ "./src/bundler/__fixtures__/server-function.js":
-  /*!*****************************************************!*\\
-    !*** ./src/bundler/__fixtures__/server-function.js ***!
-    \\*****************************************************/
-  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-  __webpack_require__.r(__webpack_exports__);
-  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "serverFunction": () => (/* binding */ serverFunction)
-  /* harmony export */ });
-  'use server';
-
-  async function serverFunction() {
-    return Promise.resolve(\`server\`);
-  }
-  Object.defineProperties(
-    serverFunction,
-    {
-      $$typeof: {value: Symbol.for("react.server.reference")},
-      $$id: {value: "./src/bundler/__fixtures__/server-function.js#serverFunction"},
-    }
-  );
-
-  /***/ })`,
+    345: (e, r, t) => {
+      async function o() {
+        return Promise.resolve("server");
+      }
+      t.r(r),
+        t.d(r, { serverFunction: () => o }),
+        Object.defineProperties(o, {
+          $$typeof: { value: Symbol.for("react.server.reference") },
+          $$id: { value: "345#serverFunction" },
+        });
+    },`,
       );
-    });
-
-    test(`the clientReferenceMap includes all client modules`, async () => {
-      await runWebpack(buildConfig);
-
-      expect(toPlainObject(clientReferenceMap)).toEqual({
-        [`${currentDirname}/__fixtures__/client-component.js`]: {
-          exportNames: {H: `ClientComponent`},
-          id: 298,
-        },
-      });
-    });
-
-    test(`the serverModulesCache includes all server modules`, async () => {
-      await runWebpack(buildConfig);
-
-      expect(toPlainObject(serverModulesCache)).toEqual({
-        [`${currentDirname}/__fixtures__/server-function.js`]: {
-          id: `./src/bundler/__fixtures__/server-function.js`,
-          exportNames: [`serverFunction`],
-        },
-      });
     });
   });
 });

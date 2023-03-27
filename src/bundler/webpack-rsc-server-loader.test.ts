@@ -45,7 +45,7 @@ async function callLoader(
   });
 }
 
-describe.only(`webpackRscServerLoader`, () => {
+describe(`webpackRscServerLoader`, () => {
   test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
     const clientReferenceMap: ClientReferencesForClientMap = new Map();
     const filename = `__fixtures__/client-components.js`;

@@ -1,4 +1,4 @@
-declare module 'react-server-dom-webpack/server' {
+declare module 'react-server-dom-webpack/server.edge' {
   import type {ReactElement, Thenable} from 'react';
   import type {
     ClientManifest,

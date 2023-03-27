@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type {ClientManifest} from 'react-server-dom-webpack';
-import ReactServerDOMServer from 'react-server-dom-webpack/server';
+import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 import {App} from '../../components/server/app.js';
 import {LocationServerContextName} from '../../location-server-context.js';
 import type {EnvWithStaticContent} from '../get-json-from-kv.js';
@@ -18,8 +18,6 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     getJsonFromKv(`react-client-manifest.json`, {request, env, ctx}),
     getJsonFromKv(`css-manifest.json`, {request, env, ctx}),
   ]);
-
-  console.log(JSON.stringify({reactClientManifest}));
 
   const mainCssHref = (cssManifest as Record<string, string>)[`main.css`];
 

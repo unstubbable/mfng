@@ -59,7 +59,6 @@ export class WebpackRscSsrPlugin {
         const onNormalModuleFactoryParser = (
           parser: Webpack.javascript.JavascriptParser,
         ) => {
-          compilation.assetsInfo;
           parser.hooks.program.tap(WebpackRscSsrPlugin.name, () => {
             if (
               parser.state.module.nameForCondition() ===
@@ -117,7 +116,6 @@ export class WebpackRscSsrPlugin {
               this.ssrManifest[clientId] = Object.fromEntries(
                 exportNames.map((exportName) => [
                   exportName,
-                  // TODO: do we need the chunks?
                   {id, name: exportName, chunks: []},
                 ]),
               );

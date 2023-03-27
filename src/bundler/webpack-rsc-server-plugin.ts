@@ -1,19 +1,7 @@
 import type Webpack from 'webpack';
-import {
-  ClientReferenceDependency,
-  ClientReferenceTemplate,
-  isClientReferenceDependency,
-} from './client-reference.js';
-import {getExportNames} from './get-export-names.js';
 import {isUseClientDirective, isUseServerDirective} from './node-helpers.js';
-import {
-  ServerReferenceDependency,
-  ServerReferenceTemplate,
-} from './server-reference.js';
 
-export interface WebpackRscServerPluginOptions {
-  readonly clientReferenceMap: Map<string, ModuleExportsInfo>;
-}
+export interface WebpackRscServerPluginOptions {}
 
 export interface ModuleExportsInfo {
   readonly moduleResource: string;
@@ -21,19 +9,69 @@ export interface ModuleExportsInfo {
 }
 
 export class WebpackRscServerPlugin {
-  private clientReferenceMap: Map<string, ModuleExportsInfo>;
+  private serverModuleNames: Set<string> = new Set();
 
-  constructor(options: WebpackRscServerPluginOptions) {
-    this.clientReferenceMap = options.clientReferenceMap;
-  }
+  constructor(_options: WebpackRscServerPluginOptions) {}
 
   apply(compiler: Webpack.Compiler): void {
+    const {
+      Template,
+      dependencies: {ModuleDependency},
+    } = compiler.webpack;
+
+    class ServerReferenceDependency extends ModuleDependency {
+      constructor(request: string) {
+        super(request);
+      }
+
+      override get type(): string {
+        return `server-reference`;
+      }
+    }
+
+    class ServerReferenceTemplate extends Template {
+      apply(
+        dependency: ServerReferenceDependency,
+        source: Webpack.sources.ReplaceSource,
+        {
+          chunkGraph,
+          moduleGraph,
+        }: {
+          chunkGraph: Webpack.ChunkGraph;
+          moduleGraph: Webpack.ModuleGraph;
+        },
+      ): void {
+        const module = moduleGraph.getModule(dependency);
+        const id = chunkGraph.getModuleId(module);
+
+        const exportNames = [
+          ...moduleGraph.getExportsInfo(module).orderedExports,
+        ].map(({name}) => name);
+
+        const newSource = exportNames
+          .map((exportName) =>
+            Template.asString([
+              ``,
+              `Object.defineProperties(${exportName}, {`,
+              Template.indent([
+                `$$typeof: {value: Symbol.for("react.server.reference")},`,
+                `$$id: {value: ${JSON.stringify(id + `#` + exportName)}},`,
+              ]),
+              `});`,
+            ]),
+          )
+          .join(`\n`);
+
+        source.insert(source.size(), newSource);
+      }
+    }
+
     compiler.hooks.thisCompilation.tap(
       WebpackRscServerPlugin.name,
       (compilation, {normalModuleFactory}) => {
-        compilation.dependencyTemplates.set(
-          ClientReferenceDependency,
-          new ClientReferenceTemplate(),
+        compilation.dependencyFactories.set(
+          ServerReferenceDependency,
+          normalModuleFactory,
         );
 
         compilation.dependencyTemplates.set(
@@ -47,23 +85,28 @@ export class WebpackRscServerPlugin {
           parser.hooks.program.tap(WebpackRscServerPlugin.name, (program) => {
             const isClientModule = program.body.some(isUseClientDirective);
             const isServerModule = program.body.some(isUseServerDirective);
+            const {module} = parser.state;
 
             if (isServerModule && isClientModule) {
               throw new Error(
-                `Cannot use both 'use server' and 'use client' in the same module ${parser.state.module.resource}.`,
-              );
-            }
-
-            if (isClientModule) {
-              parser.state.module.addDependency(
-                new ClientReferenceDependency(parser.state.module),
+                `Cannot use both 'use server' and 'use client' in the same module ${module.resource}.`,
               );
             }
 
             if (isServerModule) {
-              parser.state.module.addDependency(
-                new ServerReferenceDependency(parser.state.module),
-              );
+              const moduleName = module.nameForCondition();
+
+              if (!moduleName) {
+                throw new Error(
+                  `Server module ${module.resource} did not return a value for "nameForCondition".`,
+                );
+              }
+
+              if (!this.serverModuleNames.has(moduleName)) {
+                this.serverModuleNames.add(moduleName);
+
+                module.addDependency(new ServerReferenceDependency(moduleName));
+              }
             }
           });
         };
@@ -79,36 +122,6 @@ export class WebpackRscServerPlugin {
         normalModuleFactory.hooks.parser
           .for(`javascript/esm`)
           .tap(`HarmonyModulesPlugin`, onNormalModuleFactoryParser);
-
-        compilation.hooks.chunkAsset.tap(
-          WebpackRscServerPlugin.name,
-          (chunk) => {
-            const modules = compilation.chunkGraph.getChunkModules(chunk);
-
-            for (const module of modules) {
-              const clientReferenceDependency = module.dependencies.find(
-                isClientReferenceDependency,
-              );
-
-              if (clientReferenceDependency) {
-                for (const [, exportName] of getExportNames(
-                  module,
-                  compilation.moduleGraph,
-                  chunk.runtime,
-                )) {
-                  this.clientReferenceMap.set(
-                    clientReferenceDependency.normalModule.resource,
-                    {
-                      moduleResource:
-                        clientReferenceDependency.normalModule.resource,
-                      exportName,
-                    },
-                  );
-                }
-              }
-            }
-          },
-        );
       },
     );
   }
