@@ -22,7 +22,7 @@ server?
 - [x] Serverless deployment (using
       [Cloudflare Workers](https://workers.cloudflare.com))
 - [x] Server references manifest
-- [x] Support poisoned imports
+- [x] Support [poisoned imports][]
 - [ ] Microfrontend composition demo
 - [ ] Advanced routing
 
@@ -63,3 +63,6 @@ To deploy via GitHub Actions, follow these steps:
 ---
 
 _Please let me know in the issues if any of these steps do not work for you._
+
+[poisoned imports]:
+  https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#poisoned-imports
