@@ -12,7 +12,8 @@ export interface ModuleExportsInfo {
 
 export class WebpackRscServerPlugin {
   private serverManifestFilename: string;
-  private serverModules = new Set<Webpack.NormalModule>();
+  private serverModuleNames = new Set<string>();
+  private serverManifest: Record<string | number, string[]> = {};
 
   constructor(options?: WebpackRscServerPluginOptions) {
     this.serverManifestFilename =
@@ -106,8 +107,8 @@ export class WebpackRscServerPlugin {
                 );
               }
 
-              if (!this.serverModules.has(module)) {
-                this.serverModules.add(module);
+              if (!this.serverModuleNames.has(moduleName)) {
+                this.serverModuleNames.add(moduleName);
 
                 module.addDependency(new ServerReferenceDependency(moduleName));
               }
@@ -127,19 +128,30 @@ export class WebpackRscServerPlugin {
           .for(`javascript/esm`)
           .tap(`HarmonyModulesPlugin`, onNormalModuleFactoryParser);
 
+        compilation.hooks.afterOptimizeModuleIds.tap(
+          WebpackRscServerPlugin.name,
+          (modules) => {
+            for (const module of modules) {
+              const moduleName = module.nameForCondition();
+
+              if (!moduleName || !this.serverModuleNames.has(moduleName)) {
+                continue;
+              }
+
+              const id = compilation.chunkGraph.getModuleId(module);
+
+              this.serverManifest[id] = getExportNames(
+                compilation.moduleGraph,
+                module,
+              );
+            }
+          },
+        );
+
         compilation.hooks.processAssets.tap(WebpackRscServerPlugin.name, () => {
-          const serverManifest: Record<string | number, string[]> = {};
-
-          for (const module of this.serverModules) {
-            const id = compilation.chunkGraph.getModuleId(module);
-            const exportNames = getExportNames(compilation.moduleGraph, module);
-
-            serverManifest[id] = exportNames;
-          }
-
           compilation.emitAsset(
             this.serverManifestFilename,
-            new RawSource(JSON.stringify(serverManifest, null, 2), false),
+            new RawSource(JSON.stringify(this.serverManifest, null, 2), false),
           );
         });
       },
