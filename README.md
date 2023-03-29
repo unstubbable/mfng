@@ -24,8 +24,7 @@ server?
 - [ ] Microfrontend composition demo
 - [ ] Support poisoned imports
 - [x] Server references manifest
-- [ ] Advanced routing (~~maybe use `react-router`?~~ I don't think this is
-      feasible since the concepts of RSC and React Router don't really align.)
+- [ ] Advanced routing
 
 ## Getting Started
 
