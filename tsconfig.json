@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "checkJs": true,
-    "noEmit": true,
-    "resolveJsonModule": true
+    "noEmit": true
   },
-  "exclude": ["coverage", "dist"],
+  "exclude": ["coverage"],
   "extends": "./tsconfig.base.json",
-  "include": ["**/*"]
+  "include": ["*.js", "*.cjs"],
+  "references": [{"path": "apps/main-app"}]
 }

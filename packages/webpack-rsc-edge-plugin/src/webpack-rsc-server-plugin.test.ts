@@ -86,10 +86,10 @@ describe(`WebpackRscPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "./src/bundler/__fixtures__/server-function.js":
-/*!*****************************************************!*\\
-  !*** ./src/bundler/__fixtures__/server-function.js ***!
-  \\*****************************************************/
+/***/ "./packages/webpack-rsc-edge-plugin/src/__fixtures__/server-function.js":
+/*!******************************************************************************!*\\
+  !*** ./packages/webpack-rsc-edge-plugin/src/__fixtures__/server-function.js ***!
+  \\******************************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -103,7 +103,7 @@ async function serverFunction() {
 }
 Object.defineProperties(serverFunction, {
 	$$typeof: {value: Symbol.for("react.server.reference")},
-	$$id: {value: "./src/bundler/__fixtures__/server-function.js#serverFunction"},
+	$$id: {value: "./packages/webpack-rsc-edge-plugin/src/__fixtures__/server-function.js#serverFunction"},
 });
 
 /***/ })`,
@@ -126,7 +126,7 @@ Object.defineProperties(serverFunction, {
 
       expect(pretty(outputFile)).toMatch(
         `
-    345: (e, r, t) => {
+    692: (e, r, t) => {
       async function o() {
         return Promise.resolve("server");
       }
@@ -134,7 +134,7 @@ Object.defineProperties(serverFunction, {
         t.d(r, { serverFunction: () => o }),
         Object.defineProperties(o, {
           $$typeof: { value: Symbol.for("react.server.reference") },
-          $$id: { value: "345#serverFunction" },
+          $$id: { value: "692#serverFunction" },
         });
     },`,
       );

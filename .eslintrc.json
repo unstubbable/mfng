@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/eslintrc",
   "extends": ["prettier"],
   "overrides": [
     {
@@ -29,34 +30,29 @@
       }
     },
     {
-      "files": ["src/**/*.ts", "src/**/*.tsx"],
+      "files": ["**/*.cts", "**/*.ts", "**/*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": "tsconfig.eslint.json"
+        "project": [
+          "./tsconfig.eslint.json",
+          "./apps/*/tsconfig.json",
+          "./packages/*/tsconfig.json"
+        ]
       },
       "rules": {
         "@typescript-eslint/await-thenable": "error",
         "@typescript-eslint/consistent-type-imports": [
           "error",
-          {
-            "prefer": "type-imports"
-          }
+          {"prefer": "type-imports"}
         ],
         "@typescript-eslint/explicit-module-boundary-types": [
           "error",
-          {
-            "allowDirectConstAssertionInArrowFunctions": true
-          }
+          {"allowDirectConstAssertionInArrowFunctions": true}
         ],
         "@typescript-eslint/no-duplicate-imports": "error",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-require-imports": "error",
-        "@typescript-eslint/no-shadow": [
-          "error",
-          {
-            "hoist": "all"
-          }
-        ],
+        "@typescript-eslint/no-shadow": ["error", {"hoist": "all"}],
         "@typescript-eslint/promise-function-async": "error",
         "@typescript-eslint/quotes": ["error", "backtick"],
         "@typescript-eslint/require-await": "error",
@@ -66,9 +62,7 @@
     }
   ],
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
+    "ecmaFeatures": {"jsx": true},
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
@@ -77,34 +71,15 @@
   "rules": {
     "complexity": "error",
     "curly": "error",
-    "eqeqeq": [
-      "error",
-      "always",
-      {
-        "null": "ignore"
-      }
-    ],
-    "import/extensions": [
-      "error",
-      "always",
-      {
-        "ignorePackages": true
-      }
-    ],
+    "eqeqeq": ["error", "always", {"null": "ignore"}],
+    "import/extensions": ["error", "always", {"ignorePackages": true}],
     "import/no-commonjs": "error",
-    "import/no-duplicates": [
-      "error",
-      {
-        "considerQueryString": true
-      }
-    ],
+    "import/no-duplicates": ["error", {"considerQueryString": true}],
     "import/no-extraneous-dependencies": "error",
     "import/order": [
       "error",
       {
-        "alphabetize": {
-          "order": "asc"
-        },
+        "alphabetize": {"order": "asc"},
         "newlines-between": "never",
         "warnOnUnassignedImports": true
       }
@@ -126,10 +101,7 @@
     "quotes": ["error", "backtick"],
     "sort-imports": [
       "error",
-      {
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false
-      }
+      {"ignoreDeclarationSort": true, "ignoreMemberSort": false}
     ]
   }
 }

@@ -1,0 +1,42 @@
+{
+  "name": "@mfng/app",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'TODO'",
+    "deploy": "npm run deploy:main && npm run deploy:rsc",
+    "deploy:main": "wrangler publish -c src/workers/main/wrangler.toml",
+    "deploy:rsc": "wrangler publish -c src/workers/rsc/wrangler.toml",
+    "dev": "MODE=development npm run start",
+    "start": "concurrently -c auto -k 'npm run start:*'",
+    "start:main": "wrangler dev -c src/workers/main/wrangler.toml -l",
+    "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l"
+  },
+  "dependencies": {
+    "clsx": "^1.2.1",
+    "countries-list": "^2.6.1",
+    "cssnano": "^5.1.15",
+    "fuse.js": "^6.6.2",
+    "history": "^5.3.0",
+    "htmlescape": "^1.1.1",
+    "react": "18.3.0-next-f828bad38-20230313",
+    "react-dom": "18.3.0-next-f828bad38-20230313",
+    "react-markdown": "^8.0.5",
+    "react-server-dom-webpack": "18.3.0-next-f828bad38-20230313",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@mfng/webpack-rsc-edge-plugin": "*",
+    "@cloudflare/kv-asset-handler": "^0.3.0",
+    "@cloudflare/workers-types": "^4.20230221.0",
+    "@types/htmlescape": "^1.1.1",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "concurrently": "^7.6.0",
+    "tailwindcss": "^3.2.7",
+    "wrangler": "^2.11.0"
+  }
+}

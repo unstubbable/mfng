@@ -2,9 +2,11 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+    "composite": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importsNotUsedAsValues": "error",
+    "incremental": true,
     "isolatedModules": true,
     "jsx": "react",
     "lib": ["dom"],
@@ -21,8 +23,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "types": ["@cloudflare/workers-types", "jest", "react/next"],
-    "incremental": true,
-    "composite": true
+    "types": ["@cloudflare/workers-types", "jest", "react/next"]
   }
 }

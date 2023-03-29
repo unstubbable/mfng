@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "include": ["src/bundler/**/*.ts", "src/bundler/**/*.cts", "types/**/*"],
-  "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
-  }
-}
