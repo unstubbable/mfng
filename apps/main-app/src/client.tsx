@@ -1,4 +1,3 @@
-import type {Location} from 'history';
 import {createBrowserHistory, createPath} from 'history';
 import * as React from 'react';
 import ReactDOMClient from 'react-dom/client';
@@ -17,9 +16,7 @@ const initialJsxStream =
     {callServer},
   );
 
-function fetchJsxStream(location: Location): React.Thenable<JSX.Element> {
-  const path = createPath(location);
-
+function fetchJsxStream(path: string): React.Thenable<JSX.Element> {
   if (path === initialPath) {
     return initialJsxStream;
   }

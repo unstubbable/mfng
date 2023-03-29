@@ -1,10 +1,11 @@
-import type {History, Location} from 'history';
+import type {History} from 'history';
+import {createPath} from 'history';
 import * as React from 'react';
 import {NavigationContext} from './navigation-context.js';
 
 export interface ClientRootProps {
   readonly history: History;
-  readonly fetchJsxStream: (location: Location) => React.Thenable<JSX.Element>;
+  readonly fetchJsxStream: (path: string) => React.Thenable<JSX.Element>;
 }
 
 export function ClientRoot({
@@ -22,7 +23,7 @@ export function ClientRoot({
     [],
   );
 
-  const jsxStreamPromise = fetchJsxStream(location);
+  const jsxStreamPromise = fetchJsxStream(createPath(location));
 
   return (
     <NavigationContext.Provider
