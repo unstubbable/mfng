@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "postbuild": "npm i"
+    "postbuild": "npm i && chmod +x ./lib/build.js"
   },
   "dependencies": {
     "@babel/core": "^7.21.3",
