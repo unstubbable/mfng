@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "ci": "concurrently -c auto -n compile,format,lint,test 'npm run compile' 'npm run format:check' 'npm run lint' 'npm test'",
+    "ci": "concurrently --kill-others-on-fail -c auto -n compile,format,lint,test 'npm run compile' 'npm run format:check' 'npm run lint' 'npm test'",
     "clean": "npm run compile:clean && rimraf {apps,packages}/*/{dist,lib}",
     "compile": "tsc --build",
     "compile:clean": "tsc --build --clean",
