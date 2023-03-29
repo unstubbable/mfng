@@ -8,6 +8,6 @@
   "include": ["*.js", "*.cjs"],
   "references": [
     {"path": "apps/main-app"},
-    {"path": "packages/webpack-rsc-edge-plugin"}
+    {"path": "packages/webpack-rsc-edge-build"}
   ]
 }

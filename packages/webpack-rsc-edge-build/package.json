@@ -1,5 +1,5 @@
 {
-  "name": "@mfng/webpack-rsc-edge-plugin",
+  "name": "@mfng/webpack-rsc-edge-build",
   "version": "1.0.0",
   "description": "A webpack plugin for React Server Components, optimized for the Edge",
   "license": "MIT",
