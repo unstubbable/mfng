@@ -22,7 +22,7 @@
     "lint": "eslint .",
     "start": "turbo start:rsc start:main",
     "pretest": "turbo build:dev",
-    "test": "jest",
+    "test": "jest -c jest.config.js --debug",
     "watch": "turbo watch"
   },
   "devDependencies": {
