@@ -23,7 +23,7 @@ export function createBufferedTransformStream(): ReadableWritablePair<
       });
     },
 
-    flush() {
+    async flush() {
       return buffering;
     },
   });

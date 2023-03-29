@@ -1,7 +1,10 @@
 import type Webpack from 'webpack';
 import {isUseClientDirective, isUseServerDirective} from './node-helpers.js';
+import type {ClientReferencesForClientMap} from './webpack-rsc-server-loader.cjs';
 
-export interface WebpackRscServerPluginOptions {}
+export interface WebpackRscServerPluginOptions {
+  readonly clientReferencesForClientMap: ClientReferencesForClientMap;
+}
 
 export interface ModuleExportsInfo {
   readonly moduleResource: string;
@@ -9,9 +12,11 @@ export interface ModuleExportsInfo {
 }
 
 export class WebpackRscServerPlugin {
-  private serverModuleNames: Set<string> = new Set();
+  private clientReferencesForClientMap: ClientReferencesForClientMap;
 
-  constructor(_options: WebpackRscServerPluginOptions) {}
+  constructor(options: WebpackRscServerPluginOptions) {
+    this.clientReferencesForClientMap = options.clientReferencesForClientMap;
+  }
 
   apply(compiler: Webpack.Compiler): void {
     const {
@@ -69,6 +74,10 @@ export class WebpackRscServerPlugin {
     compiler.hooks.thisCompilation.tap(
       WebpackRscServerPlugin.name,
       (compilation, {normalModuleFactory}) => {
+        this.clientReferencesForClientMap.clear();
+
+        const serverModuleNames = new Set<string>();
+
         compilation.dependencyFactories.set(
           ServerReferenceDependency,
           normalModuleFactory,
@@ -102,8 +111,8 @@ export class WebpackRscServerPlugin {
                 );
               }
 
-              if (!this.serverModuleNames.has(moduleName)) {
-                this.serverModuleNames.add(moduleName);
+              if (!serverModuleNames.has(moduleName)) {
+                serverModuleNames.add(moduleName);
 
                 module.addDependency(new ServerReferenceDependency(moduleName));
               }

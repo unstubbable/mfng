@@ -11,6 +11,7 @@ import {createCssRule} from './create-css-rule.js';
 
 export interface CreateClientConfigOptions {
   readonly mode: Configuration['mode'];
+  readonly entry: string;
   readonly clientReferencesForClientMap: ClientReferencesForClientMap;
   readonly clientReferencesForSsrMap: ClientReferencesForSsrMap;
 }
@@ -18,13 +19,14 @@ export interface CreateClientConfigOptions {
 export function createClientConfig(
   options: CreateClientConfigOptions,
 ): Configuration {
-  const {mode, clientReferencesForClientMap, clientReferencesForSsrMap} =
+  const {mode, entry, clientReferencesForClientMap, clientReferencesForSsrMap} =
     options;
+
   const dev = mode === `development`;
 
   return {
     context: process.cwd(),
-    entry: `./src/client.tsx`,
+    entry,
     output: {
       filename: dev ? `main.js` : `main.[contenthash:8].js`,
       path: path.join(process.cwd(), `dist/client`),

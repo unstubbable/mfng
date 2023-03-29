@@ -3,10 +3,41 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
+      "inputs": ["!**/*.test.ts"],
       "outputs": ["dist/**", "lib/**"]
     },
-    "dev": {
+    "build:dev": {
       "dependsOn": ["^build"],
+      "inputs": ["!**/*.test.ts"],
+      "outputs": ["dist/**", "lib/**"]
+    },
+    "dev:rsc": {
+      "dependsOn": ["^build", "build:dev"],
+      "cache": false,
+      "persistent": true
+    },
+    "dev:main": {
+      "dependsOn": ["^build", "build:dev"],
+      "cache": false,
+      "persistent": true
+    },
+    "start:rsc": {
+      "dependsOn": ["^build", "build"],
+      "cache": false,
+      "persistent": true
+    },
+    "start:main": {
+      "dependsOn": ["^build", "build"],
+      "cache": false,
+      "persistent": true
+    },
+    "watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "watch:dev": {
+      "dependsOn": ["^build", "build:dev"],
       "cache": false,
       "persistent": true
     }

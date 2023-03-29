@@ -1,19 +1,26 @@
 {
-  "name": "@mfng/app",
+  "name": "@mfng/main-app",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
+  "exports": {
+    "browser": "./src/client.tsx",
+    "react-server": "./src/workers/rsc/index.tsx",
+    "default": "./src/workers/main/index.ts"
+  },
   "scripts": {
-    "build": "echo 'TODO'",
-    "deploy": "npm run deploy:main && npm run deploy:rsc",
+    "build": "webpack-rsc-edge-build",
+    "build:dev": "webpack-rsc-edge-build --mode development",
     "deploy:main": "wrangler publish -c src/workers/main/wrangler.toml",
     "deploy:rsc": "wrangler publish -c src/workers/rsc/wrangler.toml",
-    "dev": "MODE=development npm run start",
-    "start": "concurrently -c auto -k 'npm run start:*'",
+    "dev:main": "npm run start:main",
+    "dev:rsc": "npm run start:rsc",
     "start:main": "wrangler dev -c src/workers/main/wrangler.toml -l",
-    "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l"
+    "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l",
+    "watch": "webpack-rsc-edge-build --watch",
+    "watch:dev": "webpack-rsc-edge-build --mode development --watch"
   },
   "dependencies": {
     "clsx": "^1.2.1",
@@ -29,13 +36,12 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
-    "@mfng/webpack-rsc-edge-plugin": "*",
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230221.0",
+    "@mfng/webpack-rsc-edge-plugin": "*",
     "@types/htmlescape": "^1.1.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "concurrently": "^7.6.0",
     "tailwindcss": "^3.2.7",
     "wrangler": "^2.11.0"
   }

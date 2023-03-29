@@ -71,7 +71,7 @@ export function createInitialRscResponseTransformStream(
       }
     },
 
-    flush() {
+    async flush() {
       return insertingRscStreamScripts;
     },
   });

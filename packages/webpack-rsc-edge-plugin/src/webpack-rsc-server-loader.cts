@@ -1,9 +1,9 @@
+import {relative} from 'path';
 import generate from '@babel/generator';
 import {parse} from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import type {LoaderContext} from 'webpack';
-import {relative} from 'path';
 
 export interface WebpackRscServerLoaderOptions {
   readonly clientReferencesForClientMap: ClientReferencesForClientMap;

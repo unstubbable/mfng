@@ -63,7 +63,9 @@ describe(`WebpackRscPlugin`, () => {
           },
         ],
       },
-      plugins: [new WebpackRscServerPlugin({})],
+      plugins: [
+        new WebpackRscServerPlugin({clientReferencesForClientMap: new Map()}),
+      ],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },

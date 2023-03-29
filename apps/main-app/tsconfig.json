@@ -4,6 +4,5 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src"
-  },
-  "references": [{"path": "../../packages/webpack-rsc-edge-plugin"}]
+  }
 }

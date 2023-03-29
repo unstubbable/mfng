@@ -1,31 +1,76 @@
+import type {Compiler, Configuration, MultiStats, Stats} from 'webpack';
 import webpack from 'webpack';
 
-export async function runWebpack(
-  config: webpack.Configuration,
-): Promise<webpack.Stats> {
-  return new Promise((resolve, reject) => {
-    webpack(config, (err, stats) => {
-      if (err) {
-        console.error(err.stack || err);
-        reject(err);
-      }
+export interface RunWebpackConfigs {
+  readonly server: Configuration;
+  readonly client: Configuration;
+  readonly ssr: Configuration;
+}
 
-      if (stats) {
-        const info = stats.toJson();
+export interface RunWebpackOptions {
+  readonly watch?: boolean;
+}
 
-        if (stats.hasErrors()) {
-          console.error(info.errors);
-          reject(info.errors);
-        }
+interface NamedCompiler extends Compiler {
+  readonly name: string;
+}
 
-        if (stats.hasWarnings()) {
-          console.warn(info.warnings);
-        }
+export function runWebpack(
+  configs: RunWebpackConfigs,
+  options?: RunWebpackOptions,
+): void {
+  const {server, client, ssr} = configs;
 
-        resolve(stats);
-      }
+  const multiCompiler = webpack([
+    {...server, name: `server`},
+    {...client, name: `client`},
+    {...ssr, name: `ssr`},
+  ]);
 
-      reject(new Error(`Neither error nor stats received from Webpack.`));
-    });
-  });
+  const [serverCompiler, clientCompiler, ssrCompiler] =
+    multiCompiler.compilers as [NamedCompiler, NamedCompiler, NamedCompiler];
+
+  multiCompiler.setDependencies(clientCompiler, [serverCompiler.name]);
+  multiCompiler.setDependencies(ssrCompiler, [clientCompiler.name]);
+
+  if (options?.watch) {
+    multiCompiler.watch({}, onCompilationComplete);
+  } else {
+    multiCompiler.run(onCompilationComplete);
+  }
+}
+
+function onCompilationComplete(
+  err?: Error | null,
+  stats?: Stats | MultiStats,
+): void {
+  if (err) {
+    console.error(err.stack || err);
+    return;
+  }
+
+  if (stats) {
+    const info = stats.toJson();
+
+    if (stats.hasErrors()) {
+      console.error(info.errors);
+    }
+
+    if (stats.hasWarnings()) {
+      console.warn(info.warnings);
+    }
+
+    console.log(
+      stats.toString({
+        colors: true,
+        chunks: false,
+        modules: false,
+        version: false,
+        hash: false,
+        builtAt: true,
+      }),
+    );
+  } else {
+    console.error(`Neither error nor stats received from Webpack.`);
+  }
 }

@@ -54,6 +54,8 @@ export class WebpackRscClientPlugin {
     compiler.hooks.thisCompilation.tap(
       WebpackRscClientPlugin.name,
       (compilation, {normalModuleFactory}) => {
+        this.clientReferencesForSsrMap.clear();
+
         compilation.dependencyFactories.set(
           ClientReferenceDependency,
           normalModuleFactory,

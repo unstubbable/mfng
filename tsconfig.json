@@ -6,5 +6,8 @@
   "exclude": ["coverage"],
   "extends": "./tsconfig.base.json",
   "include": ["*.js", "*.cjs"],
-  "references": [{"path": "apps/main-app"}]
+  "references": [
+    {"path": "apps/main-app"},
+    {"path": "packages/webpack-rsc-edge-plugin"}
+  ]
 }

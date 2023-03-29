@@ -9,6 +9,7 @@ import {createCssRule} from './create-css-rule.js';
 
 export interface CreateServerConfigOptions {
   readonly mode: Configuration['mode'];
+  readonly entry: string;
   readonly clientReferencesForClientMap: ClientReferencesForClientMap;
 }
 
@@ -17,11 +18,11 @@ const require = createRequire(import.meta.url);
 export function createServerConfig(
   options: CreateServerConfigOptions,
 ): Configuration {
-  const {mode, clientReferencesForClientMap} = options;
+  const {mode, entry, clientReferencesForClientMap} = options;
 
   return {
     context: process.cwd(),
-    entry: `./src/workers/rsc/index.tsx`,
+    entry,
     output: {
       filename: `rsc-worker.js`,
       path: path.join(process.cwd(), `dist`),
@@ -56,7 +57,7 @@ export function createServerConfig(
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `rsc-main.css`, runtime: false}),
-      new WebpackRscServerPlugin({}),
+      new WebpackRscServerPlugin({clientReferencesForClientMap}),
     ],
     devtool: `source-map`,
     mode,

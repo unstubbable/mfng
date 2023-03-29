@@ -8,17 +8,18 @@ import {createCssRule} from './create-css-rule.js';
 
 export interface CreateSsrConfigOptions {
   readonly mode: Configuration['mode'];
+  readonly entry: string;
   readonly clientReferencesForSsrMap: ClientReferencesForSsrMap;
 }
 
 export function createSsrConfig(
   options: CreateSsrConfigOptions,
 ): Configuration {
-  const {mode, clientReferencesForSsrMap} = options;
+  const {mode, entry, clientReferencesForSsrMap} = options;
 
   return {
     context: process.cwd(),
-    entry: `./src/workers/main/index.ts`,
+    entry,
     output: {
       filename: `main-worker.js`,
       path: path.join(process.cwd(), `dist`),

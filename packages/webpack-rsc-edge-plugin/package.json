@@ -5,8 +5,12 @@
   "license": "MIT",
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
+  "bin": {
+    "webpack-rsc-edge-build": "./lib/build.js"
+  },
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "postbuild": "npm i"
   },
   "dependencies": {
     "@babel/core": "^7.21.3",
@@ -19,19 +23,25 @@
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "mini-css-extract-plugin": "^2.7.3",
+    "pkg-up": "^4.0.0",
     "postcss": "^8.4.21",
     "postcss-loader": "^7.0.2",
     "resolve-typescript-plugin": "^2.0.0",
     "swc-loader": "^0.2.3",
     "webpack": "^5.75.0",
-    "webpack-manifest-plugin": "^5.0.0"
+    "webpack-manifest-plugin": "^5.0.0",
+    "yargs": "^17.7.1",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/babel__generator": "^7.6.4",
     "@types/babel__parser": "^7.1.1",
     "@types/babel__traverse": "^7.18.3",
     "@types/memory-fs": "^0.3.3",
+    "@types/yargs": "^17.0.24",
     "memory-fs": "^0.5.0",
+    "prettier": "^2.8.7",
+    "react": "18.3.0-next-f828bad38-20230313",
     "react-server-dom-webpack": "18.3.0-next-f828bad38-20230313",
     "typescript": "^4.9.5"
   },

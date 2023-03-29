@@ -1,20 +1,32 @@
+import path from 'path';
+import url from 'url';
 import type {UnstableDevWorker} from 'wrangler';
 import {unstable_dev} from 'wrangler';
+
+const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 describe(`main worker`, () => {
   let rscWorker: UnstableDevWorker;
   let mainWorker: UnstableDevWorker;
 
-  beforeAll(async () => {
-    rscWorker = await unstable_dev(`dist/rsc-worker.js`, {
-      config: `src/workers/rsc/wrangler.toml`,
-      experimental: {disableExperimentalWarning: true},
-    });
+  jest.setTimeout(30000);
 
-    mainWorker = await unstable_dev(`dist/main-worker.js`, {
-      config: `src/workers/main/wrangler.toml`,
-      experimental: {disableExperimentalWarning: true},
-    });
+  beforeAll(async () => {
+    rscWorker = await unstable_dev(
+      path.resolve(currentDirname, `../../dist/rsc-worker.js`),
+      {
+        config: path.resolve(currentDirname, `./rsc/wrangler.toml`),
+        experimental: {disableExperimentalWarning: true},
+      },
+    );
+
+    mainWorker = await unstable_dev(
+      path.resolve(currentDirname, `../../dist/main-worker.js`),
+      {
+        config: path.resolve(currentDirname, `./main/wrangler.toml`),
+        experimental: {disableExperimentalWarning: true},
+      },
+    );
   });
 
   afterAll(async () => {
