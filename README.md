@@ -21,9 +21,9 @@ server?
 - [x] Production builds
 - [x] Serverless deployment (using
       [Cloudflare Workers](https://workers.cloudflare.com))
-- [ ] Microfrontend composition demo
-- [ ] Support poisoned imports
 - [x] Server references manifest
+- [x] Support poisoned imports
+- [ ] Microfrontend composition demo
 - [ ] Advanced routing
 
 ## Getting Started

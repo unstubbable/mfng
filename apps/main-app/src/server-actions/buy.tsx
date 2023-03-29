@@ -1,6 +1,7 @@
 'use server';
 
 import * as React from 'react';
+import 'server-only';
 import {Notification} from '../components/shared/notification.js';
 
 export async function buy(quantity: number): Promise<React.ReactNode> {

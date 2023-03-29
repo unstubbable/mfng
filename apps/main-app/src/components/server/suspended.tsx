@@ -1,7 +1,7 @@
 import * as React from 'react';
+import 'server-only';
 import {Markdown} from './markdown.js';
 import {wait} from './wait.js';
-// import 'server-only'; // https://twitter.com/unstubbable/status/1630897868155305984
 
 async function fetchContent(): Promise<string> {
   await wait(1500);
