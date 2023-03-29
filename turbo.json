@@ -3,8 +3,8 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["!**/*.test.ts"],
-      "outputs": ["dist/**", "lib/**"]
+      "inputs": ["**/src/*", "!**/*.test.ts"],
+      "outputs": ["dist/**", "lib/**", "tsconfig.tsbuildinfo"]
     },
     "build:dev": {
       "dependsOn": ["^build"],
