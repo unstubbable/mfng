@@ -23,7 +23,7 @@ server?
       [Cloudflare Workers](https://workers.cloudflare.com))
 - [ ] Microfrontend composition demo
 - [ ] Support poisoned imports
-- [ ] Server references manifest
+- [x] Server references manifest
 - [ ] Advanced routing (~~maybe use `react-router`?~~ I don't think this is
       feasible since the concepts of RSC and React Router don't really align.)
 

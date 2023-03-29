@@ -12,6 +12,10 @@ command = ""
 watch_dir = []
 
 [assets]
-bucket = "../../../dist/client"
-include = ["react-client-manifest.json", "css-manifest.json"]
+bucket = "../../../dist"
+include = [
+  "client/react-client-manifest.json",
+  "client/css-manifest.json",
+  "react-server-manifest.json",
+]
 serve_single_page_app = false

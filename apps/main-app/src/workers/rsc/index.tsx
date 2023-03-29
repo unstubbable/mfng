@@ -5,9 +5,10 @@ import {App} from '../../components/server/app.js';
 import {LocationServerContextName} from '../../location-server-context.js';
 import type {EnvWithStaticContent} from '../get-json-from-kv.js';
 import {getJsonFromKv} from '../get-json-from-kv.js';
-import {isValidServerReference} from './is-valid-server-reference.js';
 
 declare var __webpack_require__: (moduleId: string) => Record<string, unknown>;
+
+type ServerManifest = Record<string, string[]>;
 
 const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   request,
@@ -15,8 +16,8 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   ctx,
 ) => {
   const [reactClientManifest, cssManifest] = await Promise.all([
-    getJsonFromKv(`react-client-manifest.json`, {request, env, ctx}),
-    getJsonFromKv(`css-manifest.json`, {request, env, ctx}),
+    getJsonFromKv(`client/react-client-manifest.json`, {request, env, ctx}),
+    getJsonFromKv(`client/css-manifest.json`, {request, env, ctx}),
   ]);
 
   const mainCssHref = (cssManifest as Record<string, string>)[`main.css`];
@@ -50,6 +51,19 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   env,
   ctx,
 ) => {
+  const [reactClientManifest, reactServerManifest] = await Promise.all([
+    getJsonFromKv(`client/react-client-manifest.json`, {
+      request,
+      env,
+      ctx,
+    }) as Promise<ClientManifest>,
+    getJsonFromKv(`react-server-manifest.json`, {
+      request,
+      env,
+      ctx,
+    }) as Promise<ServerManifest>,
+  ]);
+
   const serverReferenceId = request.headers.get(`x-rsc-action`);
   const [moduleId, exportName] = serverReferenceId?.split(`#`) ?? [];
 
@@ -61,10 +75,28 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     return new Response(null, {status: 400});
   }
 
+  if (!reactServerManifest[moduleId]?.includes(exportName)) {
+    console.error(
+      `Unknown server reference ID: ${JSON.stringify(serverReferenceId)}`,
+    );
+
+    console.debug(
+      `React server manifest:`,
+      JSON.stringify(reactServerManifest, null, 2),
+    );
+
+    return new Response(null, {status: 400});
+  }
+
   const action = __webpack_require__(moduleId)[exportName];
 
-  if (!isValidServerReference(action)) {
-    console.error(action, `is not a valid server reference.`);
+  if (typeof action !== `function`) {
+    console.error(
+      `The resolved server reference ${JSON.stringify(
+        serverReferenceId,
+      )} is not a function.`,
+      action,
+    );
 
     return new Response(null, {status: 500});
   }
@@ -73,14 +105,9 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   const args = await ReactServerDOMServer.decodeReply(body);
   const actionPromise = action.apply(null, args);
 
-  const reactClientManifest = await getJsonFromKv(
-    `react-client-manifest.json`,
-    {request, env, ctx},
-  );
-
   const rscStream = ReactServerDOMServer.renderToReadableStream(
     actionPromise,
-    reactClientManifest as ClientManifest,
+    reactClientManifest,
   );
 
   return new Response(rscStream, {

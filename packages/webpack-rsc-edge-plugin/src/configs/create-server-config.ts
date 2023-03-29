@@ -57,7 +57,7 @@ export function createServerConfig(
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `rsc-main.css`, runtime: false}),
-      new WebpackRscServerPlugin({clientReferencesForClientMap}),
+      new WebpackRscServerPlugin(),
     ],
     devtool: `source-map`,
     mode,

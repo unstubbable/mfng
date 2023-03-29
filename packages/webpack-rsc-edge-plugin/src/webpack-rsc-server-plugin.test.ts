@@ -63,9 +63,7 @@ describe(`WebpackRscPlugin`, () => {
           },
         ],
       },
-      plugins: [
-        new WebpackRscServerPlugin({clientReferencesForClientMap: new Map()}),
-      ],
+      plugins: [new WebpackRscServerPlugin()],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },
@@ -111,11 +109,28 @@ Object.defineProperties(serverFunction, {
 /***/ })`,
       );
     });
+
+    test(`creates a server references manifest`, async () => {
+      await runWebpack(buildConfig);
+
+      const manifestFile = fs.readFileSync(
+        path.resolve(currentDirname, `dist/react-server-manifest.json`),
+        `utf-8`,
+      );
+
+      expect(JSON.parse(manifestFile)).toEqual({
+        './packages/webpack-rsc-edge-plugin/src/__fixtures__/server-function.js':
+          [`serverFunction`],
+      });
+    });
   });
 
   describe(`in production mode`, () => {
+    let expectedModuleId: number;
+
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
+      expectedModuleId = 692; // may change in the future
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {
@@ -128,7 +143,7 @@ Object.defineProperties(serverFunction, {
 
       expect(pretty(outputFile)).toMatch(
         `
-    692: (e, r, t) => {
+    ${expectedModuleId}: (e, r, t) => {
       async function o() {
         return Promise.resolve("server");
       }
@@ -136,10 +151,23 @@ Object.defineProperties(serverFunction, {
         t.d(r, { serverFunction: () => o }),
         Object.defineProperties(o, {
           $$typeof: { value: Symbol.for("react.server.reference") },
-          $$id: { value: "692#serverFunction" },
+          $$id: { value: "${expectedModuleId}#serverFunction" },
         });
     },`,
       );
+    });
+
+    test(`creates a server references manifest`, async () => {
+      await runWebpack(buildConfig);
+
+      const manifestFile = fs.readFileSync(
+        path.resolve(currentDirname, `dist/react-server-manifest.json`),
+        `utf-8`,
+      );
+
+      expect(JSON.parse(manifestFile)).toEqual({
+        [expectedModuleId]: [`serverFunction`],
+      });
     });
   });
 });

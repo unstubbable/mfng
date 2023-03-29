@@ -1,9 +1,8 @@
 import type Webpack from 'webpack';
 import {isUseClientDirective, isUseServerDirective} from './node-helpers.js';
-import type {ClientReferencesForClientMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
-  readonly clientReferencesForClientMap: ClientReferencesForClientMap;
+  readonly serverManifestFilename?: string;
 }
 
 export interface ModuleExportsInfo {
@@ -12,16 +11,19 @@ export interface ModuleExportsInfo {
 }
 
 export class WebpackRscServerPlugin {
-  private clientReferencesForClientMap: ClientReferencesForClientMap;
+  private serverManifestFilename: string;
+  private serverModules = new Set<Webpack.NormalModule>();
 
-  constructor(options: WebpackRscServerPluginOptions) {
-    this.clientReferencesForClientMap = options.clientReferencesForClientMap;
+  constructor(options?: WebpackRscServerPluginOptions) {
+    this.serverManifestFilename =
+      options?.serverManifestFilename || `react-server-manifest.json`;
   }
 
   apply(compiler: Webpack.Compiler): void {
     const {
       Template,
       dependencies: {ModuleDependency},
+      sources: {RawSource},
     } = compiler.webpack;
 
     class ServerReferenceDependency extends ModuleDependency {
@@ -48,10 +50,7 @@ export class WebpackRscServerPlugin {
       ): void {
         const module = moduleGraph.getModule(dependency);
         const id = chunkGraph.getModuleId(module);
-
-        const exportNames = [
-          ...moduleGraph.getExportsInfo(module).orderedExports,
-        ].map(({name}) => name);
+        const exportNames = getExportNames(moduleGraph, module);
 
         const newSource = exportNames
           .map((exportName) =>
@@ -74,10 +73,6 @@ export class WebpackRscServerPlugin {
     compiler.hooks.thisCompilation.tap(
       WebpackRscServerPlugin.name,
       (compilation, {normalModuleFactory}) => {
-        this.clientReferencesForClientMap.clear();
-
-        const serverModuleNames = new Set<string>();
-
         compilation.dependencyFactories.set(
           ServerReferenceDependency,
           normalModuleFactory,
@@ -111,8 +106,8 @@ export class WebpackRscServerPlugin {
                 );
               }
 
-              if (!serverModuleNames.has(moduleName)) {
-                serverModuleNames.add(moduleName);
+              if (!this.serverModules.has(module)) {
+                this.serverModules.add(module);
 
                 module.addDependency(new ServerReferenceDependency(moduleName));
               }
@@ -131,7 +126,32 @@ export class WebpackRscServerPlugin {
         normalModuleFactory.hooks.parser
           .for(`javascript/esm`)
           .tap(`HarmonyModulesPlugin`, onNormalModuleFactoryParser);
+
+        compilation.hooks.processAssets.tap(WebpackRscServerPlugin.name, () => {
+          const serverManifest: Record<string | number, string[]> = {};
+
+          for (const module of this.serverModules) {
+            const id = compilation.chunkGraph.getModuleId(module);
+            const exportNames = getExportNames(compilation.moduleGraph, module);
+
+            serverManifest[id] = exportNames;
+          }
+
+          compilation.emitAsset(
+            this.serverManifestFilename,
+            new RawSource(JSON.stringify(serverManifest, null, 2), false),
+          );
+        });
       },
     );
   }
+}
+
+function getExportNames(
+  moduleGraph: Webpack.ModuleGraph,
+  module: Webpack.Module,
+): string[] {
+  return [...moduleGraph.getExportsInfo(module).orderedExports].map(
+    ({name}) => name,
+  );
 }
