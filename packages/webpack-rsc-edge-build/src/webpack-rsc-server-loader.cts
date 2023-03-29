@@ -19,9 +19,7 @@ export interface ClientReferenceForClient {
   readonly exportName: string;
 }
 
-export default webpackRscServerLoader;
-
-export function webpackRscServerLoader(
+export default function webpackRscServerLoader(
   this: LoaderContext<WebpackRscServerLoaderOptions>,
   source: string,
 ): void {

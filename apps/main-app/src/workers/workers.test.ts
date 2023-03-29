@@ -1,5 +1,6 @@
 import path from 'path';
 import url from 'url';
+import {jest} from '@jest/globals';
 import type {UnstableDevWorker} from 'wrangler';
 import {unstable_dev} from 'wrangler';
 

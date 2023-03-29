@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
+import {jest} from '@jest/globals';
 import type webpack from 'webpack';
 import type {
   ClientReferencesForClientMap,
   WebpackRscServerLoaderOptions,
 } from './webpack-rsc-server-loader.cjs';
-import {webpackRscServerLoader} from './webpack-rsc-server-loader.cjs';
+import webpackRscServerLoader from './webpack-rsc-server-loader.cjs';
 
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -38,7 +39,7 @@ async function callLoader(
       },
     };
 
-    void webpackRscServerLoader.call(
+    void webpackRscServerLoader.default.call(
       context as webpack.LoaderContext<WebpackRscServerLoaderOptions>,
       input.toString(`utf-8`),
     );

@@ -1,3 +1,4 @@
+import {createRequire} from 'module';
 import path from 'path';
 import url from 'url';
 import MemoryFS from 'memory-fs';
@@ -7,6 +8,7 @@ import {WebpackRscServerPlugin} from './webpack-rsc-server-plugin.js';
 
 const fs = new MemoryFS();
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 function pretty(source: string): string {
   return prettier.format(source, {parser: `babel`});

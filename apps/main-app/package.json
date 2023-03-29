@@ -38,6 +38,7 @@
   "devDependencies": {
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230221.0",
+    "@jest/globals": "^29.5.0",
     "@mfng/webpack-rsc-edge-build": "*",
     "@types/htmlescape": "^1.1.1",
     "@types/react": "^18.0.28",

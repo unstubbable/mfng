@@ -22,7 +22,7 @@
     "lint": "eslint .",
     "start": "turbo start:rsc start:main",
     "pretest": "turbo build:dev",
-    "test": "jest -c jest.config.js --debug",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "watch": "turbo watch"
   },
   "devDependencies": {
@@ -32,6 +32,7 @@
     "@typescript-eslint/eslint-plugin": "^5.46.1",
     "@typescript-eslint/parser": "^5.46.1",
     "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
