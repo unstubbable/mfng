@@ -11,23 +11,31 @@
       "inputs": ["!**/*.test.ts"],
       "outputs": ["dist/**", "lib/**"]
     },
+    "deploy:rsc": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "deploy:main": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "dev:rsc": {
-      "dependsOn": ["^build", "build:dev"],
+      "dependsOn": ["build:dev"],
       "cache": false,
       "persistent": true
     },
     "dev:main": {
-      "dependsOn": ["^build", "build:dev"],
+      "dependsOn": ["build:dev"],
       "cache": false,
       "persistent": true
     },
     "start:rsc": {
-      "dependsOn": ["^build", "build"],
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     },
     "start:main": {
-      "dependsOn": ["^build", "build"],
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     },
@@ -37,7 +45,7 @@
       "persistent": true
     },
     "watch:dev": {
-      "dependsOn": ["^build", "build:dev"],
+      "dependsOn": ["build:dev"],
       "cache": false,
       "persistent": true
     }

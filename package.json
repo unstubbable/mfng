@@ -15,7 +15,7 @@
     "clean": "npm run compile:clean && rimraf {apps,packages}/*/{dist,lib}",
     "compile": "tsc --build",
     "compile:clean": "tsc --build --clean",
-    "deploy": "turbo deploy",
+    "deploy": "turbo deploy:rsc deploy:main",
     "dev": "turbo watch:dev dev:rsc dev:main",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
