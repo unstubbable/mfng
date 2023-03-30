@@ -11,6 +11,10 @@
       "default": "./lib/index.js"
     }
   },
+  "files": [
+    "lib",
+    "!*.test.*"
+  ],
   "scripts": {
     "build": "tsc --build"
   },
