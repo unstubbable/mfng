@@ -7,7 +7,7 @@
   "type": "module",
   "workspaces": [
     "apps/main-app",
-    "packages/webpack-rsc-edge-build"
+    "packages/webpack-rsc"
   ],
   "scripts": {
     "build": "turbo build",

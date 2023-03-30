@@ -88,10 +88,10 @@ describe(`WebpackRscPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "./packages/webpack-rsc-edge-build/src/__fixtures__/server-function.js":
-/*!*****************************************************************************!*\\
-  !*** ./packages/webpack-rsc-edge-build/src/__fixtures__/server-function.js ***!
-  \\*****************************************************************************/
+/***/ "./packages/webpack-rsc/src/__fixtures__/server-function.js":
+/*!******************************************************************!*\\
+  !*** ./packages/webpack-rsc/src/__fixtures__/server-function.js ***!
+  \\******************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -105,7 +105,7 @@ async function serverFunction() {
 }
 Object.defineProperties(serverFunction, {
 	$$typeof: {value: Symbol.for("react.server.reference")},
-	$$id: {value: "./packages/webpack-rsc-edge-build/src/__fixtures__/server-function.js#serverFunction"},
+	$$id: {value: "./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
 });
 
 /***/ })`,
@@ -121,8 +121,9 @@ Object.defineProperties(serverFunction, {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        './packages/webpack-rsc-edge-build/src/__fixtures__/server-function.js':
-          [`serverFunction`],
+        './packages/webpack-rsc/src/__fixtures__/server-function.js': [
+          `serverFunction`,
+        ],
       });
     });
   });
@@ -132,7 +133,7 @@ Object.defineProperties(serverFunction, {
 
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-      expectedModuleId = 482; // may change in the future
+      expectedModuleId = 269; // may change in the future
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {

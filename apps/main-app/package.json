@@ -5,22 +5,17 @@
   "license": "MIT",
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
-  "exports": {
-    "browser": "./src/client.tsx",
-    "react-server": "./src/workers/rsc/index.tsx",
-    "default": "./src/workers/main/index.ts"
-  },
   "scripts": {
-    "build": "webpack-rsc-edge-build",
-    "build:dev": "webpack-rsc-edge-build --mode development",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
     "deploy:main": "wrangler publish -c src/workers/main/wrangler.toml",
     "deploy:rsc": "wrangler publish -c src/workers/rsc/wrangler.toml",
     "dev:main": "npm run start:main",
     "dev:rsc": "npm run start:rsc",
     "start:main": "wrangler dev -c src/workers/main/wrangler.toml -l",
     "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l",
-    "watch": "webpack-rsc-edge-build --watch",
-    "watch:dev": "webpack-rsc-edge-build --mode development --watch"
+    "watch": "webpack --mode production --watch",
+    "watch:dev": "webpack --mode development --watch"
   },
   "dependencies": {
     "clsx": "^1.2.1",
@@ -39,11 +34,24 @@
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230221.0",
     "@jest/globals": "^29.5.0",
-    "@mfng/webpack-rsc-edge-build": "*",
+    "@mfng/webpack-rsc": "*",
+    "@swc/core": "^1.3.22",
     "@types/htmlescape": "^1.1.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "autoprefixer": "^10.4.14",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.3",
+    "mini-css-extract-plugin": "^2.7.5",
+    "pkg-up": "^4.0.0",
+    "postcss": "^8.4.21",
+    "postcss-loader": "^7.0.2",
+    "resolve-typescript-plugin": "^2.0.0",
+    "swc-loader": "^0.2.3",
     "tailwindcss": "^3.2.7",
+    "webpack": "^5.77.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-manifest-plugin": "^5.0.0",
     "wrangler": "^2.11.0"
   }
 }

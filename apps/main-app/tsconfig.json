@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*", "../../types"],
   "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
-  }
+    "checkJs": true,
+    "outDir": "lib"
+  },
+  "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
+  "references": [{"path": "../../packages/webpack-rsc"}]
 }

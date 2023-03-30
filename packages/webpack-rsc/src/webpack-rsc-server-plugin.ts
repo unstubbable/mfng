@@ -1,5 +1,5 @@
+import type {Directive, ModuleDeclaration, Statement} from 'estree';
 import type Webpack from 'webpack';
-import {isUseClientDirective, isUseServerDirective} from './node-helpers.js';
 
 export interface WebpackRscServerPluginOptions {
   readonly serverManifestFilename?: string;
@@ -88,8 +88,8 @@ export class WebpackRscServerPlugin {
           parser: Webpack.javascript.JavascriptParser,
         ) => {
           parser.hooks.program.tap(WebpackRscServerPlugin.name, (program) => {
-            const isClientModule = program.body.some(isUseClientDirective);
-            const isServerModule = program.body.some(isUseServerDirective);
+            const isClientModule = program.body.some(isDirective(`use client`));
+            const isServerModule = program.body.some(isDirective(`use server`));
             const {module} = parser.state;
 
             if (isServerModule && isClientModule) {
@@ -157,6 +157,15 @@ export class WebpackRscServerPlugin {
       },
     );
   }
+}
+
+function isDirective(
+  value: string,
+): (node: Directive | Statement | ModuleDeclaration) => node is Directive {
+  return (node): node is Directive =>
+    node.type === `ExpressionStatement` &&
+    node.expression.type === `Literal` &&
+    node.expression.value === value;
 }
 
 function getExportNames(

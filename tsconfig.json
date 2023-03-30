@@ -1,13 +1,9 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "checkJs": true,
     "noEmit": true
   },
-  "exclude": ["coverage"],
-  "extends": "./tsconfig.base.json",
   "include": ["*.js", "*.cjs"],
-  "references": [
-    {"path": "apps/main-app"},
-    {"path": "packages/webpack-rsc-edge-build"}
-  ]
+  "references": [{"path": "apps/main-app"}, {"path": "packages/webpack-rsc"}]
 }
