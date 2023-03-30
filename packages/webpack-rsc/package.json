@@ -1,6 +1,6 @@
 {
   "name": "@mfng/webpack-rsc",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Webpack loader and a set of plugins for React Server Components",
   "repository": {
     "type": "git",
@@ -28,8 +28,7 @@
     "@babel/generator": "^7.21.3",
     "@babel/parser": "^7.21.3",
     "@babel/traverse": "^7.21.3",
-    "@babel/types": "^7.21.3",
-    "@swc/core": "^1.3.22"
+    "@babel/types": "^7.21.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
