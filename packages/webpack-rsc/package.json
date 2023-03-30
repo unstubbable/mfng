@@ -1,7 +1,12 @@
 {
   "name": "@mfng/webpack-rsc",
-  "version": "1.0.0",
-  "description": "A set of webpack loaders and plugins for React Server Components",
+  "version": "1.0.1",
+  "description": "A Webpack loader and a set of plugins for React Server Components",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unstubbable/mfng.git",
+    "directory": "packages/webpack-rsc"
+  },
   "license": "MIT",
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
