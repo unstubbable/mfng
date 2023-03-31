@@ -30,9 +30,11 @@ function fetchJsxStream(path: string): React.Thenable<JSX.Element> {
 React.startTransition(() => {
   ReactDOMClient.hydrateRoot(
     document,
-    <ClientRoot
-      history={history}
-      fetchJsxStream={React.cache(fetchJsxStream)}
-    />,
+    <React.StrictMode>
+      <ClientRoot
+        history={history}
+        fetchJsxStream={React.cache(fetchJsxStream)}
+      />
+    </React.StrictMode>,
   );
 });
