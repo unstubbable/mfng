@@ -7,9 +7,7 @@ import {NavigationContext} from './navigation-context.js';
 export function NavigationContainer({
   children,
 }: React.PropsWithChildren): JSX.Element {
-  const {isPending, promise} = React.useContext(NavigationContext);
-
-  React.use(promise);
+  const {isPending} = React.useContext(NavigationContext);
 
   return (
     <div
