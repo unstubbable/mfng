@@ -24,7 +24,7 @@ export default <ExportedHandler<MainWorkerEnv>>{
 
     const [reactSsrManifest, jsManifest] = await Promise.all([
       getJsonFromKv(`react-ssr-manifest.json`, {request, env, ctx}),
-      getJsonFromKv(`js-manifest.json`, {request, env, ctx}),
+      getJsonFromKv(`client/js-manifest.json`, {request, env, ctx}),
     ]);
 
     const htmlStream = await createHtmlStream(rscResponse.body, {

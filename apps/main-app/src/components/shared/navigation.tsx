@@ -16,7 +16,7 @@ export function Navigation(): JSX.Element {
         </li>
       </ul>
       <a href="https://github.com/unstubbable/mfng/" title="MFNG GitHub Repo">
-        <img src="/github-mark-white.svg" className="h-8 w-8" />
+        <img src="/client/github-mark-white.svg" className="h-8 w-8" />
       </a>
     </nav>
   );

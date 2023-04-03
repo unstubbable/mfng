@@ -12,7 +12,8 @@ command = ""
 watch_dir = []
 
 [assets]
-bucket = "../../../dist/client"
+bucket = "../../../dist"
+include = ["client", "react-ssr-manifest"]
 serve_single_page_app = true
 
 [[services]]

@@ -80,6 +80,7 @@ export default function createConfigs(_env, argv) {
   const serverConfig = {
     name: `server`,
     entry: `./src/workers/rsc/index.tsx`,
+    target: `webworker`,
     output: {
       filename: `rsc-worker.js`,
       path: path.join(currentDirname, `dist`),
@@ -88,10 +89,8 @@ export default function createConfigs(_env, argv) {
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [`react-server`, `workerd`, `import`, `require`],
+      conditionNames: [`react-server`, `workerd`, `node`, `import`, `require`],
     },
-    experiments: {outputModule: true},
-    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
     module: {
       rules: [
         {
@@ -110,6 +109,8 @@ export default function createConfigs(_env, argv) {
       new MiniCssExtractPlugin({filename: `rsc-main.css`, runtime: false}),
       new WebpackRscServerPlugin(),
     ],
+    experiments: {outputModule: true},
+    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
     externals: [`__STATIC_CONTENT_MANIFEST`],
     devtool: `source-map`,
     mode,
@@ -127,6 +128,7 @@ export default function createConfigs(_env, argv) {
       filename: dev ? `main.js` : `main.[contenthash:8].js`,
       path: path.join(process.cwd(), `dist/client`),
       clean: !dev,
+      publicPath: `/client/`,
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
@@ -145,12 +147,12 @@ export default function createConfigs(_env, argv) {
       }),
       new WebpackManifestPlugin({
         fileName: `css-manifest.json`,
-        publicPath: `/`,
+        publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.css`),
       }),
       new WebpackManifestPlugin({
         fileName: `js-manifest.json`,
-        publicPath: `/`,
+        publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.js`),
       }),
       new WebpackRscClientPlugin({
@@ -170,6 +172,7 @@ export default function createConfigs(_env, argv) {
     name: `ssr`,
     dependencies: [`client`],
     entry: `./src/workers/main/index.ts`,
+    target: `webworker`,
     output: {
       filename: `main-worker.js`,
       path: path.join(process.cwd(), `dist`),
@@ -189,10 +192,7 @@ export default function createConfigs(_env, argv) {
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `ssr-main.css`, runtime: false}),
-      new WebpackRscSsrPlugin({
-        clientReferencesForSsrMap,
-        ssrManifestFilename: `client/react-ssr-manifest.json`,
-      }),
+      new WebpackRscSsrPlugin({clientReferencesForSsrMap}),
     ],
     experiments: {outputModule: true},
     performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
