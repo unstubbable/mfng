@@ -13,10 +13,10 @@ export interface HandlerParams {
 
 const assetManifest = JSON.parse(staticContentManifest);
 
-export async function getJsonFromKv(
+export async function getJsonFromKv<T>(
   pathname: string,
   params: HandlerParams,
-): Promise<unknown> {
+): Promise<T> {
   const {request, env, ctx} = params;
   const {origin} = new URL(request.url);
 

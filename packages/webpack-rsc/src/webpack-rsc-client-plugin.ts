@@ -1,33 +1,23 @@
 import {createRequire} from 'module';
 import type {ClientManifest} from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
-import type {ClientReferencesForClientMap} from './webpack-rsc-server-loader.cjs';
+import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscClientPluginOptions {
-  readonly clientReferencesForClientMap: ClientReferencesForClientMap;
-  readonly clientReferencesForSsrMap: ClientReferencesForSsrMap;
+  readonly clientReferencesMap: ClientReferencesMap;
   readonly clientManifestFilename?: string;
-}
-
-export type ClientReferencesForSsrMap = Map<string, ClientReferenceForSsr>;
-
-export interface ClientReferenceForSsr {
-  readonly clientId: string | number;
-  readonly exportNames: string[];
 }
 
 const require = createRequire(import.meta.url);
 
 export class WebpackRscClientPlugin {
-  private clientReferencesForClientMap: ClientReferencesForClientMap;
-  private clientReferencesForSsrMap: ClientReferencesForSsrMap;
+  private clientReferencesMap: ClientReferencesMap;
   private clientChunkNameMap = new Map<string, string>();
   private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
 
   constructor(options: WebpackRscClientPluginOptions) {
-    this.clientReferencesForClientMap = options.clientReferencesForClientMap;
-    this.clientReferencesForSsrMap = options.clientReferencesForSsrMap;
+    this.clientReferencesMap = options.clientReferencesMap;
 
     this.clientManifestFilename =
       options.clientManifestFilename || `react-client-manifest.json`;
@@ -74,7 +64,7 @@ export class WebpackRscClientPlugin {
           compilation.assetsInfo;
           parser.hooks.program.tap(WebpackRscClientPlugin.name, () => {
             if (parser.state.module.resource === reactServerDomClientPath) {
-              [...this.clientReferencesForClientMap.keys()].forEach(
+              [...this.clientReferencesMap.keys()].forEach(
                 (resourcePath, index) => {
                   const chunkName = `client${index}`;
                   this.clientChunkNameMap.set(chunkName, resourcePath);
@@ -123,7 +113,7 @@ export class WebpackRscClientPlugin {
 
             if (resourcePath) {
               const clientReferences =
-                this.clientReferencesForClientMap.get(resourcePath);
+                this.clientReferencesMap.get(resourcePath);
 
               if (clientReferences) {
                 const module = compilation.chunkGraph
@@ -146,11 +136,6 @@ export class WebpackRscClientPlugin {
                       chunks: chunk.ids ?? [],
                     };
                   }
-
-                  this.clientReferencesForSsrMap.set(resourcePath, {
-                    clientId: moduleId,
-                    exportNames,
-                  });
                 }
               }
             }

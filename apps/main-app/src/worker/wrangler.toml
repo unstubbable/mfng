@@ -1,9 +1,9 @@
-name = "mfng-rsc"
-main = "../../../dist/rsc-worker.js"
+name = "mfng"
+main = "../../dist/worker.js"
 compatibility_date = "2023-02-21"
 
 [dev]
-port = 3001
+port = 3000
 
 # Deactivate build command to prevent wrangler from restarting the build on any
 # code change. Instead we start the build separately (in watch mode).
@@ -12,10 +12,6 @@ command = ""
 watch_dir = []
 
 [assets]
-bucket = "../../../dist"
-include = [
-  "client/react-client-manifest.json",
-  "client/css-manifest.json",
-  "react-server-manifest.json",
-]
-serve_single_page_app = false
+bucket = "../../dist"
+include = ["client", "react-server-manifest.json", "react-ssr-manifest"]
+serve_single_page_app = true
