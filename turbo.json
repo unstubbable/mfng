@@ -3,38 +3,24 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["**/src/**/*", "!**/*.test.ts"],
+      "inputs": ["**/src/**/*", "**/webpack.config.js", "!**/*.test.ts"],
       "outputs": ["dist/**", "lib/**", "tsconfig.tsbuildinfo"]
     },
     "build:dev": {
       "dependsOn": ["^build"],
-      "inputs": ["!**/*.test.ts"],
+      "inputs": ["**/src/**/*", "**/webpack.config.js", "!**/*.test.ts"],
       "outputs": ["dist/**", "lib/**"]
     },
-    "deploy:rsc": {
+    "deploy": {
       "dependsOn": ["build"],
       "cache": false
     },
-    "deploy:main": {
-      "dependsOn": ["build"],
-      "cache": false
-    },
-    "dev:rsc": {
+    "dev": {
       "dependsOn": ["build:dev"],
       "cache": false,
       "persistent": true
     },
-    "dev:main": {
-      "dependsOn": ["build:dev"],
-      "cache": false,
-      "persistent": true
-    },
-    "start:rsc": {
-      "dependsOn": ["build"],
-      "cache": false,
-      "persistent": true
-    },
-    "start:main": {
+    "start": {
       "dependsOn": ["build"],
       "cache": false,
       "persistent": true

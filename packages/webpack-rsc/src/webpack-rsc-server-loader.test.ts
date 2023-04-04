@@ -4,7 +4,7 @@ import url from 'url';
 import {jest} from '@jest/globals';
 import type webpack from 'webpack';
 import type {
-  ClientReferencesForClientMap,
+  ClientReferencesMap,
   WebpackRscServerLoaderOptions,
 } from './webpack-rsc-server-loader.cjs';
 import webpackRscServerLoader from './webpack-rsc-server-loader.cjs';
@@ -13,7 +13,7 @@ const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 async function callLoader(
   filename: string,
-  clientReferenceMap: ClientReferencesForClientMap,
+  clientReferenceMap: ClientReferencesMap,
 ): Promise<string | Buffer> {
   const input = await fs.readFile(path.resolve(currentDirname, filename));
 
@@ -21,7 +21,7 @@ async function callLoader(
     const context: Partial<
       webpack.LoaderContext<WebpackRscServerLoaderOptions>
     > = {
-      getOptions: () => ({clientReferencesForClientMap: clientReferenceMap}),
+      getOptions: () => ({clientReferencesMap: clientReferenceMap}),
       resourcePath: path.resolve(currentDirname, filename),
       cacheable: jest.fn(),
       callback: (error, content) => {
@@ -48,7 +48,7 @@ async function callLoader(
 
 describe(`webpackRscServerLoader`, () => {
   test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
-    const clientReferenceMap: ClientReferencesForClientMap = new Map();
+    const clientReferenceMap: ClientReferencesMap = new Map();
     const filename = `__fixtures__/client-components.js`;
     const output = await callLoader(filename, clientReferenceMap);
 
@@ -78,7 +78,7 @@ export const ComponentC = {
   });
 
   test(`does not change modules without a 'use client' directive`, async () => {
-    const clientReferenceMap: ClientReferencesForClientMap = new Map();
+    const clientReferenceMap: ClientReferencesMap = new Map();
     const filename = `__fixtures__/server-component.js`;
     const output = await callLoader(filename, clientReferenceMap);
 

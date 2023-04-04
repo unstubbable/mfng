@@ -1,7 +1,7 @@
 {
   "name": "@mfng/webpack-rsc",
   "version": "1.0.2",
-  "description": "A Webpack loader and a set of plugins for React Server Components",
+  "description": "A Webpack loader and a pair of plugins for React Server Components",
   "repository": {
     "type": "git",
     "url": "https://github.com/unstubbable/mfng.git",

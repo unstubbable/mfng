@@ -8,12 +8,9 @@
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
-    "deploy:main": "wrangler publish -c src/workers/main/wrangler.toml",
-    "deploy:rsc": "wrangler publish -c src/workers/rsc/wrangler.toml",
-    "dev:main": "npm run start:main",
-    "dev:rsc": "npm run start:rsc",
-    "start:main": "wrangler dev -c src/workers/main/wrangler.toml -l",
-    "start:rsc": "wrangler dev -c src/workers/rsc/wrangler.toml -l",
+    "deploy": "wrangler publish -c src/worker/wrangler.toml",
+    "dev": "npm run start",
+    "start": "wrangler dev -c src/worker/wrangler.toml -l",
     "watch": "webpack --mode production --watch",
     "watch:dev": "webpack --mode development --watch"
   },

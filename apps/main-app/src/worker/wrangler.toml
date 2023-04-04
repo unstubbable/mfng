@@ -1,5 +1,5 @@
 name = "mfng"
-main = "../../../dist/main-worker.js"
+main = "../../dist/worker.js"
 compatibility_date = "2023-02-21"
 
 [dev]
@@ -12,9 +12,6 @@ command = ""
 watch_dir = []
 
 [assets]
-bucket = "../../../dist/client"
+bucket = "../../dist"
+include = ["client", "react-server-manifest.json"]
 serve_single_page_app = true
-
-[[services]]
-binding = "RSC"
-service = "mfng-rsc"

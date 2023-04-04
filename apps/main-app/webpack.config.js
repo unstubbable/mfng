@@ -1,17 +1,14 @@
 import path from 'path';
-import url from 'url';
 import {
   WebpackRscClientPlugin,
   WebpackRscServerPlugin,
-  WebpackRscSsrPlugin,
   createWebpackRscServerLoader,
+  webpackRscLayerName,
 } from '@mfng/webpack-rsc';
 import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
-
-const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
  * @param {unknown} _env
@@ -65,51 +62,61 @@ export default function createConfigs(_env, argv) {
   };
 
   /**
-   * @type {import('@mfng/webpack-rsc').ClientReferencesForClientMap}
+   * @type {import('@mfng/webpack-rsc').ClientReferencesMap}
    */
-  const clientReferencesForClientMap = new Map();
-
-  /**
-   * @type {import('@mfng/webpack-rsc').ClientReferencesForSsrMap}
-   */
-  const clientReferencesForSsrMap = new Map();
+  const clientReferencesMap = new Map();
 
   /**
    * @type {import('webpack').Configuration}
    */
   const serverConfig = {
     name: `server`,
-    entry: `./src/workers/rsc/index.tsx`,
+    entry: `./src/worker/index.ts`,
+    target: `webworker`,
     output: {
-      filename: `rsc-worker.js`,
-      path: path.join(currentDirname, `dist`),
+      filename: `worker.js`,
+      path: path.join(process.cwd(), `dist`),
       libraryTarget: `module`,
       chunkFormat: `module`,
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [`react-server`, `workerd`, `import`, `require`],
+      conditionNames: [`workerd`, `...`],
     },
-    experiments: {outputModule: true},
-    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
-          use: [
-            createWebpackRscServerLoader({clientReferencesForClientMap}),
-            `swc-loader`,
+          resource: (value) => /create-rsc-\w+-stream\.tsx?$/.test(value),
+          layer: webpackRscLayerName,
+        },
+        {
+          issuerLayer: webpackRscLayerName,
+          resolve: {conditionNames: [`react-server`, `...`]},
+        },
+        {
+          oneOf: [
+            {
+              issuerLayer: webpackRscLayerName,
+              test: /\.tsx?$/,
+              use: [
+                createWebpackRscServerLoader({clientReferencesMap}),
+                `swc-loader`,
+              ],
+              exclude: [/node_modules/],
+            },
+            {test: /\.tsx?$/, use: [`swc-loader`], exclude: [/node_modules/]},
           ],
-          exclude: [/node_modules/],
         },
         {test: /\.md$/, type: `asset/source`},
         cssRule,
       ],
     },
     plugins: [
-      new MiniCssExtractPlugin({filename: `rsc-main.css`, runtime: false}),
-      new WebpackRscServerPlugin(),
+      new MiniCssExtractPlugin({filename: `server-main.css`, runtime: false}),
+      new WebpackRscServerPlugin({clientReferencesMap}),
     ],
+    experiments: {outputModule: true, layers: true},
+    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
     externals: [`__STATIC_CONTENT_MANIFEST`],
     devtool: `source-map`,
     mode,
@@ -127,6 +134,7 @@ export default function createConfigs(_env, argv) {
       filename: dev ? `main.js` : `main.[contenthash:8].js`,
       path: path.join(process.cwd(), `dist/client`),
       clean: !dev,
+      publicPath: `/client/`,
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
@@ -145,62 +153,20 @@ export default function createConfigs(_env, argv) {
       }),
       new WebpackManifestPlugin({
         fileName: `css-manifest.json`,
-        publicPath: `/`,
+        publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.css`),
       }),
       new WebpackManifestPlugin({
         fileName: `js-manifest.json`,
-        publicPath: `/`,
+        publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.js`),
       }),
-      new WebpackRscClientPlugin({
-        clientReferencesForClientMap,
-        clientReferencesForSsrMap,
-      }),
+      new WebpackRscClientPlugin({clientReferencesMap}),
     ],
     devtool: `source-map`,
     mode,
     stats,
   };
 
-  /**
-   * @type {import('webpack').Configuration}
-   */
-  const ssrConfig = {
-    name: `ssr`,
-    dependencies: [`client`],
-    entry: `./src/workers/main/index.ts`,
-    output: {
-      filename: `main-worker.js`,
-      path: path.join(process.cwd(), `dist`),
-      libraryTarget: `module`,
-      chunkFormat: `module`,
-    },
-    resolve: {
-      plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [`workerd`, `node`, `import`, `require`],
-    },
-    module: {
-      rules: [
-        {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
-        {test: /\.md$/, type: `asset/source`},
-        cssRule,
-      ],
-    },
-    plugins: [
-      new MiniCssExtractPlugin({filename: `ssr-main.css`, runtime: false}),
-      new WebpackRscSsrPlugin({
-        clientReferencesForSsrMap,
-        ssrManifestFilename: `client/react-ssr-manifest.json`,
-      }),
-    ],
-    experiments: {outputModule: true},
-    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
-    externals: [`__STATIC_CONTENT_MANIFEST`],
-    devtool: `source-map`,
-    mode,
-    stats,
-  };
-
-  return [serverConfig, clientConfig, ssrConfig];
+  return [serverConfig, clientConfig];
 }

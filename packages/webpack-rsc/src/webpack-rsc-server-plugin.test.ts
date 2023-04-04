@@ -44,7 +44,7 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
   });
 }
 
-describe(`WebpackRscPlugin`, () => {
+describe(`WebpackRscServerPlugin`, () => {
   let buildConfig: webpack.Configuration;
 
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe(`WebpackRscPlugin`, () => {
           },
         ],
       },
-      plugins: [new WebpackRscServerPlugin()],
+      plugins: [new WebpackRscServerPlugin({clientReferencesMap: new Map()})],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },

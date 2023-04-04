@@ -6,17 +6,15 @@ import * as t from '@babel/types';
 import type {LoaderContext} from 'webpack';
 
 export interface WebpackRscServerLoaderOptions {
-  readonly clientReferencesForClientMap: ClientReferencesForClientMap;
+  readonly clientReferencesMap: ClientReferencesMap;
 }
 
-export type ClientReferencesForClientMap = Map<
-  string,
-  ClientReferenceForClient[]
->;
+export type ClientReferencesMap = Map<string, ClientReference[]>;
 
-export interface ClientReferenceForClient {
+export interface ClientReference {
   readonly id: string;
   readonly exportName: string;
+  ssrId?: string | number;
 }
 
 export default function webpackRscServerLoader(
@@ -25,7 +23,7 @@ export default function webpackRscServerLoader(
 ): void {
   this.cacheable(true);
 
-  const {clientReferencesForClientMap} = this.getOptions();
+  const {clientReferencesMap} = this.getOptions();
   const resourcePath = this.resourcePath;
 
   const ast = parse(source, {
@@ -33,7 +31,7 @@ export default function webpackRscServerLoader(
     sourceFilename: resourcePath,
   });
 
-  const clientReferences: ClientReferenceForClient[] = [];
+  const clientReferences: ClientReference[] = [];
 
   traverse(ast, {
     enter(path) {
@@ -67,7 +65,7 @@ export default function webpackRscServerLoader(
   });
 
   if (clientReferences.length > 0) {
-    clientReferencesForClientMap.set(resourcePath, clientReferences);
+    clientReferencesMap.set(resourcePath, clientReferences);
   }
 
   const {code} = generate(ast, {sourceFileName: this.resourcePath});
@@ -111,18 +109,14 @@ function createExportedClientReference(
         t.objectExpression([
           t.objectProperty(
             t.identifier(`$$typeof`),
-            createReferenceSymbol(`client`),
+            t.callExpression(
+              t.memberExpression(t.identifier(`Symbol`), t.identifier(`for`)),
+              [t.stringLiteral(`react.client.reference`)],
+            ),
           ),
           t.objectProperty(t.identifier(`$$id`), t.stringLiteral(id)),
         ]),
       ),
     ]),
-  );
-}
-
-function createReferenceSymbol(type: `client` | `server`): t.CallExpression {
-  return t.callExpression(
-    t.memberExpression(t.identifier(`Symbol`), t.identifier(`for`)),
-    [t.stringLiteral(`react.${type}.reference`)],
   );
 }

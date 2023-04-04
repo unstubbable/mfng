@@ -1,36 +1,36 @@
 import {createRequire} from 'module';
-import type {ClientManifest} from 'react-server-dom-webpack';
+import type {
+  ClientManifest,
+  ClientReferenceMetadata,
+  SSRManifest,
+} from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
-import type {ClientReferencesForClientMap} from './webpack-rsc-server-loader.cjs';
+import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscClientPluginOptions {
-  readonly clientReferencesForClientMap: ClientReferencesForClientMap;
-  readonly clientReferencesForSsrMap: ClientReferencesForSsrMap;
+  readonly clientReferencesMap: ClientReferencesMap;
   readonly clientManifestFilename?: string;
-}
-
-export type ClientReferencesForSsrMap = Map<string, ClientReferenceForSsr>;
-
-export interface ClientReferenceForSsr {
-  readonly clientId: string | number;
-  readonly exportNames: string[];
+  readonly ssrManifestFilename?: string;
 }
 
 const require = createRequire(import.meta.url);
 
 export class WebpackRscClientPlugin {
-  private clientReferencesForClientMap: ClientReferencesForClientMap;
-  private clientReferencesForSsrMap: ClientReferencesForSsrMap;
+  private clientReferencesMap: ClientReferencesMap;
   private clientChunkNameMap = new Map<string, string>();
   private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
+  private ssrManifest: SSRManifest = {};
+  private ssrManifestFilename: string;
 
   constructor(options: WebpackRscClientPluginOptions) {
-    this.clientReferencesForClientMap = options.clientReferencesForClientMap;
-    this.clientReferencesForSsrMap = options.clientReferencesForSsrMap;
+    this.clientReferencesMap = options.clientReferencesMap;
 
     this.clientManifestFilename =
       options.clientManifestFilename || `react-client-manifest.json`;
+
+    this.ssrManifestFilename =
+      options?.ssrManifestFilename || `react-ssr-manifest.json`;
   }
 
   apply(compiler: Webpack.Compiler): void {
@@ -74,7 +74,7 @@ export class WebpackRscClientPlugin {
           compilation.assetsInfo;
           parser.hooks.program.tap(WebpackRscClientPlugin.name, () => {
             if (parser.state.module.resource === reactServerDomClientPath) {
-              [...this.clientReferencesForClientMap.keys()].forEach(
+              [...this.clientReferencesMap.keys()].forEach(
                 (resourcePath, index) => {
                   const chunkName = `client${index}`;
                   this.clientChunkNameMap.set(chunkName, resourcePath);
@@ -123,7 +123,7 @@ export class WebpackRscClientPlugin {
 
             if (resourcePath) {
               const clientReferences =
-                this.clientReferencesForClientMap.get(resourcePath);
+                this.clientReferencesMap.get(resourcePath);
 
               if (clientReferences) {
                 const module = compilation.chunkGraph
@@ -135,22 +135,37 @@ export class WebpackRscClientPlugin {
 
                 if (module) {
                   const moduleId = compilation.chunkGraph.getModuleId(module);
-                  const exportNames: string[] = [];
 
-                  for (const {id, exportName} of clientReferences) {
-                    exportNames.push(exportName);
+                  const ssrModuleMetaData: Record<
+                    string,
+                    ClientReferenceMetadata
+                  > = {};
+
+                  for (const {id, exportName, ssrId} of clientReferences) {
+                    // Theoretically the used client and SSR export names should
+                    // be used here. These might differ from the original export
+                    // names that the loader has recorded. But with the current
+                    // setup (i.e. how the client entries are added on both
+                    // sides), the original export names are preserved.
+                    const clientExportName = exportName;
+                    const ssrExportName = exportName;
 
                     this.clientManifest[id] = {
                       id: moduleId,
-                      name: exportName,
+                      name: clientExportName,
                       chunks: chunk.ids ?? [],
                     };
+
+                    if (ssrId) {
+                      ssrModuleMetaData[clientExportName] = {
+                        id: ssrId,
+                        name: ssrExportName,
+                        chunks: [],
+                      };
+                    }
                   }
 
-                  this.clientReferencesForSsrMap.set(resourcePath, {
-                    clientId: moduleId,
-                    exportNames,
-                  });
+                  this.ssrManifest[moduleId] = ssrModuleMetaData;
                 }
               }
             }
@@ -161,6 +176,11 @@ export class WebpackRscClientPlugin {
           compilation.emitAsset(
             this.clientManifestFilename,
             new RawSource(JSON.stringify(this.clientManifest, null, 2), false),
+          );
+
+          compilation.emitAsset(
+            this.ssrManifestFilename,
+            new RawSource(JSON.stringify(this.ssrManifest, null, 2), false),
           );
         });
       },

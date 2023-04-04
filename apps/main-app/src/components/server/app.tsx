@@ -14,6 +14,7 @@ export function App(): JSX.Element {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{`Server Components with Streaming SSR Demo ${pathname}`}</title>
+        <link rel="icon" href="/client/favicon.ico" type="image/x-icon" />
       </head>
       <body>
         <LocationServerContext.Provider value={location}>

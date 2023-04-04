@@ -1,7 +1,9 @@
 import type {Directive, ModuleDeclaration, Statement} from 'estree';
 import type Webpack from 'webpack';
+import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
+  readonly clientReferencesMap: ClientReferencesMap;
   readonly serverManifestFilename?: string;
 }
 
@@ -10,20 +12,31 @@ export interface ModuleExportsInfo {
   readonly exportName: string;
 }
 
-export class WebpackRscServerPlugin {
-  private serverManifestFilename: string;
-  private serverModuleNames = new Set<string>();
-  private serverManifest: Record<string | number, string[]> = {};
+export const webpackRscLayerName = `react-server`;
 
-  constructor(options?: WebpackRscServerPluginOptions) {
+export class WebpackRscServerPlugin {
+  private clientReferencesMap: ClientReferencesMap;
+  private serverManifest: Record<string | number, string[]> = {};
+  private serverManifestFilename: string;
+  private serverModuleResources = new Set<string>();
+  private clientModuleResouces = new Set<string>();
+
+  constructor(options: WebpackRscServerPluginOptions) {
+    this.clientReferencesMap = options.clientReferencesMap;
+
     this.serverManifestFilename =
       options?.serverManifestFilename || `react-server-manifest.json`;
   }
 
   apply(compiler: Webpack.Compiler): void {
     const {
+      EntryPlugin,
       Template,
+      WebpackError,
       dependencies: {ModuleDependency},
+      util: {
+        runtime: {getEntryRuntime},
+      },
       sources: {RawSource},
     } = compiler.webpack;
 
@@ -84,6 +97,75 @@ export class WebpackRscServerPlugin {
           new ServerReferenceTemplate(),
         );
 
+        const addClientEntry = (resource: string) => {
+          const [entry, ...otherEntries] = compilation.entries.values();
+
+          if (!entry) {
+            compilation.errors.push(
+              new WebpackError(`Could not find an entry in the compilation.`),
+            );
+
+            return;
+          }
+
+          if (otherEntries.length > 0) {
+            compilation.warnings.push(
+              new WebpackError(
+                `Found multiple entries in the compilation, adding client module entry dependencies (for SSR) only to the first entry.`,
+              ),
+            );
+          }
+
+          const dependency = EntryPlugin.createDependency(resource, {
+            name: resource,
+          });
+
+          entry.includeDependencies.push(dependency);
+
+          const entryName = entry.options.name;
+
+          if (!entryName) {
+            compilation.errors.push(
+              new WebpackError(`The entry must have a name.`),
+            );
+
+            return;
+          }
+
+          const entryOptions: Webpack.EntryOptions = {name: entryName};
+
+          compilation.hooks.addEntry.call(dependency, entryOptions);
+
+          compilation.addModuleTree(
+            {context: compiler.context, dependency},
+            (error, entryModule) => {
+              if (error) {
+                compilation.hooks.failedEntry.call(
+                  dependency,
+                  entryOptions,
+                  error,
+                );
+              } else {
+                this.clientModuleResouces.add(resource);
+
+                const exportsInfo = compilation.moduleGraph.getExportsInfo(
+                  entryModule!,
+                );
+
+                exportsInfo.setUsedInUnknownWay(
+                  getEntryRuntime(compilation, entryName, entryOptions),
+                );
+
+                compilation.hooks.succeedEntry.call(
+                  dependency,
+                  entryOptions,
+                  entryModule!,
+                );
+              }
+            },
+          );
+        };
+
         const onNormalModuleFactoryParser = (
           parser: Webpack.javascript.JavascriptParser,
         ) => {
@@ -91,27 +173,26 @@ export class WebpackRscServerPlugin {
             const isClientModule = program.body.some(isDirective(`use client`));
             const isServerModule = program.body.some(isDirective(`use server`));
             const {module} = parser.state;
+            const {resource} = module;
 
             if (isServerModule && isClientModule) {
-              throw new Error(
-                `Cannot use both 'use server' and 'use client' in the same module ${module.resource}.`,
+              compilation.errors.push(
+                new WebpackError(
+                  `Cannot use both 'use server' and 'use client' in the same module ${resource}.`,
+                ),
               );
+
+              return;
             }
 
-            if (isServerModule) {
-              const moduleName = module.nameForCondition();
+            if (isClientModule && module.layer === webpackRscLayerName) {
+              addClientEntry(resource);
+            }
 
-              if (!moduleName) {
-                throw new Error(
-                  `Server module ${module.resource} did not return a value for "nameForCondition".`,
-                );
-              }
+            if (isServerModule && !this.serverModuleResources.has(resource)) {
+              this.serverModuleResources.add(resource);
 
-              if (!this.serverModuleNames.has(moduleName)) {
-                this.serverModuleNames.add(moduleName);
-
-                module.addDependency(new ServerReferenceDependency(moduleName));
-              }
+              module.addDependency(new ServerReferenceDependency(resource));
             }
           });
         };
@@ -132,18 +213,31 @@ export class WebpackRscServerPlugin {
           WebpackRscServerPlugin.name,
           (modules) => {
             for (const module of modules) {
-              const moduleName = module.nameForCondition();
+              const resource = module.nameForCondition();
 
-              if (!moduleName || !this.serverModuleNames.has(moduleName)) {
+              if (!resource) {
                 continue;
               }
 
-              const id = compilation.chunkGraph.getModuleId(module);
+              const moduleId = compilation.chunkGraph.getModuleId(module);
 
-              this.serverManifest[id] = getExportNames(
-                compilation.moduleGraph,
-                module,
-              );
+              if (
+                module.layer !== webpackRscLayerName &&
+                this.clientModuleResouces.has(resource)
+              ) {
+                const clientReferences = this.clientReferencesMap.get(resource);
+
+                if (clientReferences) {
+                  for (const clientReference of clientReferences) {
+                    clientReference.ssrId = moduleId;
+                  }
+                }
+              } else if (this.serverModuleResources.has(resource)) {
+                this.serverManifest[moduleId] = getExportNames(
+                  compilation.moduleGraph,
+                  module,
+                );
+              }
             }
           },
         );
