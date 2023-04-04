@@ -10,14 +10,6 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
 
-const reactServerConditionNames = [
-  `react-server`,
-  `workerd`,
-  `node`,
-  `import`,
-  `require`,
-];
-
 /**
  * @param {unknown} _env
  * @param {{readonly mode?: import('webpack').Configuration['mode']}} argv
@@ -89,7 +81,7 @@ export default function createConfigs(_env, argv) {
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [`workerd`, `node`, `import`, `require`],
+      conditionNames: [`workerd`, `...`],
     },
     module: {
       rules: [
@@ -99,7 +91,7 @@ export default function createConfigs(_env, argv) {
         },
         {
           issuerLayer: webpackRscLayerName,
-          resolve: {conditionNames: reactServerConditionNames},
+          resolve: {conditionNames: [`react-server`, `...`]},
         },
         {
           oneOf: [
