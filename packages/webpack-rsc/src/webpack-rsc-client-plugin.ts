@@ -1,11 +1,16 @@
 import {createRequire} from 'module';
-import type {ClientManifest} from 'react-server-dom-webpack';
+import type {
+  ClientManifest,
+  ClientReferenceMetadata,
+  SSRManifest,
+} from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
 import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscClientPluginOptions {
   readonly clientReferencesMap: ClientReferencesMap;
   readonly clientManifestFilename?: string;
+  readonly ssrManifestFilename?: string;
 }
 
 const require = createRequire(import.meta.url);
@@ -15,12 +20,17 @@ export class WebpackRscClientPlugin {
   private clientChunkNameMap = new Map<string, string>();
   private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
+  private ssrManifest: SSRManifest = {};
+  private ssrManifestFilename: string;
 
   constructor(options: WebpackRscClientPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
 
     this.clientManifestFilename =
       options.clientManifestFilename || `react-client-manifest.json`;
+
+    this.ssrManifestFilename =
+      options?.ssrManifestFilename || `react-ssr-manifest.json`;
   }
 
   apply(compiler: Webpack.Compiler): void {
@@ -125,17 +135,37 @@ export class WebpackRscClientPlugin {
 
                 if (module) {
                   const moduleId = compilation.chunkGraph.getModuleId(module);
-                  const exportNames: string[] = [];
 
-                  for (const {id, exportName} of clientReferences) {
-                    exportNames.push(exportName);
+                  const ssrModuleMetaData: Record<
+                    string,
+                    ClientReferenceMetadata
+                  > = {};
+
+                  for (const {id, exportName, ssrId} of clientReferences) {
+                    // Theoretically the used client and SSR export names should
+                    // be used here. These might differ from the original export
+                    // names that the loader has recorded. But with the current
+                    // setup (i.e. how the client entries are added on both
+                    // sides), the original export names are preserved.
+                    const clientExportName = exportName;
+                    const ssrExportName = exportName;
 
                     this.clientManifest[id] = {
                       id: moduleId,
-                      name: exportName,
+                      name: clientExportName,
                       chunks: chunk.ids ?? [],
                     };
+
+                    if (ssrId) {
+                      ssrModuleMetaData[clientExportName] = {
+                        id: ssrId,
+                        name: ssrExportName,
+                        chunks: [],
+                      };
+                    }
                   }
+
+                  this.ssrManifest[moduleId] = ssrModuleMetaData;
                 }
               }
             }
@@ -146,6 +176,11 @@ export class WebpackRscClientPlugin {
           compilation.emitAsset(
             this.clientManifestFilename,
             new RawSource(JSON.stringify(this.clientManifest, null, 2), false),
+          );
+
+          compilation.emitAsset(
+            this.ssrManifestFilename,
+            new RawSource(JSON.stringify(this.ssrManifest, null, 2), false),
           );
         });
       },

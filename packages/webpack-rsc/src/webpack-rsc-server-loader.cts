@@ -14,6 +14,7 @@ export type ClientReferencesMap = Map<string, ClientReference[]>;
 export interface ClientReference {
   readonly id: string;
   readonly exportName: string;
+  ssrId?: string | number;
 }
 
 export default function webpackRscServerLoader(

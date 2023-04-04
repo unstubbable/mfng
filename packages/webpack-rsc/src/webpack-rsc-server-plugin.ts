@@ -1,12 +1,10 @@
 import type {Directive, ModuleDeclaration, Statement} from 'estree';
-import type {ClientManifest} from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
 import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
   readonly clientReferencesMap: ClientReferencesMap;
   readonly serverManifestFilename?: string;
-  readonly ssrManifestFilename?: string;
 }
 
 export interface ModuleExportsInfo {
@@ -22,17 +20,12 @@ export class WebpackRscServerPlugin {
   private serverManifestFilename: string;
   private serverModuleResources = new Set<string>();
   private clientModuleResouces = new Set<string>();
-  private ssrManifest: ClientManifest = {};
-  private ssrManifestFilename: string;
 
   constructor(options: WebpackRscServerPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
 
     this.serverManifestFilename =
       options?.serverManifestFilename || `react-server-manifest.json`;
-
-    this.ssrManifestFilename =
-      options?.ssrManifestFilename || `react-ssr-manifest.json`;
   }
 
   apply(compiler: Webpack.Compiler): void {
@@ -232,15 +225,12 @@ export class WebpackRscServerPlugin {
                 module.layer !== webpackRscLayerName &&
                 this.clientModuleResouces.has(resource)
               ) {
-                const clientReferences =
-                  this.clientReferencesMap.get(resource) || [];
+                const clientReferences = this.clientReferencesMap.get(resource);
 
-                for (const {id, exportName} of clientReferences) {
-                  this.ssrManifest[id] = {
-                    id: moduleId,
-                    name: exportName,
-                    chunks: [],
-                  };
+                if (clientReferences) {
+                  for (const clientReference of clientReferences) {
+                    clientReference.ssrId = moduleId;
+                  }
                 }
               } else if (this.serverModuleResources.has(resource)) {
                 this.serverManifest[moduleId] = getExportNames(
@@ -256,11 +246,6 @@ export class WebpackRscServerPlugin {
           compilation.emitAsset(
             this.serverManifestFilename,
             new RawSource(JSON.stringify(this.serverManifest, null, 2), false),
-          );
-
-          compilation.emitAsset(
-            this.ssrManifestFilename,
-            new RawSource(JSON.stringify(this.ssrManifest, null, 2), false),
           );
         });
       },
