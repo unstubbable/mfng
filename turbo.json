@@ -3,12 +3,22 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["**/src/**/*", "**/webpack.config.js", "!**/*.test.ts"],
+      "inputs": [
+        "**/src/**/*",
+        "**/package.js",
+        "**/webpack.config.js",
+        "!**/*.test.ts"
+      ],
       "outputs": ["dist/**", "lib/**", "tsconfig.tsbuildinfo"]
     },
     "build:dev": {
       "dependsOn": ["^build"],
-      "inputs": ["**/src/**/*", "**/webpack.config.js", "!**/*.test.ts"],
+      "inputs": [
+        "**/src/**/*",
+        "**/package.js",
+        "**/webpack.config.js",
+        "!**/*.test.ts"
+      ],
       "outputs": ["dist/**", "lib/**"]
     },
     "deploy": {
