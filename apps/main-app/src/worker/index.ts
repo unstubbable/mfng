@@ -1,63 +1,98 @@
-import {createHtmlStream} from './create-html-stream.js';
-import {createRscActionStream} from './create-rsc-action-stream.js';
-import {createRscAppStream} from './create-rsc-app-stream.js';
-import type {EnvWithStaticContent} from './get-json-from-kv.js';
-import {readManifests} from './read-manifests.js';
+import type {ServerManifest} from '@mfng/core/server/rsc';
+import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
+import {createHtmlStream} from '@mfng/core/server/ssr';
+import type {ClientManifest, SSRManifest} from 'react-server-dom-webpack';
+import {createRscAppOptions} from './create-rsc-app-options.js';
+import type {EnvWithStaticContent, HandlerParams} from './get-json-from-kv.js';
+import {getJsonFromKv} from './get-json-from-kv.js';
 
-export default <ExportedHandler<EnvWithStaticContent>>{
+const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
+  request,
+  env,
+  ctx,
+) => {
+  const params: HandlerParams = {request, env, ctx};
+
+  const [reactClientManifest, reactSsrManifest, jsManifest, cssManifest] =
+    await Promise.all([
+      getJsonFromKv<ClientManifest>(
+        `client/react-client-manifest.json`,
+        params,
+      ),
+      getJsonFromKv<SSRManifest>(`client/react-ssr-manifest.json`, params),
+      getJsonFromKv<Record<string, string>>(`client/js-manifest.json`, params),
+      getJsonFromKv<Record<string, string>>(`client/css-manifest.json`, params),
+    ]);
+
+  const rscAppStream = createRscAppStream({
+    ...createRscAppOptions({requestUrl: request.url}),
+    reactClientManifest,
+    mainCssHref: cssManifest[`main.css`]!,
+  });
+
+  if (request.headers.get(`accept`) === `text/x-component`) {
+    return new Response(rscAppStream, {
+      headers: {'content-type': `text/x-component`},
+    });
+  }
+
+  const htmlStream = await createHtmlStream(rscAppStream, {
+    reactSsrManifest,
+    bootstrapScripts: [jsManifest[`main.js`]!],
+  });
+
+  return new Response(htmlStream, {
+    headers: {'content-type': `text/html; charset=utf-8`},
+  });
+};
+
+const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
+  request,
+  env,
+  ctx,
+) => {
+  const serverReferenceId = request.headers.get(`x-rsc-action`);
+
+  if (!serverReferenceId) {
+    console.error(`Missing server reference ("x-rsc-action" header).`);
+
+    return new Response(null, {status: 400});
+  }
+
+  const params: HandlerParams = {request, env, ctx};
+
+  const [reactClientManifest, reactServerManifest] = await Promise.all([
+    getJsonFromKv<ClientManifest>(`client/react-client-manifest.json`, params),
+    getJsonFromKv<ServerManifest>(`react-server-manifest.json`, params),
+  ]);
+
+  const rscActionStream = await createRscActionStream({
+    body: await request.text(),
+    serverReferenceId,
+    reactClientManifest,
+    reactServerManifest,
+  });
+
+  if (!rscActionStream) {
+    return new Response(null, {status: 500});
+  }
+
+  return new Response(rscActionStream, {
+    headers: {'content-type': `text/x-component`},
+  });
+};
+
+const handler: ExportedHandler<EnvWithStaticContent> = {
   async fetch(request, env, ctx) {
-    const {
-      reactServerManifest,
-      reactSsrManifest,
-      reactClientManifest,
-      jsManifest,
-      cssManifest,
-    } = await readManifests({request, env, ctx});
-
-    if (request.method === `POST`) {
-      const serverReferenceId = request.headers.get(`x-rsc-action`);
-
-      if (!serverReferenceId) {
-        console.error(`Missing server reference ("x-rsc-action" header).`);
-
-        return new Response(null, {status: 400});
-      }
-
-      const rscActionStream = await createRscActionStream({
-        body: await request.text(),
-        serverReferenceId,
-        reactClientManifest,
-        reactServerManifest,
-      });
-
-      if (!rscActionStream) {
-        return new Response(null, {status: 500});
-      }
-
-      return new Response(rscActionStream, {
-        headers: {'content-type': `text/x-component`},
-      });
+    switch (request.method) {
+      case `GET`:
+        return handleGet(request, env, ctx);
+      case `POST`:
+        return handlePost(request, env, ctx);
+      default:
+        return new Response(null, {status: 405});
     }
-
-    const rscAppStream = createRscAppStream({
-      requestUrl: request.url,
-      mainCssHref: cssManifest[`main.css`]!,
-      reactClientManifest,
-    });
-
-    if (request.headers.get(`accept`) === `text/x-component`) {
-      return new Response(rscAppStream, {
-        headers: {'content-type': `text/x-component`},
-      });
-    }
-
-    const htmlStream = await createHtmlStream(rscAppStream, {
-      reactSsrManifest,
-      bootstrapScripts: [jsManifest[`main.js`]!],
-    });
-
-    return new Response(htmlStream, {
-      headers: {'content-type': `text/html; charset=utf-8`},
-    });
   },
 };
+
+export default handler;

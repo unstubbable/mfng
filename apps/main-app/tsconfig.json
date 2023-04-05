@@ -2,8 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "checkJs": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "types": ["@cloudflare/workers-types", "jest", "react/next"]
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
-  "references": [{"path": "../../packages/webpack-rsc"}]
+  "references": [
+    {"path": "../../packages/core"},
+    {"path": "../../packages/webpack-rsc"}
+  ]
 }

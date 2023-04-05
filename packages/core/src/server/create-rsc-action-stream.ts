@@ -1,14 +1,14 @@
 import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 
-export type ServerManifest = Record<string, string[]>;
-
 export interface CreateRscActionStreamOptions {
   readonly body: string;
   readonly serverReferenceId: string;
   readonly reactClientManifest: ClientManifest;
   readonly reactServerManifest: ServerManifest;
 }
+
+export type ServerManifest = Record<string, string[]>;
 
 declare var __webpack_require__: (moduleId: string) => Record<string, unknown>;
 

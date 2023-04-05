@@ -86,7 +86,9 @@ export default function createConfigs(_env, argv) {
     module: {
       rules: [
         {
-          resource: (value) => /create-rsc-\w+-stream\.tsx?$/.test(value),
+          resource: (value) =>
+            /core\/lib\/server\/rsc\.js$/.test(value) ||
+            /create-rsc-app-options\.tsx$/.test(value),
           layer: webpackRscLayerName,
         },
         {
