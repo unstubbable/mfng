@@ -6,7 +6,7 @@
   },
   "include": ["*.js", "*.cjs"],
   "references": [
-    {"path": "apps/main-app"},
+    {"path": "apps/cloudflare-app"},
     {"path": "packages/core"},
     {"path": "packages/webpack-rsc"}
   ]

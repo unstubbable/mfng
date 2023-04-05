@@ -6,7 +6,7 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "workspaces": [
-    "apps/main-app",
+    "apps/cloudflare-app",
     "packages/core",
     "packages/webpack-rsc"
   ],
