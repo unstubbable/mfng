@@ -11,6 +11,10 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "exports": {
+    "./client": {
+      "types": "./lib/client/index.d.ts",
+      "default": "./lib/client/index.js"
+    },
     "./server/rsc": {
       "types": "./lib/server/rsc.d.ts",
       "default": "./lib/server/rsc.js"

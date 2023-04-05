@@ -5,12 +5,12 @@ import {NavigationContext} from './navigation-context.js';
 
 export interface ClientRootProps {
   readonly history: History;
-  readonly fetchJsxStream: (path: string) => React.Thenable<JSX.Element>;
+  readonly fetchElementStream: (urlPath: string) => React.Thenable<JSX.Element>;
 }
 
 export function ClientRoot({
   history,
-  fetchJsxStream,
+  fetchElementStream,
 }: ClientRootProps): JSX.Element {
   const [location, setLocation] = React.useState(history.location);
   const [isPending, startTransition] = React.useTransition();
@@ -23,13 +23,13 @@ export function ClientRoot({
     [],
   );
 
-  const jsxStreamPromise = fetchJsxStream(createPath(location));
+  const elementStreamPromise = fetchElementStream(createPath(location));
 
   return (
     <NavigationContext.Provider
       value={{isPending, push: history.push, replace: history.replace}}
     >
-      {React.use(jsxStreamPromise)}
+      {React.use(elementStreamPromise)}
     </NavigationContext.Provider>
   );
 }
