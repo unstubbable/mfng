@@ -5,7 +5,7 @@ import {callServer} from './call-server.js';
 export function createFetchElementStream(
   initialUrlPath: string,
 ): (urlPath: string) => React.Thenable<JSX.Element> {
-  const initialJsxStream =
+  const initialElementStream =
     ReactServerDOMClient.createFromReadableStream<JSX.Element>(
       self.initialRscResponseStream,
       {callServer},
@@ -15,7 +15,7 @@ export function createFetchElementStream(
     urlPath: string,
   ): React.Thenable<JSX.Element> {
     if (urlPath === initialUrlPath) {
-      return initialJsxStream;
+      return initialElementStream;
     }
 
     return ReactServerDOMClient.createFromFetch(
