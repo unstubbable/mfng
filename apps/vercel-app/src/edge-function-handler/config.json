@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "routes": [
+    {
+      "src": "/client/(.*)",
+      "dest": "/client/$1",
+      "headers": {"Cache-Control": "max-age=31536000, immutable, public"}
+    },
+    {"src": "/(.*)", "dest": "/"}
+  ]
+}
