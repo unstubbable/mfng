@@ -19,7 +19,7 @@ export class WebpackRscServerPlugin {
   private serverManifest: Record<string | number, string[]> = {};
   private serverManifestFilename: string;
   private serverModuleResources = new Set<string>();
-  private clientModuleResouces = new Set<string>();
+  private clientModuleResources = new Set<string>();
 
   constructor(options: WebpackRscServerPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
@@ -138,7 +138,7 @@ export class WebpackRscServerPlugin {
       WebpackRscServerPlugin.name,
       async (compilation) => {
         await Promise.all(
-          Array.from(this.clientModuleResouces).map(async (resource) =>
+          Array.from(this.clientModuleResources).map(async (resource) =>
             addClientModuleInclude(compilation, resource),
           ),
         );
@@ -178,7 +178,7 @@ export class WebpackRscServerPlugin {
             }
 
             if (isClientModule) {
-              this.clientModuleResouces.add(resource);
+              this.clientModuleResources.add(resource);
             }
 
             if (isServerModule && !this.serverModuleResources.has(resource)) {
@@ -214,7 +214,7 @@ export class WebpackRscServerPlugin {
 
               if (
                 module.layer !== webpackRscLayerName &&
-                this.clientModuleResouces.has(resource)
+                this.clientModuleResources.has(resource)
               ) {
                 const clientReferences = this.clientReferencesMap.get(resource);
 
