@@ -1,14 +1,18 @@
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
+import chokidar from 'chokidar';
 import {EdgeRuntime, createHandler} from 'edge-runtime';
 import esbuild from 'esbuild';
 import express from 'express';
+import {debounce} from './debounce.js';
 
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 const entryPoint = path.join(currentDirname, `fetch-event-listener.js`);
 const outfile = path.join(currentDirname, `../dist/dev-server.js`);
-const staticDirname = path.join(currentDirname, `../.vercel/output/static`);
+const vercelOutputDirname = path.join(currentDirname, `../.vercel/output`);
+const staticDirname = path.join(vercelOutputDirname, `static`);
+const functionDirname = path.join(vercelOutputDirname, `functions/index.func`);
 const runtime = new EdgeRuntime();
 
 const buildContext = await esbuild.context({
@@ -18,29 +22,22 @@ const buildContext = await esbuild.context({
   outfile,
   format: `esm`,
   logLevel: `info`,
-  plugins: [
-    {
-      name: `mfng-dev-server-watch-plugin`,
-      setup: (build) => {
-        build.onEnd(async (result) => {
-          for (const error of result.errors) {
-            console.error(error);
-          }
-
-          for (const warning of result.warnings) {
-            console.warn(warning);
-          }
-
-          const code = await fs.readFile(outfile);
-
-          runtime.evaluate(code.toString());
-        });
-      },
-    },
-  ],
 });
 
-await buildContext.watch();
+const rebuild = debounce(async () => {
+  await buildContext.rebuild();
+
+  const code = await fs.readFile(outfile);
+
+  runtime.evaluate(code.toString());
+  console.log(`Re-evaluated edge runtime.`);
+}, 300);
+
+chokidar
+  .watch(functionDirname, {ignored: [/\.txt$/, /\.map$/]})
+  .on(`add`, rebuild)
+  .on(`change`, rebuild);
+
 const {handler} = createHandler({runtime});
 const app = express();
 

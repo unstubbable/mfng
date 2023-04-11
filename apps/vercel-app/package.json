@@ -34,6 +34,7 @@
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "autoprefixer": "^10.4.14",
+    "chokidar": "^3.5.3",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "edge-runtime": "^2.1.2",
