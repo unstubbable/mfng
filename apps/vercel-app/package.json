@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
     "deploy": "vercel deploy --prebuilt",
-    "dev": "nodemon -w .vercel/output/functions/index.func -d 1 dev-server/run.js",
+    "dev": "node dev-server/run.js",
     "watch": "webpack --mode production --watch",
     "watch:dev": "webpack --mode development --watch"
   },
@@ -40,7 +40,6 @@
     "esbuild": "^0.17.15",
     "express": "^4.18.2",
     "mini-css-extract-plugin": "^2.7.5",
-    "nodemon": "^2.0.22",
     "postcss": "^8.4.21",
     "postcss-loader": "^7.0.2",
     "resolve-typescript-plugin": "^2.0.0",
