@@ -1,14 +1,13 @@
-import type {ServerManifest} from '@mfng/core/server/rsc';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
-import type {ClientManifest, SSRManifest} from 'react-server-dom-webpack';
 import {createRscAppOptions} from './create-rsc-app-options.js';
-
-declare var REACT_SERVER_MANIFEST: ServerManifest;
-declare var REACT_CLIENT_MANIFEST: ClientManifest;
-declare var REACT_SSR_MANIFEST: SSRManifest;
-declare var CSS_MANIFEST: Record<string, string>;
-declare var JS_MANIFEST: Record<string, string>;
+import {
+  cssManifest,
+  jsManifest,
+  reactClientManifest,
+  reactServerManifest,
+  reactSsrManifest,
+} from './manifests.js';
 
 export default async function handler(request: Request): Promise<Response> {
   switch (request.method) {
@@ -31,8 +30,8 @@ export default async function handler(request: Request): Promise<Response> {
 async function handleGet(request: Request): Promise<Response> {
   const rscAppStream = createRscAppStream({
     ...createRscAppOptions({requestUrl: request.url}),
-    reactClientManifest: REACT_CLIENT_MANIFEST,
-    mainCssHref: CSS_MANIFEST[`main.css`]!,
+    reactClientManifest,
+    mainCssHref: cssManifest[`main.css`]!,
   });
 
   if (request.headers.get(`accept`) === `text/x-component`) {
@@ -42,8 +41,8 @@ async function handleGet(request: Request): Promise<Response> {
   }
 
   const htmlStream = await createHtmlStream(rscAppStream, {
-    reactSsrManifest: REACT_SSR_MANIFEST,
-    bootstrapScripts: [JS_MANIFEST[`main.js`]!],
+    reactSsrManifest,
+    bootstrapScripts: [jsManifest[`main.js`]!],
   });
 
   return new Response(htmlStream, {
@@ -63,8 +62,8 @@ async function handlePost(request: Request): Promise<Response> {
   const rscActionStream = await createRscActionStream({
     body: await request.text(),
     serverReferenceId,
-    reactClientManifest: REACT_CLIENT_MANIFEST,
-    reactServerManifest: REACT_SERVER_MANIFEST,
+    reactClientManifest,
+    reactServerManifest,
   });
 
   if (!rscActionStream) {

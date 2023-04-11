@@ -1,5 +1,5 @@
-import fs from 'fs';
 import path from 'path';
+import url from 'url';
 import {
   WebpackRscClientPlugin,
   WebpackRscServerPlugin,
@@ -9,28 +9,33 @@ import {
 import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
-import webpack from 'webpack';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
 
-const distDirname = path.join(process.cwd(), `dist`);
+const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
+const outputDirname = path.join(currentDirname, `.vercel/output`);
+const outputFunctionDirname = path.join(outputDirname, `functions/index.func`);
 
 const reactServerManifestFilename = path.join(
-  distDirname,
+  outputFunctionDirname,
   `react-server-manifest.json`,
 );
 
 const reactClientManifestFilename = path.join(
-  distDirname,
+  outputFunctionDirname,
   `react-client-manifest.json`,
 );
 
 const reactSsrManifestFilename = path.join(
-  distDirname,
+  outputFunctionDirname,
   `react-ssr-manifest.json`,
 );
 
-const jsManifestFilename = path.join(distDirname, `js-manifest.json`);
-const cssManifestFilename = path.join(distDirname, `css-manifest.json`);
+const jsManifestFilename = path.join(outputFunctionDirname, `js-manifest.json`);
+
+const cssManifestFilename = path.join(
+  outputFunctionDirname,
+  `css-manifest.json`,
+);
 
 /**
  * @param {unknown} _env
@@ -97,7 +102,7 @@ export default function createConfigs(_env, argv) {
     target: `webworker`,
     output: {
       filename: `index.js`,
-      path: distDirname,
+      path: outputFunctionDirname,
       libraryTarget: `module`,
       chunkFormat: `module`,
     },
@@ -141,9 +146,12 @@ export default function createConfigs(_env, argv) {
       new WebpackRscServerPlugin({
         clientReferencesMap,
         serverManifestFilename: path.relative(
-          distDirname,
+          outputFunctionDirname,
           reactServerManifestFilename,
         ),
+      }),
+      new CopyPlugin({
+        patterns: [{from: `src/edge-function-handler/.vc-config.json`}],
       }),
     ],
     experiments: {outputModule: true, layers: true},
@@ -153,7 +161,7 @@ export default function createConfigs(_env, argv) {
     stats,
   };
 
-  const clientOutputDirname = path.join(distDirname, `client`);
+  const clientOutputDirname = path.join(outputDirname, `static/client`);
 
   /**
    * @type {import('webpack').Configuration}
@@ -178,18 +186,23 @@ export default function createConfigs(_env, argv) {
       ],
     },
     plugins: [
-      new CopyPlugin({patterns: [{from: `static`}]}),
+      new CopyPlugin({
+        patterns: [
+          {from: `static`},
+          {from: `src/config.json`, to: outputDirname},
+        ],
+      }),
       new MiniCssExtractPlugin({
         filename: dev ? `main.css` : `main.[contenthash:8].css`,
         runtime: false,
       }),
       new WebpackManifestPlugin({
-        fileName: path.relative(clientOutputDirname, cssManifestFilename),
+        fileName: cssManifestFilename,
         publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.css`),
       }),
       new WebpackManifestPlugin({
-        fileName: path.relative(clientOutputDirname, jsManifestFilename),
+        fileName: jsManifestFilename,
         publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.js`),
       }),
@@ -210,65 +223,5 @@ export default function createConfigs(_env, argv) {
     stats,
   };
 
-  /**
-   * @type {import('webpack').Configuration}
-   */
-  const vercelOutputConfig = {
-    name: `vercel-output`,
-    dependencies: [`server`, `client`],
-    entry: `./dist/index.js`,
-    output: {
-      filename: `functions/index.func/index.js`,
-      path: path.join(process.cwd(), `.vercel/output`),
-      libraryTarget: `module`,
-      chunkFormat: `module`,
-    },
-    module: {
-      rules: [
-        {test: /\.js$/, enforce: `pre`, use: `source-map-loader`},
-        {test: /\.js$/, loader: `swc-loader`, exclude: [/node_modules/]},
-      ],
-    },
-    plugins: [
-      new webpack.DefinePlugin({
-        REACT_SERVER_MANIFEST: webpack.DefinePlugin.runtimeValue(
-          () => fs.readFileSync(reactServerManifestFilename).toString(),
-          {fileDependencies: [reactServerManifestFilename]},
-        ),
-        REACT_CLIENT_MANIFEST: webpack.DefinePlugin.runtimeValue(
-          () => fs.readFileSync(reactClientManifestFilename).toString(),
-          {fileDependencies: [reactClientManifestFilename]},
-        ),
-        REACT_SSR_MANIFEST: webpack.DefinePlugin.runtimeValue(
-          () => fs.readFileSync(reactSsrManifestFilename).toString(),
-          {fileDependencies: [reactSsrManifestFilename]},
-        ),
-        CSS_MANIFEST: webpack.DefinePlugin.runtimeValue(
-          () => fs.readFileSync(cssManifestFilename).toString(),
-          {fileDependencies: [cssManifestFilename]},
-        ),
-        JS_MANIFEST: webpack.DefinePlugin.runtimeValue(
-          () => fs.readFileSync(jsManifestFilename).toString(),
-          {fileDependencies: [jsManifestFilename]},
-        ),
-      }),
-      new CopyPlugin({
-        patterns: [
-          {
-            from: `src/edge-function-handler/.vc-config.json`,
-            to: `functions/index.func/`,
-          },
-          {from: `src/edge-function-handler/config.json`},
-          {from: `dist/client`, to: `static/client`},
-        ],
-      }),
-    ],
-    experiments: {outputModule: true},
-    performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
-    devtool: `source-map`,
-    mode,
-    stats,
-  };
-
-  return [serverConfig, clientConfig, vercelOutputConfig];
+  return [serverConfig, clientConfig];
 }
