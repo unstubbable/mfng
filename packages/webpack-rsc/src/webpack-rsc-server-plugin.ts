@@ -84,6 +84,67 @@ export class WebpackRscServerPlugin {
       }
     }
 
+    const addClientModuleInclude = async (
+      compilation: Webpack.Compilation,
+      resource: string,
+    ) => {
+      const [entryName, ...otherEntryNames] = compilation.entries.keys();
+
+      if (!entryName) {
+        compilation.errors.push(
+          new WebpackError(`Could not find an entry in the compilation.`),
+        );
+
+        return;
+      }
+
+      if (otherEntryNames.length > 0) {
+        compilation.warnings.push(
+          new WebpackError(
+            `Found multiple entries in the compilation, adding client module include (for SSR) only to the first entry.`,
+          ),
+        );
+      }
+
+      const dependency = EntryPlugin.createDependency(resource, {
+        name: resource,
+      });
+
+      const entryOptions: Webpack.EntryOptions = {name: entryName};
+
+      return new Promise<void>((resolve, reject) => {
+        compilation.addInclude(
+          compiler.context,
+          dependency,
+          entryOptions,
+          (error, module) => {
+            if (error) {
+              return reject(error);
+            }
+
+            const exportsInfo = compilation.moduleGraph.getExportsInfo(module!);
+
+            exportsInfo.setUsedInUnknownWay(
+              getEntryRuntime(compilation, entryName, entryOptions),
+            );
+
+            resolve();
+          },
+        );
+      });
+    };
+
+    compiler.hooks.finishMake.tapPromise(
+      WebpackRscServerPlugin.name,
+      async (compilation) => {
+        await Promise.all(
+          Array.from(this.clientModuleResouces).map(async (resource) =>
+            addClientModuleInclude(compilation, resource),
+          ),
+        );
+      },
+    );
+
     compiler.hooks.thisCompilation.tap(
       WebpackRscServerPlugin.name,
       (compilation, {normalModuleFactory}) => {
@@ -96,75 +157,6 @@ export class WebpackRscServerPlugin {
           ServerReferenceDependency,
           new ServerReferenceTemplate(),
         );
-
-        const addClientEntry = (resource: string) => {
-          const [entry, ...otherEntries] = compilation.entries.values();
-
-          if (!entry) {
-            compilation.errors.push(
-              new WebpackError(`Could not find an entry in the compilation.`),
-            );
-
-            return;
-          }
-
-          if (otherEntries.length > 0) {
-            compilation.warnings.push(
-              new WebpackError(
-                `Found multiple entries in the compilation, adding client module entry dependencies (for SSR) only to the first entry.`,
-              ),
-            );
-          }
-
-          const dependency = EntryPlugin.createDependency(resource, {
-            name: resource,
-          });
-
-          entry.includeDependencies.push(dependency);
-
-          const entryName = entry.options.name;
-
-          if (!entryName) {
-            compilation.errors.push(
-              new WebpackError(`The entry must have a name.`),
-            );
-
-            return;
-          }
-
-          const entryOptions: Webpack.EntryOptions = {name: entryName};
-
-          compilation.hooks.addEntry.call(dependency, entryOptions);
-
-          compilation.addModuleTree(
-            {context: compiler.context, dependency},
-            (error, entryModule) => {
-              if (error) {
-                compilation.hooks.failedEntry.call(
-                  dependency,
-                  entryOptions,
-                  error,
-                );
-              } else {
-                this.clientModuleResouces.add(resource);
-
-                const exportsInfo = compilation.moduleGraph.getExportsInfo(
-                  entryModule!,
-                );
-
-                exportsInfo.setUsedInUnknownWay(
-                  getEntryRuntime(compilation, entryName, entryOptions),
-                );
-
-                compilation.hooks.succeedEntry.call(
-                  dependency,
-                  entryOptions,
-                  entryModule!,
-                );
-              }
-            },
-          );
-        };
 
         const onNormalModuleFactoryParser = (
           parser: Webpack.javascript.JavascriptParser,
@@ -185,13 +177,12 @@ export class WebpackRscServerPlugin {
               return;
             }
 
-            if (isClientModule && module.layer === webpackRscLayerName) {
-              addClientEntry(resource);
+            if (isClientModule) {
+              this.clientModuleResouces.add(resource);
             }
 
             if (isServerModule && !this.serverModuleResources.has(resource)) {
               this.serverModuleResources.add(resource);
-
               module.addDependency(new ServerReferenceDependency(resource));
             }
           });
