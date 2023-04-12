@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@mfng/core": "*",
+    "@vercel/analytics": "^0.1.11",
     "clsx": "^1.2.1",
     "countries-list": "^2.6.1",
     "cssnano": "^5.1.15",

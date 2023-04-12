@@ -1,3 +1,4 @@
+import {Analytics} from '@vercel/analytics/react';
 import type {History} from 'history';
 import {createPath} from 'history';
 import * as React from 'react';
@@ -29,6 +30,7 @@ export function ClientRoot({
     <NavigationContext.Provider
       value={{isPending, push: history.push, replace: history.replace}}
     >
+      <Analytics />
       {React.use(elementStreamPromise)}
     </NavigationContext.Provider>
   );
