@@ -6,6 +6,6 @@
       "dest": "/client/$1",
       "headers": {"Cache-Control": "max-age=31536000, immutable, public"}
     },
-    {"src": "/(.*)", "dest": "/"}
+    {"src": "/(?!_vercel).*", "dest": "/"}
   ]
 }
