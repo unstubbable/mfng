@@ -6,6 +6,10 @@
       "dest": "/client/$1",
       "headers": {"Cache-Control": "max-age=31536000, immutable, public"}
     },
-    {"src": "/(?!_vercel).*", "dest": "/"}
+    {
+      "src": "/_vercel/insights/script.js",
+      "dest": "https://va.vercel-scripts.com/v1/script.js"
+    },
+    {"src": "/.*", "dest": "/"}
   ]
 }
