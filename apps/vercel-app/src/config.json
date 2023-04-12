@@ -10,6 +10,10 @@
       "src": "/_vercel/insights/script.js",
       "dest": "https://va.vercel-scripts.com/v1/script.js"
     },
+    {
+      "src": "/_vercel/insights/(.*)",
+      "dest": "https://vitals.vercel-insights.com/v1/$1"
+    },
     {"src": "/.*", "dest": "/"}
   ]
 }
