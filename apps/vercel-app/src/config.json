@@ -16,9 +16,14 @@
     },
     {
       "src": "/.*",
+      "dest": "/index",
+      "has": [{"type": "header", "key": "accept", "value": "text/x-component"}],
+      "headers": {"vary": "accept"}
+    },
+    {
+      "src": "/.*",
       "dest": "/",
-      "headers": {"vary": "accept"},
-      "override": true
+      "headers": {"vary": "accept"}
     }
   ]
 }
