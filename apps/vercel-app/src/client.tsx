@@ -6,6 +6,7 @@ import * as React from 'react';
 import ReactDOMClient from 'react-dom/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tailwindcss/tailwind.css';
+import {reportWebVitals} from './vitals.js';
 
 const history = createBrowserHistory();
 const initialUrlPath = createPath(history.location);
@@ -42,4 +43,6 @@ React.startTransition(() => {
       <Analytics />
     </React.StrictMode>,
   );
+
+  reportWebVitals();
 });

@@ -10,6 +10,7 @@ import {
 import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
+import webpack from 'webpack';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
 
 const require = createRequire(import.meta.url);
@@ -191,6 +192,7 @@ export default function createConfigs(_env, argv) {
       ],
     },
     plugins: [
+      new webpack.EnvironmentPlugin({VERCEL_ANALYTICS_ID: ``}),
       new CopyPlugin({
         patterns: [
           {
