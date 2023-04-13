@@ -4,9 +4,9 @@
 // required `react-server` condition.
 
 import type {ServerContext} from '@mfng/core/server/rsc';
+import {App} from '@mfng/shared-app/app.js';
+import {LocationServerContextName} from '@mfng/shared-app/location-server-context.js';
 import * as React from 'react';
-import {App} from '../components/server/app.js';
-import {LocationServerContextName} from '../location-server-context.js';
 
 export interface CreateRscAppOptions {
   readonly requestUrl: string;
@@ -23,7 +23,9 @@ export function createRscAppOptions(
   const {requestUrl} = options;
 
   return {
-    app: <App />,
+    app: (
+      <App getTitle={(pathname) => `Vercel Edge RSC/SSR demo ${pathname}`} />
+    ),
     serverContexts: [[LocationServerContextName, requestUrl]],
   };
 }

@@ -1,0 +1,35 @@
+{
+  "name": "@mfng/shared-app",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
+  "type": "module",
+  "exports": {
+    "./app.js": "./lib/src/server/app.js",
+    "./location-server-context.js": "./lib/src/shared/location-server-context.js",
+    "./navigation-context.js": "./lib/src/client/navigation-context.js",
+    "./package.json": "./package.json",
+    "./tailwind.config.cjs": "./lib/tailwind.config.cjs"
+  },
+  "files": [
+    "lib",
+    "static",
+    "tailwind.config.cjs"
+  ],
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "clsx": "^1.2.1",
+    "countries-list": "^2.6.1",
+    "fuse.js": "^6.6.2",
+    "react": "18.3.0-next-f828bad38-20230313",
+    "react-markdown": "^8.0.5",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "tailwindcss": "^3.2.7"
+  }
+}

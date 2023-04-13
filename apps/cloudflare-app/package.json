@@ -15,20 +15,14 @@
     "watch:dev": "webpack --mode development --watch"
   },
   "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.3.0",
     "@mfng/core": "*",
-    "clsx": "^1.2.1",
-    "countries-list": "^2.6.1",
-    "cssnano": "^5.1.15",
-    "fuse.js": "^6.6.2",
+    "@mfng/shared-app": "*",
     "history": "^5.3.0",
     "react": "18.3.0-next-f828bad38-20230313",
-    "react-dom": "18.3.0-next-f828bad38-20230313",
-    "react-markdown": "^8.0.5",
-    "react-server-dom-webpack": "18.3.0-next-f828bad38-20230313",
-    "server-only": "^0.0.1"
+    "react-dom": "18.3.0-next-f828bad38-20230313"
   },
   "devDependencies": {
-    "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230221.0",
     "@jest/globals": "^29.5.0",
     "@mfng/webpack-rsc": "*",
@@ -38,9 +32,11 @@
     "autoprefixer": "^10.4.14",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
+    "cssnano": "^5.1.15",
     "mini-css-extract-plugin": "^2.7.5",
     "postcss": "^8.4.21",
     "postcss-loader": "^7.0.2",
+    "react-server-dom-webpack": "18.3.0-next-f828bad38-20230313",
     "resolve-typescript-plugin": "^2.0.0",
     "swc-loader": "^0.2.3",
     "tailwindcss": "^3.2.7",

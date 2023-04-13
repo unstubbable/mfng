@@ -1,10 +1,7 @@
+const config = require(`@mfng/shared-app/tailwind.config.cjs`);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [`./src/**/*.{ts,tsx}`],
-  theme: {
-    screens: {
-      sm: `480px`,
-    },
-  },
-  plugins: [],
+  ...config,
+  content: [`./src/**/*.{ts,tsx}`, `../shared-app/lib/**/*.js`],
 };

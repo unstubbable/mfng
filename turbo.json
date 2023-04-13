@@ -27,7 +27,7 @@
       "persistent": true
     },
     "watch:dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build:dev"],
       "cache": false,
       "persistent": true
     }

@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "outDir": "lib",
+    "types": ["node", "react/next"]
+  },
+  "include": ["src/**/*", "../../types", "*.js", "*.cjs"]
+}

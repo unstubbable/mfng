@@ -8,6 +8,7 @@
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs", "dev-server/**/*"],
   "references": [
+    {"path": "../shared-app"},
     {"path": "../../packages/core"},
     {"path": "../../packages/webpack-rsc"}
   ]

@@ -7,6 +7,7 @@
   "type": "module",
   "workspaces": [
     "apps/cloudflare-app",
+    "apps/shared-app",
     "apps/vercel-app",
     "packages/core",
     "packages/webpack-rsc"
@@ -19,7 +20,7 @@
     "compile": "tsc --build",
     "compile:clean": "tsc --build --clean",
     "deploy": "turbo deploy",
-    "dev": "turbo watch:dev dev",
+    "dev": "turbo --concurrency 11 watch:dev dev",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",

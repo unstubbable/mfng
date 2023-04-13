@@ -1,3 +1,4 @@
+import {createRequire} from 'module';
 import path from 'path';
 import {
   WebpackRscClientPlugin,
@@ -9,6 +10,8 @@ import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
+
+const require = createRequire(import.meta.url);
 
 /**
  * @param {unknown} _env
@@ -23,12 +26,17 @@ export default function createConfigs(_env, argv) {
    * @type {import('webpack').StatsOptions}
    */
   const stats = {
-    colors: true,
+    assets: true,
+    builtAt: true,
     chunks: false,
+    colors: true,
+    groupAssetsByEmitStatus: false,
+    groupAssetsByExtension: true,
+    groupAssetsByInfo: false,
+    groupAssetsByPath: false,
+    hash: false,
     modules: false,
     version: false,
-    hash: false,
-    builtAt: true,
   };
 
   const cssRule = {
@@ -65,6 +73,7 @@ export default function createConfigs(_env, argv) {
    * @type {import('@mfng/webpack-rsc').ClientReferencesMap}
    */
   const clientReferencesMap = new Map();
+  const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
 
   /**
    * @type {import('webpack').Configuration}
@@ -100,16 +109,13 @@ export default function createConfigs(_env, argv) {
             {
               issuerLayer: webpackRscLayerName,
               test: /\.tsx?$/,
-              use: [
-                createWebpackRscServerLoader({clientReferencesMap}),
-                `swc-loader`,
-              ],
+              use: [rscServerLoader, `swc-loader`],
               exclude: [/node_modules/],
             },
             {test: /\.tsx?$/, use: [`swc-loader`], exclude: [/node_modules/]},
           ],
         },
-        {test: /\.md$/, type: `asset/source`},
+        {test: /\.js$/, issuerLayer: webpackRscLayerName, use: rscServerLoader},
         cssRule,
       ],
     },
@@ -148,7 +154,16 @@ export default function createConfigs(_env, argv) {
       ],
     },
     plugins: [
-      new CopyPlugin({patterns: [{from: `static`}]}),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.join(
+              path.dirname(require.resolve(`@mfng/shared-app/package.json`)),
+              `static`,
+            ),
+          },
+        ],
+      }),
       new MiniCssExtractPlugin({
         filename: dev ? `main.css` : `main.[contenthash:8].css`,
         runtime: false,
