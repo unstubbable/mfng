@@ -9,7 +9,8 @@
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
     "deploy": "vercel deploy --prebuilt",
-    "dev": "node dev-server/run.js",
+    "dev": "npm run start",
+    "start": "node dev-server/run.js",
     "watch": "webpack --mode production --watch",
     "watch:dev": "webpack --mode development --watch"
   },
