@@ -2,24 +2,10 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": [
-        "**/src/**/*",
-        "**/package.js",
-        "**/webpack.config.js",
-        "!**/*.test.ts"
-      ],
-      "outputs": ["dist/**", "lib/**", "tsconfig.tsbuildinfo"]
+      "dependsOn": ["^build"]
     },
     "build:dev": {
-      "dependsOn": ["^build"],
-      "inputs": [
-        "**/src/**/*",
-        "**/package.js",
-        "**/webpack.config.js",
-        "!**/*.test.ts"
-      ],
-      "outputs": ["dist/**", "lib/**"]
+      "dependsOn": ["^build"]
     },
     "deploy": {
       "dependsOn": ["build"],

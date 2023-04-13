@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "pipeline": {
+    "build": {
+      "inputs": [
+        "src/**/*",
+        "package.json",
+        "tailwind.config.cjs",
+        "webpack.config.js"
+      ],
+      "outputs": ["dist/**", ".vercel/output/**"]
+    },
+    "build:dev": {
+      "inputs": [
+        "src/**/*",
+        "package.json",
+        "tailwind.config.cjs",
+        "webpack.config.js"
+      ],
+      "outputs": ["dist/**", "!dist/dev-server.js", ".vercel/output/**"]
+    }
+  }
+}

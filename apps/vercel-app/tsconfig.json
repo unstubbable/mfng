@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "outDir": "lib",
+    "resolveJsonModule": true,
+    "types": ["react/next", "@edge-runtime/types"]
+  },
+  "include": ["src/**/*", "../../types", "*.js", "*.cjs", "dev-server/**/*"],
+  "references": [
+    {"path": "../shared-app"},
+    {"path": "../../packages/core"},
+    {"path": "../../packages/webpack-rsc"}
+  ]
+}

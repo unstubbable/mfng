@@ -1,0 +1,19 @@
+{
+  "version": 3,
+  "routes": [
+    {
+      "src": "/client/(.*)",
+      "dest": "/client/$1",
+      "headers": {"Cache-Control": "max-age=31536000, immutable, public"}
+    },
+    {
+      "src": "/_vercel/insights/script.js",
+      "dest": "https://va.vercel-scripts.com/v1/script.js"
+    },
+    {
+      "src": "/_vercel/insights/(.*)",
+      "dest": "https://vitals.vercel-insights.com/v1/$1"
+    },
+    {"src": "/.*", "dest": "/"}
+  ]
+}

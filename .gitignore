@@ -4,3 +4,4 @@ dist
 lib
 tsconfig.tsbuildinfo
 .turbo
+.vercel
