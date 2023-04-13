@@ -24,4 +24,4 @@ jobs:
       - name: Test
         run: npm t
       - name: Deploy
-        run: npm run deploy
+        run: npm run deploy -- -F cloudflare-app
