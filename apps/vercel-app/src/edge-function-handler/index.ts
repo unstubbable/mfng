@@ -39,7 +39,6 @@ async function handleGet(request: Request): Promise<Response> {
       headers: {
         'Content-Type': `text/x-component`,
         'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
-        'Vary': `accept`,
       },
     });
   }
@@ -53,7 +52,6 @@ async function handleGet(request: Request): Promise<Response> {
     headers: {
       'Content-Type': `text/html; charset=utf-8`,
       'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
-      'Vary': `accept`,
     },
   });
 }

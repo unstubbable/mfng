@@ -14,6 +14,16 @@
       "src": "/_vercel/insights/(.*)",
       "dest": "https://vitals.vercel-insights.com/v1/$1"
     },
-    {"src": "/.*", "dest": "/"}
+    {
+      "src": "/.*",
+      "dest": "/index",
+      "has": [{"type": "header", "key": "accept", "value": "text/x-component"}],
+      "headers": {"vary": "accept"}
+    },
+    {
+      "src": "/.*",
+      "dest": "/",
+      "headers": {"vary": "accept"}
+    }
   ]
 }
