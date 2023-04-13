@@ -46,7 +46,10 @@ async function handleGet(request: Request): Promise<Response> {
   });
 
   return new Response(htmlStream, {
-    headers: {'content-type': `text/html; charset=utf-8`},
+    headers: {
+      'content-type': `text/html; charset=utf-8`,
+      'cache-control': `s-maxage=60, stale-while-revalidate=3600`,
+    },
   });
 }
 
