@@ -1,5 +1,6 @@
 import {createFetchElementStream} from '@mfng/core/client';
 import {NavigationContext} from '@mfng/shared-app/navigation-context.js';
+import {Analytics} from '@vercel/analytics/react';
 import {createBrowserHistory, createPath} from 'history';
 import * as React from 'react';
 import ReactDOMClient from 'react-dom/client';
@@ -38,6 +39,7 @@ React.startTransition(() => {
     document,
     <React.StrictMode>
       <ClientRoot />
+      <Analytics />
     </React.StrictMode>,
   );
 });
