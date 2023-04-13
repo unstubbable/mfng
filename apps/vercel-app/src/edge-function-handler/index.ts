@@ -27,6 +27,8 @@ export default async function handler(request: Request): Promise<Response> {
   }
 }
 
+const oneDay = 60 * 60 * 24;
+
 async function handleGet(request: Request): Promise<Response> {
   const rscAppStream = createRscAppStream({
     ...createRscAppOptions({requestUrl: request.url}),
@@ -38,7 +40,7 @@ async function handleGet(request: Request): Promise<Response> {
     return new Response(rscAppStream, {
       headers: {
         'Content-Type': `text/x-component`,
-        'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
+        'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
       },
     });
   }
@@ -51,7 +53,7 @@ async function handleGet(request: Request): Promise<Response> {
   return new Response(htmlStream, {
     headers: {
       'Content-Type': `text/html; charset=utf-8`,
-      'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
+      'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
     },
   });
 }
