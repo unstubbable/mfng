@@ -36,7 +36,11 @@ async function handleGet(request: Request): Promise<Response> {
 
   if (request.headers.get(`accept`) === `text/x-component`) {
     return new Response(rscAppStream, {
-      headers: {'content-type': `text/x-component`},
+      headers: {
+        'Content-Type': `text/x-component`,
+        'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
+        'Vary': `accept`,
+      },
     });
   }
 
@@ -47,9 +51,9 @@ async function handleGet(request: Request): Promise<Response> {
 
   return new Response(htmlStream, {
     headers: {
-      'content-type': `text/html; charset=utf-8`,
-      'cache-control': `s-maxage=60, stale-while-revalidate=3600`,
-      'vary': `accept`,
+      'Content-Type': `text/html; charset=utf-8`,
+      'Cache-Control': `s-maxage=60, stale-while-revalidate=3600`,
+      'Vary': `accept`,
     },
   });
 }
@@ -75,6 +79,6 @@ async function handlePost(request: Request): Promise<Response> {
   }
 
   return new Response(rscActionStream, {
-    headers: {'content-type': `text/x-component`},
+    headers: {'Content-Type': `text/x-component`},
   });
 }

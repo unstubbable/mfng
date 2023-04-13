@@ -32,7 +32,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
 
   if (request.headers.get(`accept`) === `text/x-component`) {
     return new Response(rscAppStream, {
-      headers: {'content-type': `text/x-component`},
+      headers: {'Content-Type': `text/x-component`},
     });
   }
 
@@ -42,7 +42,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   });
 
   return new Response(htmlStream, {
-    headers: {'content-type': `text/html; charset=utf-8`},
+    headers: {'Content-Type': `text/html; charset=utf-8`},
   });
 };
 
@@ -78,7 +78,7 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   }
 
   return new Response(rscActionStream, {
-    headers: {'content-type': `text/x-component`},
+    headers: {'Content-Type': `text/x-component`},
   });
 };
 
