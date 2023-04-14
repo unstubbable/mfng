@@ -6,6 +6,7 @@
     "types": ["@cloudflare/workers-types", "jest", "react/next"]
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
+  "exclude": ["dist"],
   "references": [
     {"path": "../shared-app"},
     {"path": "../../packages/core"},

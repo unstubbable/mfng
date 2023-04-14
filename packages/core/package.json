@@ -27,9 +27,6 @@
   "files": [
     "lib"
   ],
-  "scripts": {
-    "build": "tsc --build"
-  },
   "dependencies": {
     "htmlescape": "^1.1.1"
   },

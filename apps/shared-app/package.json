@@ -17,9 +17,6 @@
     "static",
     "tailwind.config.cjs"
   ],
-  "scripts": {
-    "build": "tsc --build"
-  },
   "dependencies": {
     "clsx": "^1.2.1",
     "countries-list": "^2.6.1",

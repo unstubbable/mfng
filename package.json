@@ -19,15 +19,15 @@
     "clean": "npm run compile:clean && rimraf -v {apps,packages}/*/{dist,lib,.turbo,.vercel} node_modules/.cache/turbo",
     "compile": "tsc --build",
     "compile:clean": "tsc --build --clean",
+    "compile:watch": "tsc --build --watch --preserveWatchOutput",
     "deploy": "turbo deploy",
-    "dev": "turbo --concurrency 11 watch:dev dev",
+    "dev": "turbo --concurrency 16 compile:watch watch:dev dev",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
-    "start": "turbo start",
+    "start": "turbo --concurrency 16 compile:watch watch start",
     "pretest": "turbo build:dev",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-    "watch": "turbo watch"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@swc/jest": "^0.2.24",

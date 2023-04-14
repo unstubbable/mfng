@@ -20,9 +20,6 @@
     "lib",
     "!*.test.*"
   ],
-  "scripts": {
-    "build": "tsc --build"
-  },
   "dependencies": {
     "@babel/core": "^7.21.3",
     "@babel/generator": "^7.21.3",
