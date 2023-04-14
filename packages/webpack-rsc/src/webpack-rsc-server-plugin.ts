@@ -18,7 +18,6 @@ export class WebpackRscServerPlugin {
   private clientReferencesMap: ClientReferencesMap;
   private serverManifest: Record<string | number, string[]> = {};
   private serverManifestFilename: string;
-  private serverModuleResources = new Set<string>();
   private clientModuleResources = new Set<string>();
 
   constructor(options: WebpackRscServerPluginOptions) {
@@ -48,6 +47,17 @@ export class WebpackRscServerPlugin {
       override get type(): string {
         return `server-reference`;
       }
+    }
+
+    function hasServerReference(
+      module: Webpack.Module,
+      resource: string,
+    ): boolean {
+      return module.dependencies.some(
+        (dependency) =>
+          dependency instanceof ServerReferenceDependency &&
+          dependency.request === resource,
+      );
     }
 
     class ServerReferenceTemplate extends Template {
@@ -181,8 +191,7 @@ export class WebpackRscServerPlugin {
               this.clientModuleResources.add(resource);
             }
 
-            if (isServerModule && !this.serverModuleResources.has(resource)) {
-              this.serverModuleResources.add(resource);
+            if (isServerModule) {
               module.addDependency(new ServerReferenceDependency(resource));
             }
           });
@@ -223,7 +232,7 @@ export class WebpackRscServerPlugin {
                     clientReference.ssrId = moduleId;
                   }
                 }
-              } else if (this.serverModuleResources.has(resource)) {
+              } else if (hasServerReference(module, resource)) {
                 this.serverManifest[moduleId] = getExportNames(
                   compilation.moduleGraph,
                   module,
