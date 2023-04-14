@@ -9,6 +9,8 @@ export interface CreateHtmlStreamOptions {
   readonly bootstrapScripts?: string[];
 }
 
+const rscResponseStreamBootstrapScriptContent = `(()=>{const t=new TransformStream(),w=t.writable.getWriter(),e=new TextEncoder();self.initialRscResponseStream=t.readable;self.addInitialRscResponseChunk=(text)=>w.write(e.encode(text))})()`;
+
 export async function createHtmlStream(
   rscStream: ReadableStream<Uint8Array>,
   options: CreateHtmlStreamOptions,
@@ -20,7 +22,10 @@ export async function createHtmlStream(
     await ReactServerDOMClient.createFromReadableStream(rscStream1, {
       moduleMap: reactSsrManifest,
     }),
-    {bootstrapScripts},
+    {
+      bootstrapScriptContent: rscResponseStreamBootstrapScriptContent,
+      bootstrapScripts,
+    },
   );
 
   return htmlStream

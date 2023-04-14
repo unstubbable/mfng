@@ -30,45 +30,43 @@ export function createInitialRscResponseTransformStream(
         controller.enqueue(chunk);
       }
 
-      if (!insertingRscStreamScripts) {
+      insertingRscStreamScripts ||= new Promise(async (resolve) => {
         const reader = rscStream.getReader();
 
-        controller.enqueue(
-          textEncoder.encode(
-            `<script>(()=>{const{writable,readable}=new TransformStream();const writer=writable.getWriter();self.initialRscResponseStream=readable;self.addInitialRscResponseChunk=(text)=>writer.write(new TextEncoder().encode(text))})()</script>`,
-          ),
-        );
+        try {
+          while (true) {
+            const result = await reader.read();
 
-        insertingRscStreamScripts = new Promise(async (resolve) => {
-          try {
-            while (true) {
-              const result = await reader.read();
+            if (result.done) {
+              finishedInsertingRscStreamScripts = true;
 
-              if (result.done) {
-                finishedInsertingRscStreamScripts = true;
-
-                if (removedClosingBodyHtmlText) {
-                  controller.enqueue(textEncoder.encode(closingBodyHtmlText));
-                }
-
-                return resolve();
+              if (removedClosingBodyHtmlText) {
+                controller.enqueue(textEncoder.encode(closingBodyHtmlText));
               }
 
-              await nextMacroTask();
-
-              controller.enqueue(
-                textEncoder.encode(
-                  `<script>self.addInitialRscResponseChunk(${sanitize(
-                    JSON.stringify(textDecoder.decode(result.value)),
-                  )});</script>`,
-                ),
-              );
+              return resolve();
             }
-          } catch (error) {
-            controller.error(error);
+
+            await nextMacroTask();
+
+            // Expects `self.addInitialRscResponseChunk` to be defined in
+            // `bootstrapScriptContent`. If we were to enqueue the
+            // initialization script in this controller, it might be parsed and
+            // evaluated by the browser after the bootstrap script tries to read
+            // from `self.initialRscResponseStream`. Defining it in
+            // `bootstrapScriptContent` avoids this race condition.
+            controller.enqueue(
+              textEncoder.encode(
+                `<script>self.addInitialRscResponseChunk(${sanitize(
+                  JSON.stringify(textDecoder.decode(result.value)),
+                )});</script>`,
+              ),
+            );
           }
-        });
-      }
+        } catch (error) {
+          controller.error(error);
+        }
+      });
     },
 
     async flush() {
