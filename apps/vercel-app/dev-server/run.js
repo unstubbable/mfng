@@ -41,6 +41,11 @@ chokidar
 const {handler} = createHandler({runtime});
 const app = express();
 
+// Redirecting insights script for local production mode.
+app.get(`/_vercel/insights/script.js`, (_req, res) =>
+  res.redirect(`https://va.vercel-scripts.com/v1/script.debug.js`),
+);
+
 app.use(express.static(staticDirname));
 app.use(handler);
 
