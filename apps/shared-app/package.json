@@ -21,7 +21,7 @@
     "clsx": "^1.2.1",
     "countries-list": "^2.6.1",
     "fuse.js": "^6.6.2",
-    "react": "18.3.0-next-f828bad38-20230313",
+    "react": "18.3.0-next-39a3b72c6-20230414",
     "react-markdown": "^8.0.5",
     "server-only": "^0.0.1"
   },
