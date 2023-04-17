@@ -4,6 +4,7 @@ import url from 'url';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
+import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
 import {WebpackRscServerPlugin} from './webpack-rsc-server-plugin.js';
 
 const fs = new MemoryFS();
@@ -46,8 +47,11 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
 
 describe(`WebpackRscServerPlugin`, () => {
   let buildConfig: webpack.Configuration;
+  let serverReferencesMap: ServerReferencesMap;
 
   beforeEach(() => {
+    serverReferencesMap = new Map();
+
     buildConfig = {
       entry: path.resolve(currentDirname, `__fixtures__/main.js`),
       output: {
@@ -65,7 +69,12 @@ describe(`WebpackRscServerPlugin`, () => {
           },
         ],
       },
-      plugins: [new WebpackRscServerPlugin({clientReferencesMap: new Map()})],
+      plugins: [
+        new WebpackRscServerPlugin({
+          clientReferencesMap: new Map(),
+          serverReferencesMap,
+        }),
+      ],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },
@@ -126,6 +135,20 @@ Object.defineProperties(serverFunction, {
         ],
       });
     });
+
+    test(`populates the given serverReferencesMap`, async () => {
+      await runWebpack(buildConfig);
+
+      expect([...serverReferencesMap.entries()]).toEqual([
+        [
+          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
+          {
+            moduleId: `./packages/webpack-rsc/src/__fixtures__/server-function.js`,
+            exportNames: [`serverFunction`],
+          },
+        ],
+      ]);
+    });
   });
 
   describe(`in production mode`, () => {
@@ -171,6 +194,17 @@ Object.defineProperties(serverFunction, {
       expect(JSON.parse(manifestFile)).toEqual({
         [expectedModuleId]: [`serverFunction`],
       });
+    });
+
+    test(`populates the given serverReferencesMap`, async () => {
+      await runWebpack(buildConfig);
+
+      expect([...serverReferencesMap.entries()]).toEqual([
+        [
+          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
+          {moduleId: expectedModuleId, exportNames: [`serverFunction`]},
+        ],
+      ]);
     });
   });
 });

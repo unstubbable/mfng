@@ -4,6 +4,7 @@ import url from 'url';
 import {
   WebpackRscClientPlugin,
   WebpackRscServerPlugin,
+  createWebpackRscClientLoader,
   createWebpackRscServerLoader,
   webpackRscLayerName,
 } from '@mfng/webpack-rsc';
@@ -100,6 +101,7 @@ export default function createConfigs(_env, argv) {
    * @type {import('@mfng/webpack-rsc').ClientReferencesMap}
    */
   const clientReferencesMap = new Map();
+  const serverReferencesMap = new Map();
   const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
 
   /**
@@ -151,6 +153,7 @@ export default function createConfigs(_env, argv) {
       new MiniCssExtractPlugin({filename: `server-main.css`, runtime: false}),
       new WebpackRscServerPlugin({
         clientReferencesMap,
+        serverReferencesMap,
         serverManifestFilename: path.relative(
           outputFunctionDirname,
           reactServerManifestFilename,
@@ -168,6 +171,7 @@ export default function createConfigs(_env, argv) {
   };
 
   const clientOutputDirname = path.join(outputDirname, `static/client`);
+  const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**
    * @type {import('webpack').Configuration}
@@ -187,7 +191,12 @@ export default function createConfigs(_env, argv) {
     },
     module: {
       rules: [
-        {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
+        {test: /\.js$/, use: rscClientLoader},
+        {
+          test: /\.tsx?$/,
+          use: [rscClientLoader, `swc-loader`],
+          exclude: [/node_modules/],
+        },
         cssRule,
       ],
     },

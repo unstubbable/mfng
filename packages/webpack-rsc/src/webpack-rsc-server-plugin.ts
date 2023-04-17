@@ -1,9 +1,11 @@
 import type {Directive, ModuleDeclaration, Statement} from 'estree';
 import type Webpack from 'webpack';
+import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
 import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
   readonly clientReferencesMap: ClientReferencesMap;
+  readonly serverReferencesMap?: ServerReferencesMap;
   readonly serverManifestFilename?: string;
 }
 
@@ -16,12 +18,14 @@ export const webpackRscLayerName = `react-server`;
 
 export class WebpackRscServerPlugin {
   private clientReferencesMap: ClientReferencesMap;
+  private serverReferencesMap: ServerReferencesMap | undefined;
   private serverManifest: Record<string | number, string[]> = {};
   private serverManifestFilename: string;
   private clientModuleResources = new Set<string>();
 
   constructor(options: WebpackRscServerPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
+    this.serverReferencesMap = options.serverReferencesMap;
 
     this.serverManifestFilename =
       options?.serverManifestFilename || `react-server-manifest.json`;
@@ -233,10 +237,17 @@ export class WebpackRscServerPlugin {
                   }
                 }
               } else if (hasServerReference(module, resource)) {
-                this.serverManifest[moduleId] = getExportNames(
+                const exportNames = getExportNames(
                   compilation.moduleGraph,
                   module,
                 );
+
+                this.serverReferencesMap?.set(resource, {
+                  moduleId,
+                  exportNames,
+                });
+
+                this.serverManifest[moduleId] = exportNames;
               }
             }
           },
