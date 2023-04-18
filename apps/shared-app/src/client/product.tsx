@@ -2,17 +2,14 @@
 
 import * as React from 'react';
 import type {buy} from '../server/buy.js';
+import {Button} from './button.js';
 import {useEphemeralState} from './use-ephemeral-state.js';
 
-export interface BuyButtonProps {
+export interface ProductProps {
   readonly buy: typeof buy;
 }
 
-export function Foo(): null {
-  return null;
-}
-
-export function BuyButton({buy}: BuyButtonProps): JSX.Element {
+export function Product({buy}: ProductProps): JSX.Element {
   const [quantity, setQuantity] = React.useState(1);
   const [isPending, startTransition] = React.useTransition();
 
@@ -41,14 +38,9 @@ export function BuyButton({buy}: BuyButtonProps): JSX.Element {
         className="bg-zinc-100 p-1 outline-cyan-500"
       />
       {` `}
-      <button
-        onClick={handleClick}
-        disabled={isPending}
-        className="rounded-full bg-cyan-500 py-1 px-4 text-white disabled:bg-zinc-300"
-        type="button"
-      >
+      <Button onClick={handleClick} disabled={isPending}>
         Buy now
-      </button>
+      </Button>
       {/* Promises can now be rendered directly. */}
       {result as React.ReactNode}
     </div>
