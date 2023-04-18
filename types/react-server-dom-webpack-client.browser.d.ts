@@ -28,4 +28,9 @@ declare module 'react-server-dom-webpack/client.browser' {
   export function encodeReply(
     value: ReactServerValue,
   ): Promise<string | FormData>;
+
+  export function createServerReference(
+    id: string,
+    callServer: CallServerCallback,
+  ): (...args: unknown[]) => Promise<unknown>;
 }
