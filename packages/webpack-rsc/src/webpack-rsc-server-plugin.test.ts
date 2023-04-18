@@ -4,6 +4,7 @@ import url from 'url';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
+import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
 import {WebpackRscServerPlugin} from './webpack-rsc-server-plugin.js';
 
 const fs = new MemoryFS();
@@ -46,8 +47,11 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
 
 describe(`WebpackRscServerPlugin`, () => {
   let buildConfig: webpack.Configuration;
+  let serverReferencesMap: ServerReferencesMap;
 
   beforeEach(() => {
+    serverReferencesMap = new Map();
+
     buildConfig = {
       entry: path.resolve(currentDirname, `__fixtures__/main.js`),
       output: {
@@ -65,7 +69,12 @@ describe(`WebpackRscServerPlugin`, () => {
           },
         ],
       },
-      plugins: [new WebpackRscServerPlugin({clientReferencesMap: new Map()})],
+      plugins: [
+        new WebpackRscServerPlugin({
+          clientReferencesMap: new Map(),
+          serverReferencesMap,
+        }),
+      ],
       resolve: {
         conditionNames: [`react-server`, `node`, `import`, `require`],
       },
@@ -88,7 +97,7 @@ describe(`WebpackRscServerPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "./packages/webpack-rsc/src/__fixtures__/server-function.js":
+/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js":
 /*!******************************************************************!*\\
   !*** ./packages/webpack-rsc/src/__fixtures__/server-function.js ***!
   \\******************************************************************/
@@ -105,7 +114,7 @@ async function serverFunction() {
 }
 Object.defineProperties(serverFunction, {
 	$$typeof: {value: Symbol.for("react.server.reference")},
-	$$id: {value: "./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
+	$$id: {value: "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
 });
 
 /***/ })`,
@@ -121,10 +130,23 @@ Object.defineProperties(serverFunction, {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        './packages/webpack-rsc/src/__fixtures__/server-function.js': [
-          `serverFunction`,
-        ],
+        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js':
+          [`serverFunction`],
       });
+    });
+
+    test(`populates the given serverReferencesMap`, async () => {
+      await runWebpack(buildConfig);
+
+      expect([...serverReferencesMap.entries()]).toEqual([
+        [
+          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
+          {
+            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js`,
+            exportNames: [`serverFunction`],
+          },
+        ],
+      ]);
     });
   });
 
@@ -133,7 +155,7 @@ Object.defineProperties(serverFunction, {
 
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-      expectedModuleId = 269; // may change in the future
+      expectedModuleId = 340; // may change in the future
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {
@@ -171,6 +193,17 @@ Object.defineProperties(serverFunction, {
       expect(JSON.parse(manifestFile)).toEqual({
         [expectedModuleId]: [`serverFunction`],
       });
+    });
+
+    test(`populates the given serverReferencesMap`, async () => {
+      await runWebpack(buildConfig);
+
+      expect([...serverReferencesMap.entries()]).toEqual([
+        [
+          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
+          {moduleId: expectedModuleId, exportNames: [`serverFunction`]},
+        ],
+      ]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {BuyButton} from '../client/buy-button.js';
+import {Product} from '../client/product.js';
 import {Main} from '../shared/main.js';
 import {buy} from './buy.js';
 import {Hello} from './hello.js';
@@ -15,7 +15,7 @@ export function HomePage(): JSX.Element {
         <Suspended />
       </React.Suspense>
       <React.Suspense>
-        <BuyButton buy={buy} />
+        <Product buy={buy} />
       </React.Suspense>
     </Main>
   );

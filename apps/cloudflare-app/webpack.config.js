@@ -3,7 +3,9 @@ import path from 'path';
 import {
   WebpackRscClientPlugin,
   WebpackRscServerPlugin,
+  createWebpackRscClientLoader,
   createWebpackRscServerLoader,
+  createWebpackRscSsrLoader,
   webpackRscLayerName,
 } from '@mfng/webpack-rsc';
 import CopyPlugin from 'copy-webpack-plugin';
@@ -73,7 +75,10 @@ export default function createConfigs(_env, argv) {
    * @type {import('@mfng/webpack-rsc').ClientReferencesMap}
    */
   const clientReferencesMap = new Map();
+  const serverReferencesMap = new Map();
   const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
+  const rscSsrLoader = createWebpackRscSsrLoader();
+  const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**
    * @type {import('webpack').Configuration}
@@ -112,16 +117,29 @@ export default function createConfigs(_env, argv) {
               use: [rscServerLoader, `swc-loader`],
               exclude: [/node_modules/],
             },
-            {test: /\.tsx?$/, use: [`swc-loader`], exclude: [/node_modules/]},
+            {
+              test: /\.tsx?$/,
+              use: [rscSsrLoader, `swc-loader`],
+              exclude: [/node_modules/],
+            },
           ],
         },
-        {test: /\.js$/, issuerLayer: webpackRscLayerName, use: rscServerLoader},
+        {
+          oneOf: [
+            {
+              test: /\.js$/,
+              issuerLayer: webpackRscLayerName,
+              use: rscServerLoader,
+            },
+            {test: /\.js$/, use: rscSsrLoader},
+          ],
+        },
         cssRule,
       ],
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `server-main.css`, runtime: false}),
-      new WebpackRscServerPlugin({clientReferencesMap}),
+      new WebpackRscServerPlugin({clientReferencesMap, serverReferencesMap}),
     ],
     experiments: {outputModule: true, layers: true},
     performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
@@ -149,7 +167,12 @@ export default function createConfigs(_env, argv) {
     },
     module: {
       rules: [
-        {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
+        {test: /\.js$/, use: rscClientLoader},
+        {
+          test: /\.tsx?$/,
+          use: [rscClientLoader, `swc-loader`],
+          exclude: [/node_modules/],
+        },
         cssRule,
       ],
     },

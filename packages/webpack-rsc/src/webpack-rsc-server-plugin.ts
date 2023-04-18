@@ -1,9 +1,11 @@
 import type {Directive, ModuleDeclaration, Statement} from 'estree';
 import type Webpack from 'webpack';
+import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
 import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
   readonly clientReferencesMap: ClientReferencesMap;
+  readonly serverReferencesMap?: ServerReferencesMap;
   readonly serverManifestFilename?: string;
 }
 
@@ -16,12 +18,15 @@ export const webpackRscLayerName = `react-server`;
 
 export class WebpackRscServerPlugin {
   private clientReferencesMap: ClientReferencesMap;
+  private serverReferencesMap: ServerReferencesMap | undefined;
   private serverManifest: Record<string | number, string[]> = {};
   private serverManifestFilename: string;
   private clientModuleResources = new Set<string>();
+  private serverModuleResources = new Set<string>();
 
   constructor(options: WebpackRscServerPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
+    this.serverReferencesMap = options.serverReferencesMap;
 
     this.serverManifestFilename =
       options?.serverManifestFilename || `react-server-manifest.json`;
@@ -49,14 +54,9 @@ export class WebpackRscServerPlugin {
       }
     }
 
-    function hasServerReference(
-      module: Webpack.Module,
-      resource: string,
-    ): boolean {
+    function hasServerReferenceDependency(module: Webpack.Module): boolean {
       return module.dependencies.some(
-        (dependency) =>
-          dependency instanceof ServerReferenceDependency &&
-          dependency.request === resource,
+        (dependency) => dependency instanceof ServerReferenceDependency,
       );
     }
 
@@ -94,13 +94,14 @@ export class WebpackRscServerPlugin {
       }
     }
 
-    const addClientModuleInclude = async (
+    const includeModule = async (
       compilation: Webpack.Compilation,
       resource: string,
+      layer?: string,
     ) => {
-      const [entryName, ...otherEntryNames] = compilation.entries.keys();
+      const [entry, ...otherEntries] = compilation.entries.entries();
 
-      if (!entryName) {
+      if (!entry) {
         compilation.errors.push(
           new WebpackError(`Could not find an entry in the compilation.`),
         );
@@ -108,7 +109,7 @@ export class WebpackRscServerPlugin {
         return;
       }
 
-      if (otherEntryNames.length > 0) {
+      if (otherEntries.length > 0) {
         compilation.warnings.push(
           new WebpackError(
             `Found multiple entries in the compilation, adding client module include (for SSR) only to the first entry.`,
@@ -116,17 +117,27 @@ export class WebpackRscServerPlugin {
         );
       }
 
+      const [entryName, {includeDependencies}] = entry;
+
+      if (
+        includeDependencies.some(
+          (includeDependency) =>
+            includeDependency instanceof ModuleDependency &&
+            includeDependency.request === resource,
+        )
+      ) {
+        return;
+      }
+
       const dependency = EntryPlugin.createDependency(resource, {
         name: resource,
       });
-
-      const entryOptions: Webpack.EntryOptions = {name: entryName};
 
       return new Promise<void>((resolve, reject) => {
         compilation.addInclude(
           compiler.context,
           dependency,
-          entryOptions,
+          {name: entryName, layer},
           (error, module) => {
             if (error) {
               return reject(error);
@@ -135,7 +146,7 @@ export class WebpackRscServerPlugin {
             const exportsInfo = compilation.moduleGraph.getExportsInfo(module!);
 
             exportsInfo.setUsedInUnknownWay(
-              getEntryRuntime(compilation, entryName, entryOptions),
+              getEntryRuntime(compilation, entryName, {name: entryName}),
             );
 
             resolve();
@@ -147,11 +158,14 @@ export class WebpackRscServerPlugin {
     compiler.hooks.finishMake.tapPromise(
       WebpackRscServerPlugin.name,
       async (compilation) => {
-        await Promise.all(
-          Array.from(this.clientModuleResources).map(async (resource) =>
-            addClientModuleInclude(compilation, resource),
+        await Promise.all([
+          ...Array.from(this.clientModuleResources).map(async (resource) =>
+            includeModule(compilation, resource),
           ),
-        );
+          ...Array.from(this.serverModuleResources).map(async (resource) =>
+            includeModule(compilation, resource, webpackRscLayerName),
+          ),
+        ]);
       },
     );
 
@@ -187,12 +201,19 @@ export class WebpackRscServerPlugin {
               return;
             }
 
-            if (isClientModule) {
+            if (isClientModule && module.layer === webpackRscLayerName) {
               this.clientModuleResources.add(resource);
+              void includeModule(compilation, resource);
             }
 
-            if (isServerModule) {
-              module.addDependency(new ServerReferenceDependency(resource));
+            if (isServerModule && !hasServerReferenceDependency(module)) {
+              if (module.layer === webpackRscLayerName) {
+                module.addDependency(new ServerReferenceDependency(resource));
+              } else {
+                // Server modules that are imported from the client (here: SSR).
+                this.serverModuleResources.add(resource);
+                void includeModule(compilation, resource, webpackRscLayerName);
+              }
             }
           });
         };
@@ -221,6 +242,10 @@ export class WebpackRscServerPlugin {
 
               const moduleId = compilation.chunkGraph.getModuleId(module);
 
+              if (moduleId === null) {
+                continue;
+              }
+
               if (
                 module.layer !== webpackRscLayerName &&
                 this.clientModuleResources.has(resource)
@@ -232,11 +257,18 @@ export class WebpackRscServerPlugin {
                     clientReference.ssrId = moduleId;
                   }
                 }
-              } else if (hasServerReference(module, resource)) {
-                this.serverManifest[moduleId] = getExportNames(
+              } else if (hasServerReferenceDependency(module)) {
+                const exportNames = getExportNames(
                   compilation.moduleGraph,
                   module,
                 );
+
+                this.serverReferencesMap?.set(resource, {
+                  moduleId,
+                  exportNames,
+                });
+
+                this.serverManifest[moduleId] = exportNames;
               }
             }
           },

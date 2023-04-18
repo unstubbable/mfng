@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import {ClientComponentWithServerAction} from './client-component-with-server-action.js';
 
 export function ComponentA() {
   return React.createElement(`div`);
@@ -11,5 +12,5 @@ export const ComponentB = function () {
 };
 
 export const ComponentC = () => {
-  return React.createElement(`div`);
+  return React.createElement(ClientComponentWithServerAction);
 };
