@@ -97,7 +97,7 @@ describe(`WebpackRscServerPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "./packages/webpack-rsc/src/__fixtures__/server-function.js":
+/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js":
 /*!******************************************************************!*\\
   !*** ./packages/webpack-rsc/src/__fixtures__/server-function.js ***!
   \\******************************************************************/
@@ -114,7 +114,7 @@ async function serverFunction() {
 }
 Object.defineProperties(serverFunction, {
 	$$typeof: {value: Symbol.for("react.server.reference")},
-	$$id: {value: "./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
+	$$id: {value: "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
 });
 
 /***/ })`,
@@ -130,9 +130,8 @@ Object.defineProperties(serverFunction, {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        './packages/webpack-rsc/src/__fixtures__/server-function.js': [
-          `serverFunction`,
-        ],
+        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js':
+          [`serverFunction`],
       });
     });
 
@@ -143,7 +142,7 @@ Object.defineProperties(serverFunction, {
         [
           path.resolve(currentDirname, `./__fixtures__/server-function.js`),
           {
-            moduleId: `./packages/webpack-rsc/src/__fixtures__/server-function.js`,
+            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js`,
             exportNames: [`serverFunction`],
           },
         ],
@@ -156,7 +155,7 @@ Object.defineProperties(serverFunction, {
 
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-      expectedModuleId = 269; // may change in the future
+      expectedModuleId = 340; // may change in the future
     });
 
     test(`the generated bundle has replacement code for server references`, async () => {

@@ -6,6 +6,7 @@ import {
   WebpackRscServerPlugin,
   createWebpackRscClientLoader,
   createWebpackRscServerLoader,
+  createWebpackRscSsrLoader,
   webpackRscLayerName,
 } from '@mfng/webpack-rsc';
 import CopyPlugin from 'copy-webpack-plugin';
@@ -103,6 +104,8 @@ export default function createConfigs(_env, argv) {
   const clientReferencesMap = new Map();
   const serverReferencesMap = new Map();
   const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
+  const rscSsrLoader = createWebpackRscSsrLoader();
+  const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**
    * @type {import('webpack').Configuration}
@@ -141,10 +144,24 @@ export default function createConfigs(_env, argv) {
               use: [rscServerLoader, `swc-loader`],
               exclude: [/node_modules/],
             },
-            {test: /\.tsx?$/, loader: `swc-loader`, exclude: [/node_modules/]},
+            {
+              test: /\.tsx?$/,
+              use: [rscSsrLoader, `swc-loader`],
+              // use: `swc-loader`,
+              exclude: [/node_modules/],
+            },
           ],
         },
-        {test: /\.js$/, issuerLayer: webpackRscLayerName, use: rscServerLoader},
+        {
+          oneOf: [
+            {
+              test: /\.js$/,
+              issuerLayer: webpackRscLayerName,
+              use: rscServerLoader,
+            },
+            {test: /\.js$/, use: rscSsrLoader},
+          ],
+        },
         cssRule,
       ],
     },
@@ -171,7 +188,6 @@ export default function createConfigs(_env, argv) {
   };
 
   const clientOutputDirname = path.join(outputDirname, `static/client`);
-  const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**
    * @type {import('webpack').Configuration}

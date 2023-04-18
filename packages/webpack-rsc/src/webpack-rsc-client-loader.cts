@@ -34,12 +34,8 @@ export default function webpackRscClientLoader(
   });
 
   traverse(ast, {
-    enter(path) {
+    Program(path) {
       const {node} = path;
-
-      if (!t.isProgram(node)) {
-        return;
-      }
 
       if (!node.directives.some(isUseServerDirective)) {
         return;

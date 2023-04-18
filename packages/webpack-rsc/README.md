@@ -35,11 +35,15 @@ import {
   WebpackRscServerPlugin,
   createWebpackRscClientLoader,
   createWebpackRscServerLoader,
+  createWebpackRscSsrLoader,
   webpackRscLayerName,
 } from '@mfng/webpack-rsc';
 
 const clientReferencesMap = new Map();
 const serverReferencesMap = new Map();
+const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
+const rscSsrLoader = createWebpackRscSsrLoader();
+const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
 const serverConfig = {
   name: 'server',
@@ -60,12 +64,12 @@ const serverConfig = {
           {
             issuerLayer: webpackRscLayerName,
             test: /\.tsx?$/,
-            use: [
-              createWebpackRscServerLoader({clientReferencesMap}),
-              'swc-loader',
-            ],
+            use: [rscServerLoader, 'swc-loader'],
           },
-          {test: /\.tsx?$/, use: ['swc-loader']},
+          {
+            test: /\.tsx?$/,
+            use: [rscSsrLoader, 'swc-loader'],
+          },
         ],
       },
     ],
@@ -85,10 +89,7 @@ const clientConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [
-          createWebpackRscClientLoader({serverReferencesMap}),
-          'swc-loader',
-        ],
+        use: [rscClientLoader, 'swc-loader'],
       },
     ],
   },
@@ -109,16 +110,26 @@ This library provides the following Webpack loaders and plugins:
 ### `createWebpackRscServerLoader`
 
 A function to create the RSC server loader `use` item for the server entry
-webpack config. This loader is responsible for replacing client components in a
-`use client` module with client references (objects that contain meta data about
-the client components), and removing all other parts of the client module. It
-also populates the given `clientReferencesMap`.
+webpack config. It should be used if the `issuerLayer` is `webpackRscLayerName`.
+This loader is responsible for replacing client components in a `use client`
+module with client references (objects that contain meta data about the client
+components), and removing all other parts of the client module. It also
+populates the given `clientReferencesMap`.
+
+### `createWebpackRscSsrLoader`
+
+A function to create the RSC SSR loader `use` item for the server entry webpack
+config. It should be used if the `issuerLayer` is **not** `webpackRscLayerName`.
+This loader is responsible for replacing server actions in a `use server` module
+that are imported from client modules with stubs. The stubs are functions that
+throw an error, since React does not allow calling server actions during SSR (to
+avoid waterfalls). All other parts of the server module are removed.
 
 ### `WebpackRscServerPlugin`
 
-The server plugin resolves the client references that the loader has created,
-and adds them as additional entries to the bundle, so that they are available
-for server-side rendering (SSR).
+The server plugin resolves the client references that the server loader has
+created, and adds them as additional includes to the bundle, so that they are
+available for server-side rendering (SSR).
 
 The plugin also handles server references for React server actions by adding
 meta data to all exported functions of a `use server` module. Based on this, it
@@ -141,10 +152,10 @@ used as import source, but this can be customized with the
 
 ### `WebpackRscClientPlugin`
 
-The client plugin resolves the client references that were saved by the loader
-in `clientReferencesMap` into separate client chunks that can be loaded by the
-browser. This plugin also generates the React client manifest file that is
-needed for creating the RSC stream with
+The client plugin resolves the client references that were saved by the server
+loader in `clientReferencesMap` into separate client chunks that can be loaded
+by the browser. This plugin also generates the React client manifest file that
+is needed for creating the RSC stream with
 `ReactServerDOMServer.renderToReadableStream()`, as well as the React SSR
 manifest that is needed for creating the HTML stream (SSR) with
 `ReactServerDOMClient.createFromReadableStream()`.

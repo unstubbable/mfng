@@ -47,6 +47,7 @@ export default function webpackRscServerLoader(
 
       if (t.isDirective(node) && isUseClientDirective(node)) {
         path.skip();
+
         return;
       }
 
