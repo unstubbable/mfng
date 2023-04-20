@@ -1,3 +1,4 @@
+import * as React from 'react';
 import ReactDOMServer from 'react-dom/server.browser';
 import type {SSRManifest} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
@@ -18,10 +19,14 @@ export async function createHtmlStream(
   const {reactSsrManifest, bootstrapScripts} = options;
   const [rscStream1, rscStream2] = rscStream.tee();
 
-  const htmlStream = await ReactDOMServer.renderToReadableStream(
-    await ReactServerDOMClient.createFromReadableStream(rscStream1, {
+  const ServerRoot = (): JSX.Element =>
+    // @ts-expect-error should be fixed with TS 5.1
+    ReactServerDOMClient.createFromReadableStream(rscStream1, {
       moduleMap: reactSsrManifest,
-    }),
+    });
+
+  const htmlStream = await ReactDOMServer.renderToReadableStream(
+    <ServerRoot />,
     {
       bootstrapScriptContent: rscResponseStreamBootstrapScriptContent,
       bootstrapScripts,
