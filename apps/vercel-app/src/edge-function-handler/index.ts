@@ -39,7 +39,7 @@ async function handleGet(request: Request): Promise<Response> {
   if (request.headers.get(`accept`) === `text/x-component`) {
     return new Response(rscAppStream, {
       headers: {
-        'Content-Type': `text/x-component`,
+        'Content-Type': `text/x-component; charset=utf-8`,
         'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
       },
     });

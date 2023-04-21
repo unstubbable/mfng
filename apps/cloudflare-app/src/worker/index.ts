@@ -32,7 +32,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
 
   if (request.headers.get(`accept`) === `text/x-component`) {
     return new Response(rscAppStream, {
-      headers: {'Content-Type': `text/x-component`},
+      headers: {'Content-Type': `text/x-component; charset=utf-8`},
     });
   }
 
