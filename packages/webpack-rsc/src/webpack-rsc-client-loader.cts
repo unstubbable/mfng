@@ -25,8 +25,10 @@ export default function webpackRscClientLoader(
 ): void {
   this.cacheable(true);
 
-  const {serverReferencesMap, callServerImportSource = `@mfng/core/client`} =
-    this.getOptions();
+  const {
+    serverReferencesMap,
+    callServerImportSource = `@mfng/core/client/browser`,
+  } = this.getOptions();
 
   const loaderContext = this;
   const resourcePath = this.resourcePath;

@@ -1,13 +1,13 @@
 'use client';
 
+import {useRouter} from '@mfng/core/client';
 import {clsx} from 'clsx';
 import * as React from 'react';
-import {NavigationContext} from './navigation-context.js';
 
 export function NavigationContainer({
   children,
 }: React.PropsWithChildren): JSX.Element {
-  const {isPending} = React.useContext(NavigationContext);
+  const {isPending} = useRouter();
 
   return (
     <div

@@ -146,9 +146,9 @@ webpack config. This loader is responsible for replacing server actions in a
 that the server module can be imported from a client module.
 
 **Note:** Importing server actions from a client module requires that
-`callServer` can be imported from a module. Per default `@mfng/core/client` is
-used as import source, but this can be customized with the
-`callServerImportSource` option.
+`callServer` can be imported from a module. Per default
+`@mfng/core/client/browser` is used as import source, but this can be customized
+with the `callServerImportSource` option.
 
 ### `WebpackRscClientPlugin`
 

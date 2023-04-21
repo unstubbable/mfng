@@ -18,6 +18,7 @@
     "tailwind.config.cjs"
   ],
   "dependencies": {
+    "@mfng/core": "*",
     "clsx": "^1.2.1",
     "countries-list": "^2.6.1",
     "fuse.js": "^6.6.2",

@@ -1,18 +1,18 @@
 'use client';
 
+import {useRouter} from '@mfng/core/client';
 import * as React from 'react';
-import {NavigationContext} from './navigation-context.js';
 
 export type LinkProps = React.PropsWithChildren<{
   readonly pathname: string;
 }>;
 
 export function Link({children, pathname}: LinkProps): JSX.Element {
-  const {push} = React.useContext(NavigationContext);
+  const {push} = useRouter();
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
     event.preventDefault();
-    push(pathname);
+    push({pathname});
   };
 
   return (
