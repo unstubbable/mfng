@@ -31,6 +31,7 @@ export default function webpackRscServerLoader(
     sourceFilename: resourcePath,
   });
 
+  let hasUseClientDirective = false;
   const clientReferences: ClientReference[] = [];
 
   traverse(ast, {
@@ -38,7 +39,9 @@ export default function webpackRscServerLoader(
       const {node} = path;
 
       if (t.isProgram(node)) {
-        if (!node.directives.some(isUseClientDirective)) {
+        if (node.directives.some(isUseClientDirective)) {
+          hasUseClientDirective = true;
+        } else {
           path.skip();
         }
 
@@ -64,6 +67,10 @@ export default function webpackRscServerLoader(
       }
     },
   });
+
+  if (!hasUseClientDirective) {
+    return this.callback(null, source);
+  }
 
   if (clientReferences.length > 0) {
     clientReferencesMap.set(resourcePath, clientReferences);

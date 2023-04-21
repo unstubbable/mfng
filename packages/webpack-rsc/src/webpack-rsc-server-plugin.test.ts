@@ -112,6 +112,7 @@ __webpack_require__.r(__webpack_exports__);
 async function serverFunction() {
   return Promise.resolve(\`server\`);
 }
+
 Object.defineProperties(serverFunction, {
 	$$typeof: {value: Symbol.for("react.server.reference")},
 	$$id: {value: "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},

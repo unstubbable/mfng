@@ -129,23 +129,10 @@ export const foo = createServerReference("test#foo", callServer);
       `__fixtures__/client-component.js`,
     );
 
+    const source = (await fs.readFile(resourcePath)).toString();
     const serverReferencesMap = new Map();
     const output = await callLoader(resourcePath, {serverReferencesMap});
 
-    expect(output.toString().trim()).toEqual(
-      `
-// @ts-nocheck
-'use client';
-
-import * as React from 'react';
-
-export function ClientComponent({action}) {
-  React.useEffect(() => {
-    action().then(console.log);
-  }, []);
-
-  return null;
-}`.trim(),
-    );
+    expect(output).toEqual(source);
   });
 });

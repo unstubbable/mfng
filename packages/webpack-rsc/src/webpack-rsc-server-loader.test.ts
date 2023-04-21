@@ -12,17 +12,17 @@ import webpackRscServerLoader from './webpack-rsc-server-loader.cjs';
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 async function callLoader(
-  filename: string,
+  resourcePath: string,
   clientReferencesMap: ClientReferencesMap,
 ): Promise<string | Buffer> {
-  const input = await fs.readFile(path.resolve(currentDirname, filename));
+  const input = await fs.readFile(resourcePath);
 
   return new Promise((resolve, reject) => {
     const context: Partial<
       webpack.LoaderContext<WebpackRscServerLoaderOptions>
     > = {
       getOptions: () => ({clientReferencesMap}),
-      resourcePath: path.resolve(currentDirname, filename),
+      resourcePath,
       cacheable: jest.fn(),
       callback: (error, content) => {
         if (error) {
@@ -49,13 +49,14 @@ async function callLoader(
 describe(`webpackRscServerLoader`, () => {
   test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
     const clientReferencesMap: ClientReferencesMap = new Map();
-    const filename = `__fixtures__/client-components.js`;
-    const output = await callLoader(filename, clientReferencesMap);
 
-    const idPrefix = path.relative(
-      process.cwd(),
-      path.resolve(currentDirname, filename),
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/client-components.js`,
     );
+
+    const output = await callLoader(resourcePath, clientReferencesMap);
+    const idPrefix = path.relative(process.cwd(), resourcePath);
 
     expect(output).toEqual(
       `
@@ -79,16 +80,15 @@ export const ComponentC = {
 
   test(`does not change modules without a 'use client' directive`, async () => {
     const clientReferencesMap: ClientReferencesMap = new Map();
-    const filename = `__fixtures__/server-component.js`;
-    const output = await callLoader(filename, clientReferencesMap);
 
-    expect(output).toEqual(
-      `
-import * as React from 'react';
-export async function ServerComponent() {
-  return React.createElement(\`div\`);
-}
-    `.trim(),
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/server-component.js`,
     );
+
+    const source = (await fs.readFile(resourcePath)).toString();
+    const output = await callLoader(resourcePath, clientReferencesMap);
+
+    expect(output).toEqual(source);
   });
 });
