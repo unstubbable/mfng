@@ -132,18 +132,18 @@ export const foo = createServerReference("test#foo", callServer);
     const serverReferencesMap = new Map();
     const output = await callLoader(resourcePath, {serverReferencesMap});
 
-    expect(output).toEqual(
+    expect(output.toString().trim()).toEqual(
       `
 // @ts-nocheck
 'use client';
 
 import * as React from 'react';
-export function ClientComponent({
-  action
-}) {
+
+export function ClientComponent({action}) {
   React.useEffect(() => {
     action().then(console.log);
   }, []);
+
   return null;
 }`.trim(),
     );
