@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import 'server-only';
+import {Link} from '../client/link.js';
 import {Notification} from '../shared/notification.js';
 
 export async function buy(quantity: number): Promise<React.ReactNode> {
@@ -14,7 +15,8 @@ export async function buy(quantity: number): Promise<React.ReactNode> {
 
     return (
       <Notification status="success">
-        Bought <strong>{quantity}</strong> {itemOrItems}.
+        Bought <strong>{quantity}</strong> {itemOrItems}. {` `}
+        <Link pathname="/fast-page">Test</Link>
       </Notification>
     );
   } catch {
