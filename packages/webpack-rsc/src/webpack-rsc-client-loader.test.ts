@@ -64,7 +64,7 @@ describe(`webpackRscClientLoader`, () => {
     expect(output).toEqual(
       `
 import { createServerReference } from "react-server-dom-webpack/client";
-import { callServer } from "@mfng/core/client";
+import { callServer } from "@mfng/core/client/browser";
 export const foo = createServerReference("test#foo", callServer);
 export const bar = createServerReference("test#bar", callServer);
 `.trim(),

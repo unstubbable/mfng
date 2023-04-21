@@ -4,7 +4,7 @@ import {FastPage} from './fast-page.js';
 import {HomePage} from './home-page.js';
 import {SlowPage} from './slow-page.js';
 
-export function Router(): JSX.Element {
+export function Routes(): JSX.Element {
   const location = React.useContext(LocationServerContext);
   const {pathname} = new URL(location);
 

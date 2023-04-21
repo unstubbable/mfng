@@ -1,12 +1,12 @@
 'use client';
 
+import {useRouter} from '@mfng/core/client';
 import * as React from 'react';
 import {LocationServerContext} from '../shared/location-server-context.js';
-import {NavigationContext} from './navigation-context.js';
 
 export function CountriesSearch(): JSX.Element {
   const location = React.useContext(LocationServerContext);
-  const {replace} = React.useContext(NavigationContext);
+  const {replace} = useRouter();
   const [, startTransition] = React.useTransition();
 
   const [query, setQuery] = React.useState(
