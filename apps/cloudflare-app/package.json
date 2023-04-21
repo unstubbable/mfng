@@ -38,6 +38,7 @@
     "postcss-loader": "^7.0.2",
     "react-server-dom-webpack": "18.3.0-next-d962f35ca-20230418",
     "resolve-typescript-plugin": "^2.0.0",
+    "source-map-loader": "^4.0.1",
     "swc-loader": "^0.2.3",
     "tailwindcss": "^3.2.7",
     "webpack": "^5.77.0",

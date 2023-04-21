@@ -207,6 +207,7 @@ export default function createConfigs(_env, argv) {
     },
     module: {
       rules: [
+        {test: /\.js$/, loader: `source-map-loader`, enforce: `pre`},
         {test: /\.js$/, use: rscClientLoader},
         {
           test: /\.tsx?$/,

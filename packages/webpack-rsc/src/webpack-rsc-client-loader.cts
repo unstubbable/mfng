@@ -2,7 +2,7 @@ import generate from '@babel/generator';
 import {parse} from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
-import type {LoaderContext} from 'webpack';
+import type {LoaderContext, LoaderDefinitionFunction} from 'webpack';
 
 export interface WebpackRscClientLoaderOptions {
   readonly serverReferencesMap: ServerReferencesMap;
@@ -16,9 +16,12 @@ export interface ServerReferencesModuleInfo {
   readonly exportNames: string[];
 }
 
+type SourceMap = Parameters<LoaderDefinitionFunction>[1];
+
 export default function webpackRscClientLoader(
   this: LoaderContext<WebpackRscClientLoaderOptions>,
   source: string,
+  sourceMap?: SourceMap,
 ): void {
   this.cacheable(true);
 
@@ -33,6 +36,8 @@ export default function webpackRscClientLoader(
     sourceFilename: resourcePath,
   });
 
+  let hasUseServerDirective = false;
+
   traverse(ast, {
     Program(path) {
       const {node} = path;
@@ -40,6 +45,8 @@ export default function webpackRscClientLoader(
       if (!node.directives.some(isUseServerDirective)) {
         return;
       }
+
+      hasUseServerDirective = true;
 
       const moduleInfo = serverReferencesMap.get(resourcePath);
 
@@ -95,9 +102,13 @@ export default function webpackRscClientLoader(
     },
   });
 
-  const {code} = generate(ast, {sourceFileName: this.resourcePath});
+  if (!hasUseServerDirective) {
+    return this.callback(null, source, sourceMap);
+  }
 
   // TODO: Handle source maps.
+
+  const {code} = generate(ast, {sourceFileName: this.resourcePath});
 
   this.callback(null, code);
 }
