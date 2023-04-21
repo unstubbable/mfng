@@ -1,6 +1,6 @@
 {
   "name": "@mfng/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core server and client utilities for bootstrapping a React Server Components app",
   "repository": {
     "type": "git",

@@ -15,7 +15,7 @@ export function createInitialRscResponseTransformStream(
 
   return new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
-      const text = textDecoder.decode(chunk);
+      const text = textDecoder.decode(chunk, {stream: true});
 
       if (
         text.endsWith(closingBodyHtmlText) &&
@@ -58,7 +58,9 @@ export function createInitialRscResponseTransformStream(
             controller.enqueue(
               textEncoder.encode(
                 `<script>self.addInitialRscResponseChunk(${sanitize(
-                  JSON.stringify(textDecoder.decode(result.value)),
+                  JSON.stringify(
+                    textDecoder.decode(result.value, {stream: true}),
+                  ),
                 )});</script>`,
               ),
             );
