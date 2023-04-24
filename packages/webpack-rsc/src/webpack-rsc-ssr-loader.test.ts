@@ -27,7 +27,7 @@ async function callLoader(resourcePath: string): Promise<string | Buffer> {
       },
     };
 
-    void webpackRscSsrLoader.default.call(
+    void webpackRscSsrLoader.call(
       context as webpack.LoaderContext<{}>,
       input.toString(`utf-8`),
     );

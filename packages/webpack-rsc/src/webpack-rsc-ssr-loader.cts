@@ -1,10 +1,12 @@
-import generate from '@babel/generator';
-import {parse} from '@babel/parser';
-import traverse from '@babel/traverse';
-import * as t from '@babel/types';
+/* eslint-disable import/no-commonjs, @typescript-eslint/no-require-imports */
+
+import generate = require('@babel/generator');
+import parser = require('@babel/parser');
+import traverse = require('@babel/traverse');
+import t = require('@babel/types');
 import type {LoaderContext} from 'webpack';
 
-export default function webpackRscSsrLoader(
+export = function webpackRscSsrLoader(
   this: LoaderContext<{}>,
   source: string,
 ): void {
@@ -12,12 +14,12 @@ export default function webpackRscSsrLoader(
 
   const resourcePath = this.resourcePath;
 
-  const ast = parse(source, {
+  const ast = parser.parse(source, {
     sourceType: `module`,
     sourceFilename: resourcePath,
   });
 
-  traverse(ast, {
+  traverse.default(ast, {
     enter(path) {
       const {node} = path;
 
@@ -46,12 +48,12 @@ export default function webpackRscSsrLoader(
     },
   });
 
-  const {code} = generate(ast, {sourceFileName: this.resourcePath});
+  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
 
   // TODO: Handle source maps.
 
   this.callback(null, code);
-}
+};
 
 function isUseServerDirective(directive: t.Directive): boolean {
   return (

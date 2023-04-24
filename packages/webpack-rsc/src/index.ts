@@ -3,11 +3,21 @@ import type {RuleSetUseItem} from 'webpack';
 import type {WebpackRscClientLoaderOptions} from './webpack-rsc-client-loader.cjs';
 import type {WebpackRscServerLoaderOptions} from './webpack-rsc-server-loader.cjs';
 
-export * from './webpack-rsc-client-loader.cjs';
+export type {
+  ServerReferencesMap,
+  ServerReferencesModuleInfo,
+  WebpackRscClientLoaderOptions,
+} from './webpack-rsc-client-loader.cjs';
+
 export * from './webpack-rsc-client-plugin.js';
-export * from './webpack-rsc-server-loader.cjs';
+
+export type {
+  ClientReference,
+  ClientReferencesMap,
+  WebpackRscServerLoaderOptions,
+} from './webpack-rsc-server-loader.cjs';
+
 export * from './webpack-rsc-server-plugin.js';
-export * from './webpack-rsc-ssr-loader.cjs';
 
 const require = createRequire(import.meta.url);
 const serverLoader = require.resolve(`./webpack-rsc-server-loader.cjs`);

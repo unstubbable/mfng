@@ -1,24 +1,28 @@
-import {relative} from 'path';
-import generate from '@babel/generator';
-import {parse} from '@babel/parser';
-import traverse from '@babel/traverse';
-import * as t from '@babel/types';
+/* eslint-disable import/no-commonjs, @typescript-eslint/no-require-imports */
+
+import path = require('path');
+import generate = require('@babel/generator');
+import parser = require('@babel/parser');
+import traverse = require('@babel/traverse');
+import t = require('@babel/types');
 import type {LoaderContext} from 'webpack';
 
-export interface WebpackRscServerLoaderOptions {
-  readonly clientReferencesMap: ClientReferencesMap;
+namespace webpackRscServerLoader {
+  export interface WebpackRscServerLoaderOptions {
+    readonly clientReferencesMap: ClientReferencesMap;
+  }
+
+  export type ClientReferencesMap = Map<string, ClientReference[]>;
+
+  export interface ClientReference {
+    readonly id: string;
+    readonly exportName: string;
+    ssrId?: string | number;
+  }
 }
 
-export type ClientReferencesMap = Map<string, ClientReference[]>;
-
-export interface ClientReference {
-  readonly id: string;
-  readonly exportName: string;
-  ssrId?: string | number;
-}
-
-export default function webpackRscServerLoader(
-  this: LoaderContext<WebpackRscServerLoaderOptions>,
+function webpackRscServerLoader(
+  this: LoaderContext<webpackRscServerLoader.WebpackRscServerLoaderOptions>,
   source: string,
 ): void {
   this.cacheable(true);
@@ -26,30 +30,30 @@ export default function webpackRscServerLoader(
   const {clientReferencesMap} = this.getOptions();
   const resourcePath = this.resourcePath;
 
-  const ast = parse(source, {
+  const ast = parser.parse(source, {
     sourceType: `module`,
     sourceFilename: resourcePath,
   });
 
   let hasUseClientDirective = false;
-  const clientReferences: ClientReference[] = [];
+  const clientReferences: webpackRscServerLoader.ClientReference[] = [];
 
-  traverse(ast, {
-    enter(path) {
-      const {node} = path;
+  traverse.default(ast, {
+    enter(nodePath) {
+      const {node} = nodePath;
 
       if (t.isProgram(node)) {
         if (node.directives.some(isUseClientDirective)) {
           hasUseClientDirective = true;
         } else {
-          path.skip();
+          nodePath.skip();
         }
 
         return;
       }
 
       if (t.isDirective(node) && isUseClientDirective(node)) {
-        path.skip();
+        nodePath.skip();
 
         return;
       }
@@ -57,13 +61,16 @@ export default function webpackRscServerLoader(
       const exportName = getExportName(node);
 
       if (exportName) {
-        const id = `${relative(process.cwd(), resourcePath)}#${exportName}`;
+        const id = `${path.relative(
+          process.cwd(),
+          resourcePath,
+        )}#${exportName}`;
 
         clientReferences.push({id, exportName});
-        path.replaceWith(createExportedClientReference(id, exportName));
-        path.skip();
+        nodePath.replaceWith(createExportedClientReference(id, exportName));
+        nodePath.skip();
       } else {
-        path.remove();
+        nodePath.remove();
       }
     },
   });
@@ -76,7 +83,7 @@ export default function webpackRscServerLoader(
     clientReferencesMap.set(resourcePath, clientReferences);
   }
 
-  const {code} = generate(ast, {sourceFileName: this.resourcePath});
+  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
 
   // TODO: Handle source maps.
 
@@ -128,3 +135,5 @@ function createExportedClientReference(
     ]),
   );
 }
+
+export = webpackRscServerLoader;

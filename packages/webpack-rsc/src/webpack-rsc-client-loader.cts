@@ -1,25 +1,29 @@
-import generate from '@babel/generator';
-import {parse} from '@babel/parser';
-import traverse from '@babel/traverse';
-import * as t from '@babel/types';
+/* eslint-disable import/no-commonjs, @typescript-eslint/no-require-imports */
+
+import generate = require('@babel/generator');
+import parser = require('@babel/parser');
+import traverse = require('@babel/traverse');
+import t = require('@babel/types');
 import type {LoaderContext, LoaderDefinitionFunction} from 'webpack';
 
-export interface WebpackRscClientLoaderOptions {
-  readonly serverReferencesMap: ServerReferencesMap;
-  readonly callServerImportSource?: string;
-}
+namespace webpackRscClientLoader {
+  export interface WebpackRscClientLoaderOptions {
+    readonly serverReferencesMap: ServerReferencesMap;
+    readonly callServerImportSource?: string;
+  }
 
-export type ServerReferencesMap = Map<string, ServerReferencesModuleInfo>;
+  export type ServerReferencesMap = Map<string, ServerReferencesModuleInfo>;
 
-export interface ServerReferencesModuleInfo {
-  readonly moduleId: string | number;
-  readonly exportNames: string[];
+  export interface ServerReferencesModuleInfo {
+    readonly moduleId: string | number;
+    readonly exportNames: string[];
+  }
 }
 
 type SourceMap = Parameters<LoaderDefinitionFunction>[1];
 
-export default function webpackRscClientLoader(
-  this: LoaderContext<WebpackRscClientLoaderOptions>,
+function webpackRscClientLoader(
+  this: LoaderContext<webpackRscClientLoader.WebpackRscClientLoaderOptions>,
   source: string,
   sourceMap?: SourceMap,
 ): void {
@@ -33,14 +37,14 @@ export default function webpackRscClientLoader(
   const loaderContext = this;
   const resourcePath = this.resourcePath;
 
-  const ast = parse(source, {
+  const ast = parser.parse(source, {
     sourceType: `module`,
     sourceFilename: resourcePath,
   });
 
   let hasUseServerDirective = false;
 
-  traverse(ast, {
+  traverse.default(ast, {
     Program(path) {
       const {node} = path;
 
@@ -110,7 +114,7 @@ export default function webpackRscClientLoader(
 
   // TODO: Handle source maps.
 
-  const {code} = generate(ast, {sourceFileName: this.resourcePath});
+  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
 
   this.callback(null, code);
 }
@@ -121,3 +125,5 @@ function isUseServerDirective(directive: t.Directive): boolean {
     directive.value.value === `use server`
   );
 }
+
+export = webpackRscClientLoader;

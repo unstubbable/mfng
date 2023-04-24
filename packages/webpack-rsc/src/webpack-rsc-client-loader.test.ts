@@ -41,7 +41,7 @@ async function callLoader(
       },
     };
 
-    void webpackRscClientLoader.default.call(
+    void webpackRscClientLoader.call(
       context as webpack.LoaderContext<WebpackRscClientLoaderOptions>,
       input.toString(`utf-8`),
     );
