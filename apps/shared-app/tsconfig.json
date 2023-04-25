@@ -3,7 +3,9 @@
   "compilerOptions": {
     "checkJs": true,
     "outDir": "lib",
-    "types": ["node", "react/next"]
+    "types": ["node", "react/next"],
+    "sourceMap": true,
+    "inlineSources": true
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
   "references": [{"path": "../../packages/core"}]
