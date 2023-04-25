@@ -35,8 +35,8 @@
     "@types/memory-fs": "^0.3.3",
     "memory-fs": "^0.5.0",
     "prettier": "^2.8.7",
-    "react": "18.3.0-next-d962f35ca-20230418",
-    "react-server-dom-webpack": "18.3.0-next-d962f35ca-20230418",
+    "react": "0.0.0-experimental-c8369527e-20230420",
+    "react-server-dom-webpack": "0.0.0-experimental-c8369527e-20230420",
     "webpack": "^5.75.0"
   },
   "peerDependencies": {

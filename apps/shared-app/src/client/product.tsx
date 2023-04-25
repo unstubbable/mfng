@@ -1,5 +1,6 @@
 'use client';
 
+import {clsx} from 'clsx';
 import * as React from 'react';
 import type {buy} from '../server/buy.js';
 import {Button} from './button.js';
@@ -10,39 +11,44 @@ export interface ProductProps {
 }
 
 export function Product({buy}: ProductProps): JSX.Element {
-  const [quantity, setQuantity] = React.useState(1);
   const [isPending, startTransition] = React.useTransition();
 
-  const [result, setResult] = useEphemeralState<Promise<React.ReactNode>>(
+  const [result, setResult] = useEphemeralState<ReturnType<typeof buy>>(
     undefined,
-    3000,
+    5000,
   );
 
-  const handleClick = () => {
-    startTransition(() => setResult(buy(quantity)));
+  const [message, fieldErrors] = result ? React.use(result) : [];
+
+  const formAction = (formData: FormData) => {
+    startTransition(() => setResult(buy(formData)));
   };
 
   return (
-    <div>
+    <form action={formAction}>
       <p className="my-2">
-        This is a client component that triggers a server action, which in turn
-        responds with serialized React element that's rendered below the button.
+        This is a client component that renders a form with a form action. On
+        submit, the form action calls a server action with the current form
+        data, which in turn responds with a serialized React element that's
+        rendered below the button.
       </p>
       <input
         type="number"
-        value={quantity}
+        name="quantity"
+        defaultValue={1}
         step={1}
         min={1}
         max={99}
-        onChange={({target}) => setQuantity(parseInt(target.value, 10))}
-        className="bg-zinc-100 p-1 outline-cyan-500"
+        className={clsx(
+          `p-1`,
+          fieldErrors?.quantity
+            ? [`bg-red-100`, `outline-red-700`]
+            : [`bg-zinc-100`, `outline-cyan-500`],
+        )}
       />
       {` `}
-      <Button onClick={handleClick} disabled={isPending}>
-        Buy now
-      </Button>
-      {/* Promises can now be rendered directly. */}
-      {result as React.ReactNode}
-    </div>
+      <Button disabled={isPending}>Buy now</Button>
+      {message}
+    </form>
   );
 }
