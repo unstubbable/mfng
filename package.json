@@ -45,10 +45,10 @@
     "jest-config": "^29.5.0",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.4",
-    "react-dom": "18.3.0-next-d962f35ca-20230418",
+    "react-dom": "0.0.0-experimental-c8369527e-20230420",
     "rimraf": "^4.4.1",
     "turbo": "^1.8.8",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.0-beta"
   },
   "wallaby": {
     "env": {

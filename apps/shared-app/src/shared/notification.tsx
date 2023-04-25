@@ -10,13 +10,13 @@ export function Notification({
   status,
 }: NotificationProps): JSX.Element {
   return (
-    <p
+    <div
       className={clsx(
         `my-2`,
         status === `success` ? `text-cyan-600` : `text-red-600`,
       )}
     >
       {children}
-    </p>
+    </div>
   );
 }

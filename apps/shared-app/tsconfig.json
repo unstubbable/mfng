@@ -3,7 +3,7 @@
   "compilerOptions": {
     "checkJs": true,
     "outDir": "lib",
-    "types": ["node", "react/next"],
+    "types": ["node", "react/experimental"],
     "sourceMap": true,
     "inlineSources": true
   },

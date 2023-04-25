@@ -2,7 +2,10 @@ import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 
 export interface CreateRscActionStreamOptions {
-  readonly body: string;
+  /**
+   * Form data file entry values are not supported yet.
+   */
+  readonly body: string | FormData;
   readonly serverReferenceId: string;
   readonly reactClientManifest: ClientManifest;
   readonly reactServerManifest: ServerManifest;

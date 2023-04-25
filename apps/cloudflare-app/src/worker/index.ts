@@ -59,6 +59,12 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     return new Response(null, {status: 400});
   }
 
+  const body = await (request.headers
+    .get(`content-type`)
+    ?.startsWith(`multipart/form-data`)
+    ? request.formData()
+    : request.text());
+
   const params: HandlerParams = {request, env, ctx};
 
   const [reactClientManifest, reactServerManifest] = await Promise.all([
@@ -67,7 +73,7 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   ]);
 
   const rscActionStream = await createRscActionStream({
-    body: await request.text(),
+    body,
     serverReferenceId,
     reactClientManifest,
     reactServerManifest,
