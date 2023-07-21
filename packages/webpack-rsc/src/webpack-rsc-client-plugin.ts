@@ -73,7 +73,7 @@ export class WebpackRscClientPlugin {
         ) => {
           compilation.assetsInfo;
           parser.hooks.program.tap(WebpackRscClientPlugin.name, () => {
-            if (parser.state.module.resource === reactServerDomClientPath) {
+            if (parser.state.module.resource.includes('react-server-dom-webpack')) {
               [...this.clientReferencesMap.keys()].forEach(
                 (resourcePath, index) => {
                   const chunkName = `client${index}`;
