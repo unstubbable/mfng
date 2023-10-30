@@ -2,15 +2,15 @@
 
 import * as React from 'react';
 
-export interface UrlPathObject {
+export interface RouterLocation {
   readonly pathname: string;
   readonly search: string;
 }
 
 export interface RouterContextValue {
   readonly isPending: boolean;
-  readonly push: (to: Partial<UrlPathObject>) => void;
-  readonly replace: (to: Partial<UrlPathObject>) => void;
+  readonly push: (to: Partial<RouterLocation>) => void;
+  readonly replace: (to: Partial<RouterLocation>) => void;
 }
 
 export const RouterContext = React.createContext<RouterContextValue>({
