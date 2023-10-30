@@ -8,10 +8,8 @@ import {Suspended} from './suspended.js';
 export function HomePage(): JSX.Element {
   return (
     <Main>
-      {/* @ts-expect-error (async component) */}
       <Hello />
       <React.Suspense fallback={<p className="my-3">Loading...</p>}>
-        {/* @ts-expect-error (async component) */}
         <Suspended />
       </React.Suspense>
       <React.Suspense>

@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import {AsyncLocalStorage} from 'node:async_hooks';
 import path from 'path';
 import url from 'url';
 import chokidar from 'chokidar';
@@ -13,7 +14,12 @@ const outfile = path.join(currentDirname, `../dist/dev-server.js`);
 const vercelOutputDirname = path.join(currentDirname, `../.vercel/output`);
 const staticDirname = path.join(vercelOutputDirname, `static`);
 const functionDirname = path.join(vercelOutputDirname, `functions/index.func`);
-const runtime = new EdgeRuntime();
+
+const runtime = new EdgeRuntime({
+  // Define AsyncLocalStorage as a global. Works in conjunction with the
+  // AsyncLocalStorage plugin below.
+  extend: (context) => Object.assign(context, {AsyncLocalStorage}),
+});
 
 const buildContext = await esbuild.context({
   bundle: true,
@@ -22,6 +28,16 @@ const buildContext = await esbuild.context({
   outfile,
   format: `esm`,
   logLevel: `info`,
+  plugins: [
+    {
+      name: `AsyncLocalStorage plugin`,
+      setup({onResolve}) {
+        onResolve({filter: /node:async_hooks/}, () => ({
+          path: path.join(currentDirname, `global-async-local-storage.js`),
+        }));
+      },
+    },
+  ],
 });
 
 const rebuild = debounce(async () => {
