@@ -11,9 +11,19 @@ declare module 'react-server-dom-webpack' {
   }
 
   export interface SSRManifest {
+    moduleMap: SSRModuleMap;
+    moduleLoading: ModuleLoading | null;
+  }
+
+  export interface SSRModuleMap {
     [clientId: string]: {
       [clientExportName: string]: ClientReferenceMetadata;
     };
+  }
+
+  export interface ModuleLoading {
+    prefix: string;
+    crossOrigin?: 'use-credentials' | '';
   }
 
   export interface ClientReferenceMetadata {

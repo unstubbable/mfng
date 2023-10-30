@@ -169,15 +169,15 @@ Object.defineProperties(serverFunction, {
 
       expect(pretty(outputFile)).toMatch(
         `
-    ${expectedModuleId}: (e, r, t) => {
+    ${expectedModuleId}: (e, t, r) => {
       async function o() {
-        return Promise.resolve("server");
+        return Promise.resolve(\"server\");
       }
-      t.r(r),
-        t.d(r, { serverFunction: () => o }),
+      r.r(t),
+        r.d(t, { serverFunction: () => o }),
         Object.defineProperties(o, {
-          $$typeof: { value: Symbol.for("react.server.reference") },
-          $$id: { value: "${expectedModuleId}#serverFunction" },
+          $$typeof: { value: Symbol.for(\"react.server.reference\") },
+          $$id: { value: \"340#serverFunction\" },
         });
     },`,
       );

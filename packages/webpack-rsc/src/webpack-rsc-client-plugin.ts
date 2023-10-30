@@ -20,7 +20,7 @@ export class WebpackRscClientPlugin {
   private clientChunkNameMap = new Map<string, string>();
   private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
-  private ssrManifest: SSRManifest = {};
+  private ssrManifest: SSRManifest = {moduleMap: {}, moduleLoading: null};
   private ssrManifestFilename: string;
 
   constructor(options: WebpackRscClientPluginOptions) {
@@ -150,10 +150,19 @@ export class WebpackRscClientPlugin {
                     const clientExportName = exportName;
                     const ssrExportName = exportName;
 
+                    // chunks is a double indexed array of chunkId / chunkFilename pairs
+                    const chunks: (string | number)[] = [];
+
+                    if (chunk.id) {
+                      for (const file of chunk.files) {
+                        chunks.push(chunk.id, file);
+                      }
+                    }
+
                     this.clientManifest[id] = {
                       id: moduleId,
                       name: clientExportName,
-                      chunks: chunk.ids ?? [],
+                      chunks,
                     };
 
                     if (ssrId) {
@@ -165,7 +174,7 @@ export class WebpackRscClientPlugin {
                     }
                   }
 
-                  this.ssrManifest[moduleId] = ssrModuleMetaData;
+                  this.ssrManifest.moduleMap[moduleId] = ssrModuleMetaData;
                 }
               }
             }
@@ -177,6 +186,21 @@ export class WebpackRscClientPlugin {
             this.clientManifestFilename,
             new RawSource(JSON.stringify(this.clientManifest, null, 2), false),
           );
+
+          const {crossOriginLoading, publicPath = ``} =
+            compilation.outputOptions;
+
+          this.ssrManifest.moduleLoading = {
+            // https://github.com/webpack/webpack/blob/87660921808566ef3b8796f8df61bd79fc026108/lib/runtime/PublicPathRuntimeModule.js#L30-L32
+            prefix: compilation.getPath(publicPath, {
+              hash: compilation.hash ?? `XXXX`,
+            }),
+            crossOrigin: crossOriginLoading
+              ? crossOriginLoading === `use-credentials`
+                ? crossOriginLoading
+                : ``
+              : undefined,
+          };
 
           compilation.emitAsset(
             this.ssrManifestFilename,

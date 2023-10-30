@@ -3,7 +3,7 @@ declare module 'react-server-dom-webpack/client.edge' {
   import type {SSRManifest} from 'react-server-dom-webpack';
 
   export interface CreateFromReadableStreamOptions {
-    moduleMap?: SSRManifest;
+    ssrManifest?: SSRManifest;
   }
 
   export function createFromReadableStream<T>(

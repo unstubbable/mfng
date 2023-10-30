@@ -36,11 +36,11 @@
   },
   "devDependencies": {
     "@types/htmlescape": "^1.1.1",
-    "@types/react": "^18.0.38",
-    "@types/react-dom": "^18.0.11",
-    "react": "0.0.0-experimental-c8369527e-20230420",
-    "react-dom": "0.0.0-experimental-c8369527e-20230420",
-    "react-server-dom-webpack": "0.0.0-experimental-c8369527e-20230420"
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "react": "0.0.0-experimental-8039e6d0b-20231026",
+    "react-dom": "0.0.0-experimental-8039e6d0b-20231026",
+    "react-server-dom-webpack": "0.0.0-experimental-8039e6d0b-20231026"
   },
   "peerDependencies": {
     "react-dom": "*",

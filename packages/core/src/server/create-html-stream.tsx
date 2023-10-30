@@ -1,5 +1,8 @@
+// eslint-disable-next-line import/order
+import './node-compat-environment.js';
+
 import * as React from 'react';
-import ReactDOMServer from 'react-dom/server.browser';
+import ReactDOMServer from 'react-dom/server.edge';
 import type {SSRManifest} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
 import {createBufferedTransformStream} from './create-buffered-transform-stream.js';
@@ -19,11 +22,18 @@ export async function createHtmlStream(
   const {reactSsrManifest, bootstrapScripts} = options;
   const [rscStream1, rscStream2] = rscStream.tee();
 
-  const ServerRoot = (): JSX.Element =>
-    // @ts-expect-error should be fixed with TS 5.1
-    ReactServerDOMClient.createFromReadableStream(rscStream1, {
-      moduleMap: reactSsrManifest,
-    });
+  let root: React.Thenable<JSX.Element>;
+
+  const ServerRoot = (): JSX.Element => {
+    // This needs to be created during render, otherwise there will be no
+    // current request defined that the chunk preloads can be attached to.
+    root ??= ReactServerDOMClient.createFromReadableStream<JSX.Element>(
+      rscStream1,
+      {ssrManifest: reactSsrManifest},
+    );
+
+    return React.use(root);
+  };
 
   const htmlStream = await ReactDOMServer.renderToReadableStream(
     <ServerRoot />,

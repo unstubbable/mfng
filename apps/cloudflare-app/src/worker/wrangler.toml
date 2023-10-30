@@ -1,6 +1,7 @@
 name = "mfng"
 main = "../../dist/worker.js"
 compatibility_date = "2023-02-21"
+compatibility_flags = ["nodejs_compat"]
 
 [dev]
 port = 3000

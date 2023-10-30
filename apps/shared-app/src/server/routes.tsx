@@ -10,7 +10,6 @@ export function Routes(): JSX.Element {
 
   switch (pathname) {
     case `/slow-page`:
-      // @ts-expect-error (async component)
       return <SlowPage />;
     case `/fast-page`:
       return <FastPage />;

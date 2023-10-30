@@ -143,7 +143,7 @@ export default function createConfigs(_env, argv) {
     ],
     experiments: {outputModule: true, layers: true},
     performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
-    externals: [`__STATIC_CONTENT_MANIFEST`],
+    externals: [`__STATIC_CONTENT_MANIFEST`, `node:async_hooks`],
     devtool: `source-map`,
     mode,
     stats,
