@@ -1,7 +1,8 @@
 import * as React from 'react';
+import type {RouterLocation} from '../use-router-location.js';
 import {createFetchElementStream} from './create-fetch-element-stream.js';
-import type {RouterLocation} from './router-context.js';
-import {RouterContext} from './router-context.js';
+import {RouterLocationContext} from './use-router-location.js';
+import {RouterContext} from './use-router.js';
 
 const fetchElementStream = createFetchElementStream(
   createUrlPath(document.location),
@@ -82,7 +83,9 @@ export function Router(): JSX.Element {
 
   return (
     <RouterContext.Provider value={{isPending, push, replace}}>
-      {React.use(elementStreamPromise)}
+      <RouterLocationContext.Provider value={routerState.location}>
+        {React.use(elementStreamPromise)}
+      </RouterLocationContext.Provider>
     </RouterContext.Provider>
   );
 }

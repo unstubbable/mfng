@@ -1,6 +1,6 @@
+import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
 import {Link} from '../client/link.js';
-import {LocationServerContext} from './location-server-context.js';
 
 export type NavigationItemProps = React.PropsWithChildren<{
   readonly pathname: string;
@@ -10,9 +10,9 @@ export function NavigationItem({
   children,
   pathname,
 }: NavigationItemProps): JSX.Element {
-  const location = React.useContext(LocationServerContext);
+  const {pathname: currentPathname} = useRouterLocation();
 
-  if (pathname === new URL(location).pathname) {
+  if (pathname === currentPathname) {
     return (
       <span className="inline-block rounded-md bg-zinc-800 py-1 px-3 text-zinc-50">
         {children}

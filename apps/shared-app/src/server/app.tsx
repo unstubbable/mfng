@@ -1,6 +1,6 @@
+import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
 import {NavigationContainer} from '../client/navigation-container.js';
-import {LocationServerContext} from '../shared/location-server-context.js';
 import {Navigation} from '../shared/navigation.js';
 import {Routes} from './routes.js';
 
@@ -9,8 +9,7 @@ export interface AppProps {
 }
 
 export function App({getTitle}: AppProps): JSX.Element {
-  const location = React.useContext(LocationServerContext);
-  const {pathname} = new URL(location);
+  const {pathname} = useRouterLocation();
 
   return (
     <html>
@@ -21,14 +20,12 @@ export function App({getTitle}: AppProps): JSX.Element {
         <link rel="icon" href="/client/favicon.ico" type="image/x-icon" />
       </head>
       <body>
-        <LocationServerContext.Provider value={location}>
-          <React.Suspense>
-            <Navigation />
-            <NavigationContainer>
-              <Routes />
-            </NavigationContainer>
-          </React.Suspense>
-        </LocationServerContext.Provider>
+        <React.Suspense>
+          <Navigation />
+          <NavigationContainer>
+            <Routes />
+          </NavigationContainer>
+        </React.Suspense>
       </body>
     </html>
   );

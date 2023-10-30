@@ -122,19 +122,24 @@ export default function createConfigs(_env, argv) {
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [`workerd`, `...`],
+      conditionNames: [`workerd`, `node`, `...`],
     },
     module: {
       rules: [
         {
           resource: (value) =>
             /core\/lib\/server\/rsc\.js$/.test(value) ||
-            /create-rsc-app-options\.tsx$/.test(value),
+            /create-rsc-app\.tsx$/.test(value),
           layer: webpackRscLayerName,
         },
         {
+          // AsyncLocalStorage module instances must be in a shared layer.
+          layer: `shared`,
+          test: /(router-location-async-local-storage|core\/lib\/server\/use-router-location\.js)/,
+        },
+        {
           issuerLayer: webpackRscLayerName,
-          resolve: {conditionNames: [`react-server`, `...`]},
+          resolve: {conditionNames: [`react-server`, `node`, `...`]},
         },
         {
           oneOf: [

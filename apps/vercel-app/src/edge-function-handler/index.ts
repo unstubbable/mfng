@@ -1,6 +1,7 @@
+import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
-import {createRscAppOptions} from './create-rsc-app-options.js';
+import {createRscApp} from './create-rsc-app.js';
 import {
   cssManifest,
   jsManifest,
@@ -29,32 +30,37 @@ export default async function handler(request: Request): Promise<Response> {
 
 const oneDay = 60 * 60 * 24;
 
-async function handleGet(request: Request): Promise<Response> {
-  const rscAppStream = createRscAppStream({
-    ...createRscAppOptions({requestUrl: request.url}),
-    reactClientManifest,
-    mainCssHref: cssManifest[`main.css`]!,
-  });
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+function handleGet(request: Request): Promise<Response> {
+  const {pathname, search} = new URL(request.url);
 
-  if (request.headers.get(`accept`) === `text/x-component`) {
-    return new Response(rscAppStream, {
+  return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
+    const rscAppStream = createRscAppStream({
+      app: createRscApp(),
+      reactClientManifest,
+      mainCssHref: cssManifest[`main.css`]!,
+    });
+
+    if (request.headers.get(`accept`) === `text/x-component`) {
+      return new Response(rscAppStream, {
+        headers: {
+          'Content-Type': `text/x-component; charset=utf-8`,
+          'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
+        },
+      });
+    }
+
+    const htmlStream = await createHtmlStream(rscAppStream, {
+      reactSsrManifest,
+      bootstrapScripts: [jsManifest[`main.js`]!],
+    });
+
+    return new Response(htmlStream, {
       headers: {
-        'Content-Type': `text/x-component; charset=utf-8`,
+        'Content-Type': `text/html; charset=utf-8`,
         'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
       },
     });
-  }
-
-  const htmlStream = await createHtmlStream(rscAppStream, {
-    reactSsrManifest,
-    bootstrapScripts: [jsManifest[`main.js`]!],
-  });
-
-  return new Response(htmlStream, {
-    headers: {
-      'Content-Type': `text/html; charset=utf-8`,
-      'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
-    },
   });
 }
 

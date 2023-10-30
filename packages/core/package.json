@@ -26,6 +26,15 @@
     "./server/ssr": {
       "types": "./lib/server/ssr.d.ts",
       "default": "./lib/server/ssr.js"
+    },
+    "./use-router-location": {
+      "types": "./lib/use-router-location.d.ts",
+      "node": "./lib/server/use-router-location.js",
+      "default": "./lib/client/use-router-location.js"
+    },
+    "./router-location-async-local-storage": {
+      "types": "./lib/server/router-location-async-local-storage.d.ts",
+      "default": "./lib/server/router-location-async-local-storage.js"
     }
   },
   "files": [
