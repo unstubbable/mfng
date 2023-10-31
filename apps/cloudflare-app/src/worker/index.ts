@@ -1,8 +1,9 @@
+import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
 import type {ServerManifest} from '@mfng/core/server/rsc';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
 import type {ClientManifest, SSRManifest} from 'react-server-dom-webpack';
-import {createRscAppOptions} from './create-rsc-app-options.js';
+import {createRscApp} from './create-rsc-app.js';
 import type {EnvWithStaticContent, HandlerParams} from './get-json-from-kv.js';
 import {getJsonFromKv} from './get-json-from-kv.js';
 
@@ -24,25 +25,29 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
       getJsonFromKv<Record<string, string>>(`client/css-manifest.json`, params),
     ]);
 
-  const rscAppStream = createRscAppStream({
-    ...createRscAppOptions({requestUrl: request.url}),
-    reactClientManifest,
-    mainCssHref: cssManifest[`main.css`]!,
-  });
+  const {pathname, search} = new URL(request.url);
 
-  if (request.headers.get(`accept`) === `text/x-component`) {
-    return new Response(rscAppStream, {
-      headers: {'Content-Type': `text/x-component; charset=utf-8`},
+  return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
+    const rscAppStream = createRscAppStream({
+      app: createRscApp(),
+      reactClientManifest,
+      mainCssHref: cssManifest[`main.css`]!,
     });
-  }
 
-  const htmlStream = await createHtmlStream(rscAppStream, {
-    reactSsrManifest,
-    bootstrapScripts: [jsManifest[`main.js`]!],
-  });
+    if (request.headers.get(`accept`) === `text/x-component`) {
+      return new Response(rscAppStream, {
+        headers: {'Content-Type': `text/x-component; charset=utf-8`},
+      });
+    }
 
-  return new Response(htmlStream, {
-    headers: {'Content-Type': `text/html; charset=utf-8`},
+    const htmlStream = await createHtmlStream(rscAppStream, {
+      reactSsrManifest,
+      bootstrapScripts: [jsManifest[`main.js`]!],
+    });
+
+    return new Response(htmlStream, {
+      headers: {'Content-Type': `text/html; charset=utf-8`},
+    });
   });
 };
 

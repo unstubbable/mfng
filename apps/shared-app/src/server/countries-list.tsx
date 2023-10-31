@@ -1,10 +1,10 @@
+import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
-import {LocationServerContext} from '../shared/location-server-context.js';
 import {countriesFuse} from './countries-fuse.js';
 
 export function CountriesList(): JSX.Element {
-  const location = React.useContext(LocationServerContext);
-  const query = new URL(location).searchParams.get(`q`);
+  const {search} = useRouterLocation();
+  const query = new URLSearchParams(search).get(`q`);
 
   if (!query) {
     return (

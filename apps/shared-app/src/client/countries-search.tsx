@@ -1,16 +1,16 @@
 'use client';
 
 import {useRouter} from '@mfng/core/client';
+import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
-import {LocationServerContext} from '../shared/location-server-context.js';
 
 export function CountriesSearch(): JSX.Element {
-  const location = React.useContext(LocationServerContext);
+  const {search} = useRouterLocation();
   const {replace} = useRouter();
   const [, startTransition] = React.useTransition();
 
   const [query, setQuery] = React.useState(
-    () => new URL(location).searchParams.get(`q`) || ``,
+    () => new URLSearchParams(search).get(`q`) || ``,
   );
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
