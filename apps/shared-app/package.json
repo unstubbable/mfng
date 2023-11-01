@@ -19,10 +19,13 @@
   ],
   "dependencies": {
     "@mfng/core": "*",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
     "clsx": "^1.2.1",
     "countries-list": "^2.6.1",
     "fuse.js": "^6.6.2",
     "react": "0.0.0-experimental-8039e6d0b-20231026",
+    "react-dom": "0.0.0-experimental-8039e6d0b-20231026",
     "react-markdown": "^8.0.5",
     "server-only": "^0.0.1",
     "zod": "^3.21.4"
