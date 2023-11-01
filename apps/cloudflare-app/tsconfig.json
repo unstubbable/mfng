@@ -3,7 +3,12 @@
   "compilerOptions": {
     "checkJs": true,
     "outDir": "lib",
-    "types": ["@cloudflare/workers-types", "jest", "react/experimental"]
+    "types": [
+      "@cloudflare/workers-types",
+      "jest",
+      "react/experimental",
+      "react-dom/experimental"
+    ]
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
   "exclude": ["dist"],

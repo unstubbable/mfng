@@ -1,12 +1,27 @@
 'use server';
 
-import * as React from 'react';
 import 'server-only';
 import {z} from 'zod';
-import {Notification} from '../shared/notification.js';
 import {wait} from './wait.js';
 
-type BuyFieldErrors = z.inferFlattenedErrors<typeof BuyFormData>['fieldErrors'];
+export type BuyResult = BuySuccessResult | BuyErrorResult;
+
+export interface BuySuccessResult {
+  readonly status: 'success';
+  readonly quantity: number;
+  readonly totalQuantityInSession: number;
+}
+
+export interface BuyErrorResult {
+  readonly status: 'error';
+  readonly message: string;
+  readonly fieldErrors?: BuyFieldErrors;
+  readonly totalQuantityInSession: number;
+}
+
+export type BuyFieldErrors = z.inferFlattenedErrors<
+  typeof BuyFormData
+>['fieldErrors'];
 
 const FormDataFields = z.instanceof(FormData).transform((formData) => {
   const fields: Record<string, string> = {};
@@ -37,14 +52,20 @@ async function fetchAvailableProductCount(): Promise<number> {
 }
 
 export async function buy(
+  prevResult: BuyResult | undefined,
   formData: FormData,
-): Promise<[React.ReactNode] | [React.ReactNode, BuyFieldErrors]> {
+): Promise<BuyResult> {
   const parsedFormData = FormDataFields.safeParse(formData);
+  const totalQuantityInSession = prevResult?.totalQuantityInSession ?? 0;
 
   if (!parsedFormData.success) {
-    return [
-      <Notification status="error">An unexpected error occured.</Notification>,
-    ];
+    console.error(parsedFormData.error);
+
+    return {
+      status: `error`,
+      message: `An unexpected error occured.`,
+      totalQuantityInSession,
+    };
   }
 
   const result = await BuyFormData.safeParseAsync(parsedFormData.data);
@@ -52,19 +73,21 @@ export async function buy(
   if (!result.success) {
     const {fieldErrors} = result.error.formErrors;
 
-    return [
-      <Notification status="error">
-        {Object.values(fieldErrors).flat().join(` `)}
-      </Notification>,
+    return {
+      status: `error`,
+      message: Object.values(fieldErrors).flat().join(` `),
       fieldErrors,
-    ];
+      totalQuantityInSession,
+    };
   }
 
   const {quantity} = result.data;
 
-  return [
-    <Notification status="success">
-      Bought <strong>{quantity}</strong> {quantity === 1 ? `item` : `items`}.
-    </Notification>,
-  ];
+  // Buy quantity number of items ...
+
+  return {
+    status: `success`,
+    quantity,
+    totalQuantityInSession: totalQuantityInSession + quantity,
+  };
 }

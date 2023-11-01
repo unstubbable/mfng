@@ -4,7 +4,11 @@
     "checkJs": true,
     "outDir": "lib",
     "resolveJsonModule": true,
-    "types": ["react/experimental", "@edge-runtime/types"]
+    "types": [
+      "react/experimental",
+      "react-dom/experimental",
+      "@edge-runtime/types"
+    ]
   },
   "include": ["src/**/*", "../../types", "*.js", "*.cjs", "dev-server/**/*"],
   "exclude": ["dist", "dev-server/fetch-event-listener.js"],
