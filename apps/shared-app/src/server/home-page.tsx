@@ -12,7 +12,7 @@ export function HomePage(): JSX.Element {
         <Suspended />
       </React.Suspense>
       <React.Suspense>
-        <Product />
+        <Product productId="some-product-id" />
       </React.Suspense>
     </Main>
   );

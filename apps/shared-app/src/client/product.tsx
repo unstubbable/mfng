@@ -7,8 +7,13 @@ import {buy} from '../server/buy.js';
 import {Notification} from '../shared/notification.js';
 import {Button} from './button.js';
 
-export function Product(): JSX.Element {
-  const [result, formAction] = ReactDOM.useFormState(buy, undefined);
+export interface ProductProps {
+  readonly productId: string;
+}
+
+export function Product({productId}: ProductProps): JSX.Element {
+  const buyProduct = buy.bind(null, productId);
+  const [result, formAction] = ReactDOM.useFormState(buyProduct, undefined);
 
   return (
     <form action={formAction}>

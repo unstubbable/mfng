@@ -52,6 +52,7 @@ async function fetchAvailableProductCount(): Promise<number> {
 }
 
 export async function buy(
+  productId: string,
   prevResult: BuyResult | undefined,
   formData: FormData,
 ): Promise<BuyResult> {
@@ -84,6 +85,11 @@ export async function buy(
   const {quantity} = result.data;
 
   // Buy quantity number of items ...
+  console.log(
+    `Buying ${quantity} ${
+      quantity === 1 ? `item` : `items`
+    } of product ${productId}...`,
+  );
 
   return {
     status: `success`,
