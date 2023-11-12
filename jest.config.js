@@ -19,6 +19,8 @@ export default {
   moduleFileExtensions: [...defaults.moduleFileExtensions, `cts`],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.c?js$': `$1`,
+    '@mfng/core/client': `<rootDir>/packages/core/src/client/index.ts`,
+    '@mfng/core/(.*)': `<rootDir>/packages/core/src/$1.ts`,
   },
   restoreMocks: true,
   testMatch: [`**/src/**/*.test.{ts,tsx}`],

@@ -6,13 +6,14 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "scripts": {
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development",
+    "build": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production",
+    "build:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development",
+    "build:node18": "NODE_OPTIONS='--loader=tsx --conditions=@mfng:internal' webpack --mode production",
     "deploy": "vercel deploy --prebuilt",
     "dev": "npm run start",
     "start": "node dev-server/run.js",
-    "watch": "webpack --mode production --watch",
-    "watch:dev": "webpack --mode development --watch"
+    "watch": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production --watch",
+    "watch:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development --watch"
   },
   "dependencies": {
     "@mfng/core": "*",
@@ -44,6 +45,7 @@
     "source-map-loader": "^4.0.1",
     "swc-loader": "^0.2.3",
     "tailwindcss": "^3.2.7",
+    "tsx": "^4.1.0",
     "vercel": "^28.18.3",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1",
