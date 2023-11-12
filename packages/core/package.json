@@ -13,22 +13,18 @@
   "exports": {
     "./client": {
       "@mfng:internal": "./src/client/index.ts",
-      "types": "./lib/client/index.d.ts",
       "default": "./lib/client/index.js"
     },
     "./client/browser": {
       "@mfng:internal": "./src/client/browser.ts",
-      "types": "./lib/client/browser.d.ts",
       "default": "./lib/client/browser.js"
     },
     "./server/rsc": {
       "@mfng:internal": "./src/server/rsc.ts",
-      "types": "./lib/server/rsc.d.ts",
       "default": "./lib/server/rsc.js"
     },
     "./server/ssr": {
       "@mfng:internal": "./src/server/ssr.ts",
-      "types": "./lib/server/ssr.d.ts",
       "default": "./lib/server/ssr.js"
     },
     "./use-router-location": {
@@ -40,7 +36,6 @@
     },
     "./router-location-async-local-storage": {
       "@mfng:internal": "./src/server/router-location-async-local-storage.ts",
-      "types": "./lib/server/router-location-async-local-storage.d.ts",
       "default": "./lib/server/router-location-async-local-storage.js"
     }
   },
