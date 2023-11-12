@@ -8,13 +8,11 @@
   "exports": {
     "./app.js": {
       "@mfng:internal": "./src/server/app.tsx",
-      "types": "./lib/src/server/app.d.ts",
       "default": "./lib/src/server/app.js"
     },
     "./package.json": "./package.json",
     "./tailwind.config.cjs": {
       "@mfng:internal": "./tailwind.config.cjs",
-      "types": "./lib/tailwind.config.d.cts",
       "default": "./lib/tailwind.config.cjs"
     }
   },
