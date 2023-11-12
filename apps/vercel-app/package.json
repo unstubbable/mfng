@@ -8,6 +8,7 @@
   "scripts": {
     "build": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production",
     "build:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development",
+    "build:node18": "NODE_OPTIONS='--loader=tsx --conditions=@mfng:internal' webpack --mode production",
     "deploy": "vercel deploy --prebuilt",
     "dev": "npm run start",
     "start": "node dev-server/run.js",
