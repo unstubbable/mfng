@@ -12,6 +12,7 @@
   "type": "module",
   "exports": {
     ".": {
+      "@mfng:internal": "./src/index.ts",
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     }

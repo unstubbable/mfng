@@ -1,20 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "//#compile": {
-      "cache": false
-    },
-    "//#compile:watch": {
-      "dependsOn": ["//#compile"],
-      "cache": false,
-      "persistent": true
-    },
-    "build": {
-      "dependsOn": ["//#compile"]
-    },
-    "build:dev": {
-      "dependsOn": ["//#compile"]
-    },
+    "build": {},
+    "build:dev": {},
     "deploy": {
       "dependsOn": ["build"],
       "cache": false

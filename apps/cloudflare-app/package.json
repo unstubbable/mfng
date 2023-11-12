@@ -6,13 +6,13 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "scripts": {
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development",
+    "build": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production",
+    "build:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development",
     "deploy": "wrangler publish -c src/worker/wrangler.toml",
     "dev": "npm run start",
     "start": "wrangler dev -c src/worker/wrangler.toml -l",
-    "watch": "webpack --mode production --watch",
-    "watch:dev": "webpack --mode development --watch"
+    "watch": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production --watch",
+    "watch:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development --watch"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.3.0",
@@ -40,6 +40,7 @@
     "source-map-loader": "^4.0.1",
     "swc-loader": "^0.2.3",
     "tailwindcss": "^3.2.7",
+    "tsx": "^4.1.0",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1",
     "webpack-manifest-plugin": "^5.0.0",

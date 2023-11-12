@@ -21,12 +21,12 @@
     "compile:clean": "tsc --build --clean",
     "compile:watch": "tsc --build --watch --preserveWatchOutput",
     "deploy": "turbo deploy",
-    "dev": "turbo --concurrency 16 compile:watch watch:dev dev",
+    "dev": "turbo --concurrency 11 watch:dev dev",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
-    "start": "turbo --concurrency 16 compile:watch watch start",
-    "pretest": "turbo build:dev",
+    "start": "turbo --concurrency 11 watch start",
+    "pretest": "turbo build:dev --filter cloudflare-app",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
