@@ -5,7 +5,7 @@ import generate = require('@babel/generator');
 import parser = require('@babel/parser');
 import traverse = require('@babel/traverse');
 import t = require('@babel/types');
-import type {LoaderContext} from 'webpack';
+import webpack = require('webpack');
 
 namespace webpackRscServerLoader {
   export interface WebpackRscServerLoaderOptions {
@@ -22,7 +22,7 @@ namespace webpackRscServerLoader {
 }
 
 function webpackRscServerLoader(
-  this: LoaderContext<webpackRscServerLoader.WebpackRscServerLoaderOptions>,
+  this: webpack.LoaderContext<webpackRscServerLoader.WebpackRscServerLoaderOptions>,
   source: string,
 ): void {
   this.cacheable(true);
@@ -35,7 +35,8 @@ function webpackRscServerLoader(
     sourceFilename: resourcePath,
   });
 
-  let hasUseClientDirective = false;
+  let moduleDirective: 'use client' | 'use server' | undefined;
+  let addedRegisterServerReferenceCall = false;
   const clientReferences: webpackRscServerLoader.ClientReference[] = [];
 
   traverse.default(ast, {
@@ -43,8 +44,10 @@ function webpackRscServerLoader(
       const {node} = nodePath;
 
       if (t.isProgram(node)) {
-        if (node.directives.some(isUseClientDirective)) {
-          hasUseClientDirective = true;
+        if (node.directives.some(isDirective(`use client`))) {
+          moduleDirective = `use client`;
+        } else if (node.directives.some(isDirective(`use server`))) {
+          moduleDirective = `use server`;
         } else {
           nodePath.skip();
         }
@@ -52,7 +55,11 @@ function webpackRscServerLoader(
         return;
       }
 
-      if (t.isDirective(node) && isUseClientDirective(node)) {
+      if (
+        !moduleDirective ||
+        (t.isDirective(node) &&
+          (isDirective(`use client`)(node) || isDirective(`use server`)(node)))
+      ) {
         nodePath.skip();
 
         return;
@@ -60,22 +67,37 @@ function webpackRscServerLoader(
 
       const exportName = getExportName(node);
 
-      if (exportName) {
-        const id = `${path.relative(
-          process.cwd(),
-          resourcePath,
-        )}#${exportName}`;
+      if (moduleDirective === `use client`) {
+        if (exportName) {
+          const id = `${path.relative(
+            process.cwd(),
+            resourcePath,
+          )}#${exportName}`;
 
-        clientReferences.push({id, exportName});
-        nodePath.replaceWith(createExportedClientReference(id, exportName));
+          clientReferences.push({id, exportName});
+          nodePath.replaceWith(createExportedClientReference(id, exportName));
+          nodePath.skip();
+        } else {
+          nodePath.remove();
+        }
+      } else if (exportName) {
+        addedRegisterServerReferenceCall = true;
+        nodePath.insertAfter(createRegisterServerReference(exportName));
         nodePath.skip();
-      } else {
-        nodePath.remove();
+      }
+    },
+    exit(nodePath) {
+      const {node} = nodePath;
+
+      if (t.isProgram(node) && addedRegisterServerReferenceCall) {
+        (nodePath as traverse.NodePath<t.Program>).unshiftContainer(`body`, [
+          creatRegisterServerReferenceImport(),
+        ]);
       }
     },
   });
 
-  if (!hasUseClientDirective) {
+  if (!moduleDirective) {
     return this.callback(null, source);
   }
 
@@ -90,11 +112,11 @@ function webpackRscServerLoader(
   this.callback(null, code);
 }
 
-function isUseClientDirective(directive: t.Directive): boolean {
-  return (
-    t.isDirectiveLiteral(directive.value) &&
-    directive.value.value === `use client`
-  );
+function isDirective(
+  value: 'use client' | 'use server',
+): (directive: t.Directive) => boolean {
+  return (directive) =>
+    t.isDirectiveLiteral(directive.value) && directive.value.value === value;
 }
 
 function getExportName(node: t.Node): string | undefined {
@@ -133,6 +155,26 @@ function createExportedClientReference(
         ]),
       ),
     ]),
+  );
+}
+
+function createRegisterServerReference(exportName: string): t.CallExpression {
+  return t.callExpression(t.identifier(`registerServerReference`), [
+    t.identifier(exportName),
+    t.identifier(webpack.RuntimeGlobals.moduleId),
+    t.stringLiteral(exportName),
+  ]);
+}
+
+function creatRegisterServerReferenceImport(): t.ImportDeclaration {
+  return t.importDeclaration(
+    [
+      t.importSpecifier(
+        t.identifier(`registerServerReference`),
+        t.identifier(`registerServerReference`),
+      ),
+    ],
+    t.stringLiteral(`react-server-dom-webpack/server`),
   );
 }
 

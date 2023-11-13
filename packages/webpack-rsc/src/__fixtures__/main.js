@@ -1,6 +1,5 @@
-import * as React from 'react';
-import {serverFunction} from './server-function.js';
+import {pretendRscRendering} from './rsc.js';
 
-export function Main() {
-  return React.createElement(`div`, {action: serverFunction});
+export function pretendSsrRendering() {
+  console.log(pretendRscRendering());
 }

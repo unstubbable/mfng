@@ -52,7 +52,7 @@ describe(`webpackRscClientLoader`, () => {
   test(`generates a server reference module based on given serverReferencesMap`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
-      `__fixtures__/server-function.js`,
+      `__fixtures__/server-functions.js`,
     );
 
     const serverReferencesMap: ServerReferencesMap = new Map([
@@ -74,7 +74,7 @@ export const bar = createServerReference("test#bar", callServer);
   test(`accepts a custom callServer import source`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
-      `__fixtures__/server-function.js`,
+      `__fixtures__/server-functions.js`,
     );
 
     const serverReferencesMap: ServerReferencesMap = new Map([
@@ -100,7 +100,7 @@ export const foo = createServerReference("test#foo", callServer);
   test(`emits an error if module info is missing in serverReferencesMap`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
-      `__fixtures__/server-function.js`,
+      `__fixtures__/server-functions.js`,
     );
 
     const serverReferencesMap: ServerReferencesMap = new Map();

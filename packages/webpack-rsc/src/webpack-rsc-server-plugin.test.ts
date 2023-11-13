@@ -1,15 +1,21 @@
-import {createRequire} from 'module';
 import path from 'path';
 import url from 'url';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
 import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
-import {WebpackRscServerPlugin} from './webpack-rsc-server-plugin.js';
+import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
+import {
+  WebpackRscServerPlugin,
+  webpackRscLayerName,
+} from './webpack-rsc-server-plugin.js';
+import {
+  createWebpackRscServerLoader,
+  createWebpackRscSsrLoader,
+} from './index.js';
 
 const fs = new MemoryFS();
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
 
 function pretty(source: string): string {
   return prettier.format(source, {parser: `babel`});
@@ -47,9 +53,11 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
 
 describe(`WebpackRscServerPlugin`, () => {
   let buildConfig: webpack.Configuration;
+  let clientReferencesMap: ClientReferencesMap;
   let serverReferencesMap: ServerReferencesMap;
 
   beforeEach(() => {
+    clientReferencesMap = new Map();
     serverReferencesMap = new Map();
 
     buildConfig = {
@@ -60,25 +68,37 @@ describe(`WebpackRscServerPlugin`, () => {
         libraryTarget: `module`,
         chunkFormat: `module`,
       },
-      experiments: {outputModule: true},
+      experiments: {outputModule: true, layers: true},
       module: {
         rules: [
           {
+            resource: /rsc.js$/,
+            layer: webpackRscLayerName,
+          },
+          {
+            issuerLayer: webpackRscLayerName,
+            resolve: {conditionNames: [`react-server`, `workerd`, `...`]},
+          },
+          {
             test: /\.js$/,
-            loader: require.resolve(`./webpack-rsc-server-loader`),
+            oneOf: [
+              {
+                issuerLayer: webpackRscLayerName,
+                use: createWebpackRscServerLoader({clientReferencesMap}),
+              },
+              {
+                use: createWebpackRscSsrLoader(),
+              },
+            ],
           },
         ],
       },
       plugins: [
-        new WebpackRscServerPlugin({
-          clientReferencesMap: new Map(),
-          serverReferencesMap,
-        }),
+        new WebpackRscServerPlugin({clientReferencesMap, serverReferencesMap}),
       ],
-      resolve: {
-        conditionNames: [`react-server`, `node`, `import`, `require`],
-      },
       devtool: false,
+      performance: false,
+      cache: false,
     };
   });
 
@@ -87,7 +107,7 @@ describe(`WebpackRscServerPlugin`, () => {
       buildConfig = {...buildConfig, mode: `development`};
     });
 
-    test(`the generated bundle has replacement code for server references`, async () => {
+    test(`the generated bundle has registerServerReference calls for server references, with correct local and exported names`, async () => {
       await runWebpack(buildConfig);
 
       const outputFile = fs.readFileSync(
@@ -97,28 +117,47 @@ describe(`WebpackRscServerPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js":
-/*!******************************************************************!*\\
-  !*** ./packages/webpack-rsc/src/__fixtures__/server-function.js ***!
-  \\******************************************************************/
+/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js":
+/*!***************************************************************************************!*\\
+  !*** ./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js ***!
+  \\***************************************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "serverFunction": () => (/* binding */ serverFunction)
+/* harmony export */   "serverFunctionImportedFromClient": () => (/* binding */ serverFunctionImportedFromClient)
 /* harmony export */ });
+/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/./node_modules/react-server-dom-webpack/server.edge.js");
 'use server';
 
-async function serverFunction() {
-  return Promise.resolve(\`server\`);
+
+async function serverFunctionImportedFromClient() {
+  return Promise.resolve(\`server-function-imported-from-client\`);
 }
+(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionImportedFromClient, module.id, "serverFunctionImportedFromClient")
 
-Object.defineProperties(serverFunction, {
-	$$typeof: {value: Symbol.for("react.server.reference")},
-	$$id: {value: "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js#serverFunction"},
-});
+/***/ }),
 
-/***/ })`,
+/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js":
+/*!*************************************************************************************!*\\
+  !*** ./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js ***!
+  \\*************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "serverFunctionPassedFromServer": () => (/* binding */ serverFunctionPassedFromServer)
+/* harmony export */ });
+/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/./node_modules/react-server-dom-webpack/server.edge.js");
+'use server';
+
+
+async function serverFunctionPassedFromServer() {
+  return Promise.resolve(\`server-function-passed-from-server\`);
+}
+(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionPassedFromServer, module.id, "serverFunctionPassedFromServer")
+
+/***/ }),`,
       );
     });
 
@@ -131,8 +170,10 @@ Object.defineProperties(serverFunction, {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js':
-          [`serverFunction`],
+        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js':
+          [`serverFunctionImportedFromClient`],
+        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js':
+          [`serverFunctionPassedFromServer`],
       });
     });
 
@@ -141,10 +182,23 @@ Object.defineProperties(serverFunction, {
 
       expect([...serverReferencesMap.entries()]).toEqual([
         [
-          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
+          path.resolve(
+            currentDirname,
+            `./__fixtures__/server-function-passed-from-server.js`,
+          ),
           {
-            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function.js`,
-            exportNames: [`serverFunction`],
+            exportNames: [`serverFunctionPassedFromServer`],
+            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js`,
+          },
+        ],
+        [
+          path.resolve(
+            currentDirname,
+            `./__fixtures__/server-function-imported-from-client.js`,
+          ),
+          {
+            exportNames: [`serverFunctionImportedFromClient`],
+            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js`,
           },
         ],
       ]);
@@ -152,14 +206,11 @@ Object.defineProperties(serverFunction, {
   });
 
   describe(`in production mode`, () => {
-    let expectedModuleId: number;
-
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-      expectedModuleId = 340; // may change in the future
     });
 
-    test(`the generated bundle has replacement code for server references`, async () => {
+    test(`the generated bundle has registerServerReference calls for server references, with correct local and exported names`, async () => {
       await runWebpack(buildConfig);
 
       const outputFile = fs.readFileSync(
@@ -169,16 +220,29 @@ Object.defineProperties(serverFunction, {
 
       expect(pretty(outputFile)).toMatch(
         `
-    ${expectedModuleId}: (e, t, r) => {
+    644: (e, t, r) => {
       async function o() {
-        return Promise.resolve(\"server\");
+        return Promise.resolve("server-function-imported-from-client");
       }
       r.r(t),
-        r.d(t, { serverFunction: () => o }),
-        Object.defineProperties(o, {
-          $$typeof: { value: Symbol.for(\"react.server.reference\") },
-          $$id: { value: \"340#serverFunction\" },
-        });
+        r.d(t, { serverFunctionImportedFromClient: () => o }),
+        (0, r(748).registerServerReference)(
+          o,
+          module.id,
+          "serverFunctionImportedFromClient"
+        );
+    },
+    830: (e, t, r) => {
+      async function o() {
+        return Promise.resolve("server-function-passed-from-server");
+      }
+      r.r(t),
+        r.d(t, { serverFunctionPassedFromServer: () => o }),
+        (0, r(748).registerServerReference)(
+          o,
+          module.id,
+          "serverFunctionPassedFromServer"
+        );
     },`,
       );
     });
@@ -192,7 +256,8 @@ Object.defineProperties(serverFunction, {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        [expectedModuleId]: [`serverFunction`],
+        644: [`serverFunctionImportedFromClient`],
+        830: [`serverFunctionPassedFromServer`],
       });
     });
 
@@ -201,8 +266,18 @@ Object.defineProperties(serverFunction, {
 
       expect([...serverReferencesMap.entries()]).toEqual([
         [
-          path.resolve(currentDirname, `./__fixtures__/server-function.js`),
-          {moduleId: expectedModuleId, exportNames: [`serverFunction`]},
+          path.resolve(
+            currentDirname,
+            `./__fixtures__/server-function-passed-from-server.js`,
+          ),
+          {exportNames: [`serverFunctionPassedFromServer`], moduleId: 830},
+        ],
+        [
+          path.resolve(
+            currentDirname,
+            `./__fixtures__/server-function-imported-from-client.js`,
+          ),
+          {exportNames: [`serverFunctionImportedFromClient`], moduleId: 644},
         ],
       ]);
     });

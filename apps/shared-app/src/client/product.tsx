@@ -3,17 +3,19 @@
 import {clsx} from 'clsx';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {buy} from '../server/buy.js';
+import type {BuyResult} from '../server/buy.js';
 import {Notification} from '../shared/notification.js';
 import {Button} from './button.js';
 
 export interface ProductProps {
-  readonly productId: string;
+  readonly buy: (
+    prevResult: BuyResult | undefined,
+    formData: FormData,
+  ) => Promise<BuyResult>;
 }
 
-export function Product({productId}: ProductProps): JSX.Element {
-  const buyProduct = buy.bind(null, productId);
-  const [result, formAction] = ReactDOM.useFormState(buyProduct, undefined);
+export function Product({buy}: ProductProps): JSX.Element {
+  const [result, formAction] = ReactDOM.useFormState(buy, undefined);
 
   return (
     <form action={formAction}>

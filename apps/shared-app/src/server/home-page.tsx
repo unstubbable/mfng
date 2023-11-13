@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Product} from '../client/product.js';
 import {Main} from '../shared/main.js';
+import {buy} from './buy.js';
 import {Hello} from './hello.js';
 import {Suspended} from './suspended.js';
 
@@ -12,7 +13,7 @@ export function HomePage(): JSX.Element {
         <Suspended />
       </React.Suspense>
       <React.Suspense>
-        <Product productId="some-product-id" />
+        <Product buy={buy.bind(null, `some-product-id`)} />
       </React.Suspense>
     </Main>
   );

@@ -35,20 +35,15 @@ export class WebpackRscServerPlugin {
   apply(compiler: Webpack.Compiler): void {
     const {
       EntryPlugin,
-      Template,
       WebpackError,
-      dependencies: {ModuleDependency},
+      dependencies: {NullDependency},
       util: {
         runtime: {getEntryRuntime},
       },
       sources: {RawSource},
     } = compiler.webpack;
 
-    class ServerReferenceDependency extends ModuleDependency {
-      constructor(request: string) {
-        super(request);
-      }
-
+    class ServerReferenceDependency extends NullDependency {
       override get type(): string {
         return `server-reference`;
       }
@@ -58,40 +53,6 @@ export class WebpackRscServerPlugin {
       return module.dependencies.some(
         (dependency) => dependency instanceof ServerReferenceDependency,
       );
-    }
-
-    class ServerReferenceTemplate extends Template {
-      apply(
-        dependency: ServerReferenceDependency,
-        source: Webpack.sources.ReplaceSource,
-        {
-          chunkGraph,
-          moduleGraph,
-        }: {
-          chunkGraph: Webpack.ChunkGraph;
-          moduleGraph: Webpack.ModuleGraph;
-        },
-      ): void {
-        const module = moduleGraph.getModule(dependency);
-        const id = chunkGraph.getModuleId(module);
-        const exportNames = getExportNames(moduleGraph, module);
-
-        const newSource = exportNames
-          .map((exportName) =>
-            Template.asString([
-              ``,
-              `Object.defineProperties(${exportName}, {`,
-              Template.indent([
-                `$$typeof: {value: Symbol.for("react.server.reference")},`,
-                `$$id: {value: ${JSON.stringify(id + `#` + exportName)}},`,
-              ]),
-              `});`,
-            ]),
-          )
-          .join(`\n`);
-
-        source.insert(source.size(), newSource);
-      }
     }
 
     const includeModule = async (
@@ -117,17 +78,7 @@ export class WebpackRscServerPlugin {
         );
       }
 
-      const [entryName, {includeDependencies}] = entry;
-
-      if (
-        includeDependencies.some(
-          (includeDependency) =>
-            includeDependency instanceof ModuleDependency &&
-            includeDependency.request === resource,
-        )
-      ) {
-        return;
-      }
+      const [entryName] = entry;
 
       const dependency = EntryPlugin.createDependency(resource, {
         name: resource,
@@ -179,7 +130,7 @@ export class WebpackRscServerPlugin {
 
         compilation.dependencyTemplates.set(
           ServerReferenceDependency,
-          new ServerReferenceTemplate(),
+          new ServerReferenceDependency.Template(),
         );
 
         const onNormalModuleFactoryParser = (
@@ -207,12 +158,10 @@ export class WebpackRscServerPlugin {
             }
 
             if (isServerModule && !hasServerReferenceDependency(module)) {
+              this.serverModuleResources.add(resource);
+
               if (module.layer === webpackRscLayerName) {
-                module.addDependency(new ServerReferenceDependency(resource));
-              } else {
-                // Server modules that are imported from the client (here: SSR).
-                this.serverModuleResources.add(resource);
-                void includeModule(compilation, resource, webpackRscLayerName);
+                module.addDependency(new ServerReferenceDependency());
               }
             }
           });
