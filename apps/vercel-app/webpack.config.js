@@ -126,7 +126,6 @@ export default function createConfigs(_env, argv) {
         `@mfng:internal:node`,
         `@mfng:internal`,
         `workerd`,
-        `node`,
         `...`,
       ],
     },
@@ -145,7 +144,7 @@ export default function createConfigs(_env, argv) {
         },
         {
           issuerLayer: webpackRscLayerName,
-          resolve: {conditionNames: [`react-server`, `node`, `...`]},
+          resolve: {conditionNames: [`react-server`, `workerd`, `...`]},
         },
         {
           oneOf: [

@@ -78,7 +78,34 @@ export const ComponentC = {
     );
   });
 
-  test(`does not change modules without a 'use client' directive`, async () => {
+  test(`adds 'registerServerReference' calls to all exported functions of a module with a 'use server' directive`, async () => {
+    const clientReferencesMap: ClientReferencesMap = new Map();
+
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/server-functions.js`,
+    );
+
+    const output = await callLoader(resourcePath, clientReferencesMap);
+
+    expect(output).toEqual(
+      `
+'use server';
+
+import { registerServerReference } from "react-server-dom-webpack/server";
+export async function foo() {
+  return Promise.resolve(\`foo\`);
+}
+registerServerReference(foo, module.id, "foo")
+export const bar = async () => Promise.resolve(\`bar\`);
+registerServerReference(bar, module.id, "bar")
+export const baz = 42;
+registerServerReference(baz, module.id, "baz")
+`.trim(),
+    );
+  });
+
+  test(`does not change modules without a 'use client' or 'use server' directive`, async () => {
     const clientReferencesMap: ClientReferencesMap = new Map();
 
     const resourcePath = path.resolve(

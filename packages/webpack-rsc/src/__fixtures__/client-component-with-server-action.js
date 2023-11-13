@@ -2,11 +2,12 @@
 'use client';
 
 import * as React from 'react';
-import {serverFunction} from './server-function.js';
+import {serverFunctionImportedFromClient} from './server-function-imported-from-client.js';
 
-export function ClientComponentWithServerAction() {
+export function ClientComponentWithServerAction({action}) {
   React.useEffect(() => {
-    serverFunction().then(console.log);
+    action().then(console.log);
+    serverFunctionImportedFromClient().then(console.log);
   }, []);
 
   return null;
