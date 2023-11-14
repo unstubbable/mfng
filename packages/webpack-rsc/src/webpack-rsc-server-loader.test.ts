@@ -56,24 +56,21 @@ describe(`webpackRscServerLoader`, () => {
     );
 
     const output = await callLoader(resourcePath, clientReferencesMap);
-    const idPrefix = path.relative(process.cwd(), resourcePath);
+    const expectedId = path.relative(process.cwd(), resourcePath);
 
     expect(output).toEqual(
       `
 'use client';
 
-export const ComponentA = {
-  $$typeof: Symbol.for("react.client.reference"),
-  $$id: "${idPrefix}#ComponentA"
-};
-export const ComponentB = {
-  $$typeof: Symbol.for("react.client.reference"),
-  $$id: "${idPrefix}#ComponentB"
-};
-export const ComponentC = {
-  $$typeof: Symbol.for("react.client.reference"),
-  $$id: "${idPrefix}#ComponentC"
-};
+import { registerClientReference } from "react-server-dom-webpack/server";
+function createClientReferenceProxy(exportName) {
+  return () => {
+    throw new Error(\`Attempted to call \${exportName}() from the server but \${exportName} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`);
+  };
+}
+export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${expectedId}", "ComponentA");
+export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${expectedId}", "ComponentB");
+export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${expectedId}", "ComponentC");
 `.trim(),
     );
   });
