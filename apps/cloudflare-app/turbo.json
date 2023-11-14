@@ -19,6 +19,9 @@
         "webpack.config.js"
       ],
       "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build:dev"]
     }
   }
 }
