@@ -117,17 +117,17 @@ describe(`WebpackRscServerPlugin`, () => {
 
       expect(outputFile).toMatch(
         `
-/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js":
-/*!***************************************************************************************!*\\
-  !*** ./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js ***!
-  \\***************************************************************************************/
+/***/ "(react-server)/./src/__fixtures__/server-function-imported-from-client.js":
+/*!******************************************************************!*\\
+  !*** ./src/__fixtures__/server-function-imported-from-client.js ***!
+  \\******************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "serverFunctionImportedFromClient": () => (/* binding */ serverFunctionImportedFromClient)
 /* harmony export */ });
-/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/./node_modules/react-server-dom-webpack/server.edge.js");
+/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/../../node_modules/react-server-dom-webpack/server.edge.js");
 'use server';
 
 
@@ -138,17 +138,17 @@ async function serverFunctionImportedFromClient() {
 
 /***/ }),
 
-/***/ "(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js":
-/*!*************************************************************************************!*\\
-  !*** ./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js ***!
-  \\*************************************************************************************/
+/***/ "(react-server)/./src/__fixtures__/server-function-passed-from-server.js":
+/*!****************************************************************!*\\
+  !*** ./src/__fixtures__/server-function-passed-from-server.js ***!
+  \\****************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "serverFunctionPassedFromServer": () => (/* binding */ serverFunctionPassedFromServer)
 /* harmony export */ });
-/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/./node_modules/react-server-dom-webpack/server.edge.js");
+/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/../../node_modules/react-server-dom-webpack/server.edge.js");
 'use server';
 
 
@@ -170,9 +170,9 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js':
+        '(react-server)/./src/__fixtures__/server-function-imported-from-client.js':
           [`serverFunctionImportedFromClient`],
-        '(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js':
+        '(react-server)/./src/__fixtures__/server-function-passed-from-server.js':
           [`serverFunctionPassedFromServer`],
       });
     });
@@ -188,7 +188,7 @@ async function serverFunctionPassedFromServer() {
           ),
           {
             exportNames: [`serverFunctionPassedFromServer`],
-            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-passed-from-server.js`,
+            moduleId: `(react-server)/./src/__fixtures__/server-function-passed-from-server.js`,
           },
         ],
         [
@@ -198,7 +198,7 @@ async function serverFunctionPassedFromServer() {
           ),
           {
             exportNames: [`serverFunctionImportedFromClient`],
-            moduleId: `(react-server)/./packages/webpack-rsc/src/__fixtures__/server-function-imported-from-client.js`,
+            moduleId: `(react-server)/./src/__fixtures__/server-function-imported-from-client.js`,
           },
         ],
       ]);
@@ -220,25 +220,25 @@ async function serverFunctionPassedFromServer() {
 
       expect(pretty(outputFile)).toMatch(
         `
-    644: (e, t, r) => {
+    839: (e, t, r) => {
       async function o() {
         return Promise.resolve("server-function-imported-from-client");
       }
       r.r(t),
         r.d(t, { serverFunctionImportedFromClient: () => o }),
-        (0, r(748).registerServerReference)(
+        (0, r(324).registerServerReference)(
           o,
           module.id,
           "serverFunctionImportedFromClient"
         );
     },
-    830: (e, t, r) => {
+    871: (e, t, r) => {
       async function o() {
         return Promise.resolve("server-function-passed-from-server");
       }
       r.r(t),
         r.d(t, { serverFunctionPassedFromServer: () => o }),
-        (0, r(748).registerServerReference)(
+        (0, r(324).registerServerReference)(
           o,
           module.id,
           "serverFunctionPassedFromServer"
@@ -256,8 +256,8 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        644: [`serverFunctionImportedFromClient`],
-        830: [`serverFunctionPassedFromServer`],
+        839: [`serverFunctionImportedFromClient`],
+        871: [`serverFunctionPassedFromServer`],
       });
     });
 
@@ -270,14 +270,14 @@ async function serverFunctionPassedFromServer() {
             currentDirname,
             `./__fixtures__/server-function-passed-from-server.js`,
           ),
-          {exportNames: [`serverFunctionPassedFromServer`], moduleId: 830},
+          {exportNames: [`serverFunctionPassedFromServer`], moduleId: 871},
         ],
         [
           path.resolve(
             currentDirname,
             `./__fixtures__/server-function-imported-from-client.js`,
           ),
-          {exportNames: [`serverFunctionImportedFromClient`], moduleId: 644},
+          {exportNames: [`serverFunctionImportedFromClient`], moduleId: 839},
         ],
       ]);
     });
