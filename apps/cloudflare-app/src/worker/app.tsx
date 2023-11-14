@@ -3,11 +3,11 @@
 // (React and the server components) will be imported with the required
 // `react-server` condition.
 
-import {App} from '@mfng/shared-app/app.js';
+import {App as SharedApp} from '@mfng/shared-app/app.js';
 import * as React from 'react';
 
-export function createRscApp(): React.ReactNode {
+export function App(): JSX.Element {
   return (
-    <App getTitle={(pathname) => `Vercel Edge RSC/SSR demo ${pathname}`} />
+    <SharedApp getTitle={(pathname) => `Cloudflare RSC/SSR demo ${pathname}`} />
   );
 }

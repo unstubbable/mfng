@@ -85,7 +85,7 @@ export default function createConfigs(_env, argv) {
    */
   const serverConfig = {
     name: `server`,
-    entry: `./src/worker/index.ts`,
+    entry: `./src/worker/index.tsx`,
     target: `webworker`,
     output: {
       filename: `worker.js`,
@@ -105,9 +105,7 @@ export default function createConfigs(_env, argv) {
     module: {
       rules: [
         {
-          resource: (value) =>
-            /core\/src\/server\/rsc\.ts$/.test(value) ||
-            /create-rsc-app\.tsx$/.test(value),
+          resource: [/rsc\.ts$/, /app\.tsx$/],
           layer: webpackRscLayerName,
         },
         {
