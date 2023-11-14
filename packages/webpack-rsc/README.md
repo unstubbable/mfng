@@ -116,6 +116,9 @@ module with client references (objects that contain meta data about the client
 components), and removing all other parts of the client module. It also
 populates the given `clientReferencesMap`.
 
+In addtion, the loader handles server references for React server actions by
+adding meta data to all exported functions of a `use server` module.
+
 ### `createWebpackRscSsrLoader`
 
 A function to create the RSC SSR loader `use` item for the server entry webpack
@@ -131,11 +134,9 @@ The server plugin resolves the client references that the server loader has
 created, and adds them as additional includes to the bundle, so that they are
 available for server-side rendering (SSR).
 
-The plugin also handles server references for React server actions by adding
-meta data to all exported functions of a `use server` module. Based on this, it
-generates the server manifest that is needed for validating the server
-references for server actions (also known as mutations) that are sent back from
-the client. It also populates the given `serverReferencesMap`.
+The plugin also generates the server manifest that is needed for validating the
+server references of server actions (also known as mutations) that are sent back
+from the client. It also populates the given `serverReferencesMap`.
 
 ### `createWebpackRscClientLoader`
 
