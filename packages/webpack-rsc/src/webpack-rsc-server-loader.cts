@@ -21,6 +21,8 @@ namespace webpackRscServerLoader {
   }
 }
 
+type RegisterReferenceType = 'Server' | 'Client';
+
 function webpackRscServerLoader(
   this: webpack.LoaderContext<webpackRscServerLoader.WebpackRscServerLoaderOptions>,
   source: string,
@@ -28,6 +30,7 @@ function webpackRscServerLoader(
   this.cacheable(true);
 
   const {clientReferencesMap} = this.getOptions();
+  const clientReferences: webpackRscServerLoader.ClientReference[] = [];
   const resourcePath = this.resourcePath;
 
   const ast = parser.parse(source, {
@@ -36,8 +39,8 @@ function webpackRscServerLoader(
   });
 
   let moduleDirective: 'use client' | 'use server' | undefined;
-  let addedRegisterServerReferenceCall = false;
-  const clientReferences: webpackRscServerLoader.ClientReference[] = [];
+  let addedRegisterReferenceCall: RegisterReferenceType | undefined;
+  const unshiftedNodes = new Set<t.Node>();
 
   traverse.default(ast, {
     enter(nodePath) {
@@ -57,8 +60,8 @@ function webpackRscServerLoader(
 
       if (
         !moduleDirective ||
-        (t.isDirective(node) &&
-          (isDirective(`use client`)(node) || isDirective(`use server`)(node)))
+        (t.isDirective(node) && isDirective(`use client`)(node)) ||
+        unshiftedNodes.has(node)
       ) {
         nodePath.skip();
 
@@ -69,31 +72,43 @@ function webpackRscServerLoader(
 
       if (moduleDirective === `use client`) {
         if (exportName) {
-          const id = `${path.relative(
-            process.cwd(),
-            resourcePath,
-          )}#${exportName}`;
-
+          const id = `${path.relative(process.cwd(), resourcePath)}`;
           clientReferences.push({id, exportName});
+          addedRegisterReferenceCall = `Client`;
           nodePath.replaceWith(createExportedClientReference(id, exportName));
           nodePath.skip();
         } else {
           nodePath.remove();
         }
       } else if (exportName) {
-        addedRegisterServerReferenceCall = true;
+        addedRegisterReferenceCall = `Server`;
         nodePath.insertAfter(createRegisterServerReference(exportName));
         nodePath.skip();
       }
     },
     exit(nodePath) {
-      const {node} = nodePath;
+      if (!t.isProgram(nodePath.node) || !addedRegisterReferenceCall) {
+        nodePath.skip();
 
-      if (t.isProgram(node) && addedRegisterServerReferenceCall) {
-        (nodePath as traverse.NodePath<t.Program>).unshiftContainer(`body`, [
-          creatRegisterServerReferenceImport(),
-        ]);
+        return;
       }
+
+      const nodes: t.Node[] = [
+        createRegisterReferenceImport(addedRegisterReferenceCall),
+      ];
+
+      if (addedRegisterReferenceCall === `Client`) {
+        nodes.push(createClientReferenceProxyImplementation());
+      }
+
+      for (const node of nodes) {
+        unshiftedNodes.add(node);
+      }
+
+      (nodePath as traverse.NodePath<t.Program>).unshiftContainer(
+        `body`,
+        nodes,
+      );
     },
   });
 
@@ -143,16 +158,46 @@ function createExportedClientReference(
     t.variableDeclaration(`const`, [
       t.variableDeclarator(
         t.identifier(exportName),
-        t.objectExpression([
-          t.objectProperty(
-            t.identifier(`$$typeof`),
-            t.callExpression(
-              t.memberExpression(t.identifier(`Symbol`), t.identifier(`for`)),
-              [t.stringLiteral(`react.client.reference`)],
-            ),
-          ),
-          t.objectProperty(t.identifier(`$$id`), t.stringLiteral(id)),
+        t.callExpression(t.identifier(`registerClientReference`), [
+          t.callExpression(t.identifier(`createClientReferenceProxy`), [
+            t.stringLiteral(exportName),
+          ]),
+          t.stringLiteral(id),
+          t.stringLiteral(exportName),
         ]),
+      ),
+    ]),
+  );
+}
+
+function createClientReferenceProxyImplementation(): t.FunctionDeclaration {
+  return t.functionDeclaration(
+    t.identifier(`createClientReferenceProxy`),
+    [t.identifier(`exportName`)],
+    t.blockStatement([
+      t.returnStatement(
+        t.arrowFunctionExpression(
+          [],
+          t.blockStatement([
+            t.throwStatement(
+              t.newExpression(t.identifier(`Error`), [
+                t.templateLiteral(
+                  [
+                    t.templateElement({raw: `Attempted to call `}),
+                    t.templateElement({raw: `() from the server but `}),
+                    t.templateElement(
+                      {
+                        raw: ` is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.`,
+                      },
+                      true,
+                    ),
+                  ],
+                  [t.identifier(`exportName`), t.identifier(`exportName`)],
+                ),
+              ]),
+            ),
+          ]),
+        ),
       ),
     ]),
   );
@@ -166,12 +211,14 @@ function createRegisterServerReference(exportName: string): t.CallExpression {
   ]);
 }
 
-function creatRegisterServerReferenceImport(): t.ImportDeclaration {
+function createRegisterReferenceImport(
+  type: RegisterReferenceType,
+): t.ImportDeclaration {
   return t.importDeclaration(
     [
       t.importSpecifier(
-        t.identifier(`registerServerReference`),
-        t.identifier(`registerServerReference`),
+        t.identifier(`register${type}Reference`),
+        t.identifier(`register${type}Reference`),
       ),
     ],
     t.stringLiteral(`react-server-dom-webpack/server`),
