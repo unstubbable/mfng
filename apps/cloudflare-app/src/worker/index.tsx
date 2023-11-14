@@ -2,8 +2,9 @@ import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-
 import type {ServerManifest} from '@mfng/core/server/rsc';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
+import * as React from 'react';
 import type {ClientManifest, SSRManifest} from 'react-server-dom-webpack';
-import {createRscApp} from './create-rsc-app.js';
+import {App} from './app.js';
 import type {EnvWithStaticContent, HandlerParams} from './get-json-from-kv.js';
 import {getJsonFromKv} from './get-json-from-kv.js';
 
@@ -28,7 +29,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   const {pathname, search} = new URL(request.url);
 
   return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
-    const rscAppStream = createRscAppStream(createRscApp(), {
+    const rscAppStream = createRscAppStream(<App />, {
       reactClientManifest,
       mainCssHref: cssManifest[`main.css`]!,
     });

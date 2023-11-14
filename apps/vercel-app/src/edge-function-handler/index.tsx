@@ -1,7 +1,8 @@
 import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
-import {createRscApp} from './create-rsc-app.js';
+import * as React from 'react';
+import {App} from './app.js';
 import {
   cssManifest,
   jsManifest,
@@ -35,7 +36,7 @@ function handleGet(request: Request): Promise<Response> {
   const {pathname, search} = new URL(request.url);
 
   return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
-    const rscAppStream = createRscAppStream(createRscApp(), {
+    const rscAppStream = createRscAppStream(<App />, {
       reactClientManifest,
       mainCssHref: cssManifest[`main.css`]!,
     });
