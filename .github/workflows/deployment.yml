@@ -20,7 +20,7 @@ jobs:
           node-version-file: '.node-version'
           cache: 'npm'
       - name: Install
-        run: npm i
+        run: npm ci --no-audit --no-fund
       - name: Test
         run: npm t
       - name: Deploy
