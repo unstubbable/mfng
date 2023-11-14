@@ -15,7 +15,6 @@
   "scripts": {
     "build": "turbo build",
     "build:dev": "turbo build:dev",
-    "ci": "concurrently --kill-others-on-fail -c auto -n compile,format,lint,test 'npm run compile' 'npm run format:check' 'npm run lint' 'npm test'",
     "clean": "npm run compile:clean && rimraf -v {apps,packages}/*/{dist,lib,.turbo,.vercel} node_modules/.cache/turbo",
     "compile": "tsc --build",
     "compile:clean": "tsc --build --clean",
@@ -35,7 +34,6 @@
     "@types/node": "^18.11.14",
     "@typescript-eslint/eslint-plugin": "^5.46.1",
     "@typescript-eslint/parser": "^5.46.1",
-    "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
