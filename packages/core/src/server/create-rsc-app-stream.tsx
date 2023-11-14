@@ -3,15 +3,15 @@ import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 
 export interface CreateRscAppStreamOptions {
-  readonly app: React.ReactNode;
   readonly reactClientManifest: ClientManifest;
   readonly mainCssHref?: string;
 }
 
 export function createRscAppStream(
+  app: React.ReactNode,
   options: CreateRscAppStreamOptions,
 ): ReadableStream<Uint8Array> {
-  const {app, reactClientManifest, mainCssHref} = options;
+  const {reactClientManifest, mainCssHref} = options;
 
   return ReactServerDOMServer.renderToReadableStream(
     <>

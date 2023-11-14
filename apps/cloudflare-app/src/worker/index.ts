@@ -28,8 +28,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   const {pathname, search} = new URL(request.url);
 
   return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
-    const rscAppStream = createRscAppStream({
-      app: createRscApp(),
+    const rscAppStream = createRscAppStream(createRscApp(), {
       reactClientManifest,
       mainCssHref: cssManifest[`main.css`]!,
     });
