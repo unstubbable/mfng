@@ -107,6 +107,36 @@ describe(`WebpackRscServerPlugin`, () => {
       buildConfig = {...buildConfig, mode: `development`};
     });
 
+    test(`the generated bundle has stubbed implementations for client-side imported server actions`, async () => {
+      await runWebpack(buildConfig);
+
+      const outputFile = fs.readFileSync(
+        path.resolve(currentDirname, `dist/bundle.js`),
+        `utf-8`,
+      );
+
+      expect(outputFile).toMatch(
+        `
+/***/ "./src/__fixtures__/server-function-imported-from-client.js":
+/*!******************************************************************!*\\
+  !*** ./src/__fixtures__/server-function-imported-from-client.js ***!
+  \\******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "serverFunctionImportedFromClient": () => (/* binding */ serverFunctionImportedFromClient)
+/* harmony export */ });
+'use server';
+
+function serverFunctionImportedFromClient() {
+  throw new Error("Server actions must not be called during server-side rendering.");
+}
+
+/***/ })`,
+      );
+    });
+
     test(`the generated bundle has registerServerReference calls for server references, with correct local and exported names`, async () => {
       await runWebpack(buildConfig);
 
