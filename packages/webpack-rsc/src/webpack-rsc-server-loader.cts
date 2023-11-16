@@ -1,5 +1,3 @@
-/* eslint-disable import/no-commonjs, @typescript-eslint/no-require-imports */
-
 import path = require('path');
 import generate = require('@babel/generator');
 import parser = require('@babel/parser');

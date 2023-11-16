@@ -1,5 +1,0 @@
-{
-  "compilerOptions": {"noEmit": true},
-  "extends": "./tsconfig.base.json",
-  "include": ["*.js", "*.cjs", "types/**/*.d.ts"]
-}
