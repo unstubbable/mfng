@@ -16,7 +16,6 @@
     "watch:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development --watch"
   },
   "dependencies": {
-    "@cloudflare/kv-asset-handler": "^0.3.0",
     "@mfng/core": "*",
     "@mfng/shared-app": "*",
     "react": "0.0.0-experimental-8039e6d0b-20231026",
