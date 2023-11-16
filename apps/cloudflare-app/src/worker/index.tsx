@@ -1,31 +1,17 @@
 import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
-import type {ServerManifest} from '@mfng/core/server/rsc';
 import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
 import * as React from 'react';
-import type {ClientManifest, SSRManifest} from 'react-server-dom-webpack';
 import {App} from './app.js';
-import type {EnvWithStaticContent, HandlerParams} from './get-json-from-kv.js';
-import {getJsonFromKv} from './get-json-from-kv.js';
+import {
+  cssManifest,
+  jsManifest,
+  reactClientManifest,
+  reactServerManifest,
+  reactSsrManifest,
+} from './manifests.js';
 
-const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
-  request,
-  env,
-  ctx,
-) => {
-  const params: HandlerParams = {request, env, ctx};
-
-  const [reactClientManifest, reactSsrManifest, jsManifest, cssManifest] =
-    await Promise.all([
-      getJsonFromKv<ClientManifest>(
-        `client/react-client-manifest.json`,
-        params,
-      ),
-      getJsonFromKv<SSRManifest>(`client/react-ssr-manifest.json`, params),
-      getJsonFromKv<Record<string, string>>(`client/js-manifest.json`, params),
-      getJsonFromKv<Record<string, string>>(`client/css-manifest.json`, params),
-    ]);
-
+const handleGet: ExportedHandlerFetchHandler = async (request) => {
   const {pathname, search} = new URL(request.url);
 
   return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
@@ -51,11 +37,7 @@ const handleGet: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   });
 };
 
-const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
-  request,
-  env,
-  ctx,
-) => {
+const handlePost: ExportedHandlerFetchHandler = async (request) => {
   const serverReferenceId = request.headers.get(`x-rsc-action`);
 
   if (!serverReferenceId) {
@@ -69,13 +51,6 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
     ?.startsWith(`multipart/form-data`)
     ? request.formData()
     : request.text());
-
-  const params: HandlerParams = {request, env, ctx};
-
-  const [reactClientManifest, reactServerManifest] = await Promise.all([
-    getJsonFromKv<ClientManifest>(`client/react-client-manifest.json`, params),
-    getJsonFromKv<ServerManifest>(`react-server-manifest.json`, params),
-  ]);
 
   const rscActionStream = await createRscActionStream({
     body,
@@ -93,7 +68,7 @@ const handlePost: ExportedHandlerFetchHandler<EnvWithStaticContent> = async (
   });
 };
 
-const handler: ExportedHandler<EnvWithStaticContent> = {
+const handler: ExportedHandler = {
   async fetch(request, env, ctx) {
     switch (request.method) {
       case `GET`:

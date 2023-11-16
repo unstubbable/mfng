@@ -14,5 +14,5 @@ watch_dir = []
 
 [assets]
 bucket = "../../dist"
-include = ["client", "react-server-manifest.json"]
+include = ["client"]
 serve_single_page_app = true
