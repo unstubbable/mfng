@@ -7,7 +7,11 @@ declare module 'react-server-dom-webpack' {
   } from 'react';
 
   export interface ClientManifest {
-    [id: string]: ClientReferenceMetadata;
+    [id: string]: ImportManifestEntry;
+  }
+
+  export interface ServerManifest {
+    [id: string]: ImportManifestEntry;
   }
 
   export interface SSRManifest {
@@ -17,7 +21,7 @@ declare module 'react-server-dom-webpack' {
 
   export interface SSRModuleMap {
     [clientId: string]: {
-      [clientExportName: string]: ClientReferenceMetadata;
+      [clientExportName: string]: ImportManifestEntry;
     };
   }
 
@@ -26,8 +30,9 @@ declare module 'react-server-dom-webpack' {
     crossOrigin?: 'use-credentials' | '';
   }
 
-  export interface ClientReferenceMetadata {
+  export interface ImportManifestEntry {
     id: string | number;
+    // chunks is a double indexed array of chunkId / chunkFilename pairs
     chunks: (string | number)[];
     name: string;
   }
@@ -44,12 +49,12 @@ declare module 'react-server-dom-webpack' {
     | ReactElement
     // | LazyExoticComponent<ReactClientValue> // TODO: this is invalid and widens the type to any
     // References are passed by their value
-    | ClientReferenceMetadata
+    | ImportManifestEntry
     | ServerReference
     // The rest are passed as is. Sub-types can be passed in but lose their
     // subtype, so the receiver can only accept once of these.
     | ReactElement<string>
-    | ReactElement<ClientReferenceMetadata>
+    | ReactElement<ImportManifestEntry>
     | Context<any> // ServerContext
     | string
     | boolean

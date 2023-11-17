@@ -200,10 +200,18 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        '(react-server)/./src/__fixtures__/server-function-imported-from-client.js':
-          [`serverFunctionImportedFromClient`],
-        '(react-server)/./src/__fixtures__/server-function-passed-from-server.js':
-          [`serverFunctionPassedFromServer`],
+        '(react-server)/./src/__fixtures__/server-function-imported-from-client.js#serverFunctionImportedFromClient':
+          {
+            chunks: [],
+            id: `(react-server)/./src/__fixtures__/server-function-imported-from-client.js`,
+            name: `serverFunctionImportedFromClient`,
+          },
+        '(react-server)/./src/__fixtures__/server-function-passed-from-server.js#serverFunctionPassedFromServer':
+          {
+            chunks: [],
+            id: `(react-server)/./src/__fixtures__/server-function-passed-from-server.js`,
+            name: `serverFunctionPassedFromServer`,
+          },
       });
     });
 
@@ -286,8 +294,16 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
-        839: [`serverFunctionImportedFromClient`],
-        871: [`serverFunctionPassedFromServer`],
+        '839#serverFunctionImportedFromClient': {
+          chunks: [],
+          id: 839,
+          name: `serverFunctionImportedFromClient`,
+        },
+        '871#serverFunctionPassedFromServer': {
+          chunks: [],
+          id: 871,
+          name: `serverFunctionPassedFromServer`,
+        },
       });
     });
 

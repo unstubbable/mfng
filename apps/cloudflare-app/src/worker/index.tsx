@@ -1,7 +1,12 @@
 import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
-import {createRscActionStream, createRscAppStream} from '@mfng/core/server/rsc';
+import {
+  createRscActionStream,
+  createRscAppStream,
+  createRscFormState,
+} from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
 import * as React from 'react';
+import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
 import {
   cssManifest,
@@ -11,13 +16,17 @@ import {
   reactSsrManifest,
 } from './manifests.js';
 
-const handleGet: ExportedHandlerFetchHandler = async (request) => {
+async function renderApp(
+  request: Request,
+  formState?: ReactFormState,
+): Promise<Response> {
   const {pathname, search} = new URL(request.url);
 
   return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
     const rscAppStream = createRscAppStream(<App />, {
       reactClientManifest,
       mainCssHref: cssManifest[`main.css`]!,
+      formState,
     });
 
     if (request.headers.get(`accept`) === `text/x-component`) {
@@ -35,37 +44,43 @@ const handleGet: ExportedHandlerFetchHandler = async (request) => {
       headers: {'Content-Type': `text/html; charset=utf-8`},
     });
   });
+}
+
+const handleGet: ExportedHandlerFetchHandler = async (request) => {
+  return renderApp(request);
 };
 
 const handlePost: ExportedHandlerFetchHandler = async (request) => {
   const serverReferenceId = request.headers.get(`x-rsc-action`);
 
-  if (!serverReferenceId) {
-    console.error(`Missing server reference ("x-rsc-action" header).`);
+  if (serverReferenceId) {
+    // POST via callServer:
 
-    return new Response(null, {status: 400});
+    const contentType = request.headers.get(`content-type`);
+
+    const body = await (contentType?.startsWith(`multipart/form-data`)
+      ? request.formData()
+      : request.text());
+
+    const rscActionStream = await createRscActionStream({
+      body,
+      serverReferenceId,
+      reactClientManifest,
+      reactServerManifest,
+    });
+
+    return new Response(rscActionStream, {
+      status: rscActionStream ? 200 : 500,
+      headers: {'Content-Type': `text/x-component`},
+    });
+  } else {
+    // POST before hydration (progressive enhancement):
+
+    const formData = await request.formData();
+    const formState = await createRscFormState(formData, reactServerManifest);
+
+    return renderApp(request, formState);
   }
-
-  const body = await (request.headers
-    .get(`content-type`)
-    ?.startsWith(`multipart/form-data`)
-    ? request.formData()
-    : request.text());
-
-  const rscActionStream = await createRscActionStream({
-    body,
-    serverReferenceId,
-    reactClientManifest,
-    reactServerManifest,
-  });
-
-  if (!rscActionStream) {
-    return new Response(null, {status: 500});
-  }
-
-  return new Response(rscActionStream, {
-    headers: {'Content-Type': `text/x-component`},
-  });
 };
 
 const handler: ExportedHandler = {

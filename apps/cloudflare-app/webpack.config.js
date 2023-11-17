@@ -100,6 +100,9 @@ export default function createConfigs(_env, argv) {
       path: path.join(process.cwd(), `dist`),
       libraryTarget: `module`,
       chunkFormat: `module`,
+      devtoolModuleFilenameTemplate: (
+        /** @type {{ absoluteResourcePath: string; }} */ info,
+      ) => info.absoluteResourcePath,
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
@@ -113,7 +116,7 @@ export default function createConfigs(_env, argv) {
     module: {
       rules: [
         {
-          resource: [/rsc\.ts$/, /app\.tsx$/],
+          resource: [/rsc\.ts$/, /\/app\.tsx$/],
           layer: webpackRscLayerName,
         },
         {

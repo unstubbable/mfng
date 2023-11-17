@@ -1,7 +1,7 @@
 import {createRequire} from 'module';
 import type {
   ClientManifest,
-  ClientReferenceMetadata,
+  ImportManifestEntry,
   SSRManifest,
 } from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
@@ -136,10 +136,8 @@ export class WebpackRscClientPlugin {
                 if (module) {
                   const moduleId = compilation.chunkGraph.getModuleId(module);
 
-                  const ssrModuleMetaData: Record<
-                    string,
-                    ClientReferenceMetadata
-                  > = {};
+                  const ssrModuleMetaData: Record<string, ImportManifestEntry> =
+                    {};
 
                   for (const {id, exportName, ssrId} of clientReferences) {
                     // Theoretically the used client and SSR export names should

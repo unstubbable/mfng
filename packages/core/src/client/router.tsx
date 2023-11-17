@@ -1,12 +1,12 @@
 import * as React from 'react';
 import type {RouterLocation} from '../use-router-location.js';
-import {createFetchElementStream} from './create-fetch-element-stream.js';
+import {createUrl, createUrlPath} from './router-location-utils.js';
 import {RouterLocationContext} from './use-router-location.js';
 import {RouterContext} from './use-router.js';
 
-const fetchElementStream = createFetchElementStream(
-  createUrlPath(document.location),
-);
+export interface RouterProps {
+  readonly fetchRoot: (urlPath: string) => Promise<React.ReactElement>;
+}
 
 interface RouterState {
   readonly location: RouterLocation;
@@ -15,7 +15,7 @@ interface RouterState {
 
 type RouterAction = 'push' | 'replace' | 'pop';
 
-export function Router(): JSX.Element {
+export function Router({fetchRoot}: RouterProps): React.ReactNode {
   const [routerState, setRouterState] = React.useState<RouterState>(() => {
     const {pathname, search} = document.location;
 
@@ -77,29 +77,13 @@ export function Router(): JSX.Element {
     }
   }, [routerState]);
 
-  const elementStreamPromise = fetchElementStream(
-    createUrlPath(routerState.location),
-  );
+  const rootPromise = fetchRoot(createUrlPath(routerState.location));
 
   return (
     <RouterContext.Provider value={{isPending, push, replace}}>
       <RouterLocationContext.Provider value={routerState.location}>
-        {React.use(elementStreamPromise)}
+        {React.use(rootPromise)}
       </RouterLocationContext.Provider>
     </RouterContext.Provider>
   );
-}
-
-function createUrlPath(location: RouterLocation): string {
-  const {pathname, search} = location;
-
-  return `${pathname}${normalizeSearch(search)}`;
-}
-
-function createUrl(location: RouterLocation): URL {
-  return new URL(createUrlPath(location), document.location.origin);
-}
-
-function normalizeSearch(search: string): string {
-  return `${search.replace(/(^[^?].*)/, `?$1`)}`;
 }
