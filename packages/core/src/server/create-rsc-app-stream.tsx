@@ -1,19 +1,26 @@
 import * as React from 'react';
+import type {ReactFormState} from 'react-dom/server';
 import type {ClientManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 
 export interface CreateRscAppStreamOptions {
   readonly reactClientManifest: ClientManifest;
   readonly mainCssHref?: string;
+  readonly formState?: ReactFormState;
+}
+
+export interface RscAppResult {
+  readonly root: React.ReactElement;
+  readonly formState?: ReactFormState;
 }
 
 export function createRscAppStream(
   app: React.ReactNode,
   options: CreateRscAppStreamOptions,
 ): ReadableStream<Uint8Array> {
-  const {reactClientManifest, mainCssHref} = options;
+  const {reactClientManifest, mainCssHref, formState} = options;
 
-  return ReactServerDOMServer.renderToReadableStream(
+  const root = (
     <>
       {mainCssHref && (
         <link
@@ -24,7 +31,11 @@ export function createRscAppStream(
         />
       )}
       {app}
-    </>,
+    </>
+  );
+
+  return ReactServerDOMServer.renderToReadableStream(
+    {root, formState: formState as (string | number)[]},
     reactClientManifest,
   );
 }

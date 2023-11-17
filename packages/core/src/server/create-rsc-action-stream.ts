@@ -1,4 +1,4 @@
-import type {ClientManifest} from 'react-server-dom-webpack';
+import type {ClientManifest, ServerManifest} from 'react-server-dom-webpack';
 import ReactServerDOMServer from 'react-server-dom-webpack/server.edge';
 
 export interface CreateRscActionStreamOptions {
@@ -11,9 +11,9 @@ export interface CreateRscActionStreamOptions {
   readonly reactServerManifest: ServerManifest;
 }
 
-export type ServerManifest = Record<string, string[]>;
-
-declare var __webpack_require__: (moduleId: string) => Record<string, unknown>;
+declare var __webpack_require__: (
+  moduleId: string | number,
+) => Record<string, unknown>;
 
 export async function createRscActionStream(
   options: CreateRscActionStreamOptions,
@@ -21,17 +21,9 @@ export async function createRscActionStream(
   const {body, serverReferenceId, reactClientManifest, reactServerManifest} =
     options;
 
-  const [moduleId, exportName] = serverReferenceId?.split(`#`) ?? [];
+  const serverReference = reactServerManifest[serverReferenceId];
 
-  if (!moduleId || !exportName) {
-    console.error(
-      `Invalid server reference ID: ${JSON.stringify(serverReferenceId)}`,
-    );
-
-    return undefined;
-  }
-
-  if (!reactServerManifest[moduleId]?.includes(exportName)) {
+  if (!serverReference) {
     console.error(
       `Unknown server reference ID: ${JSON.stringify(serverReferenceId)}`,
     );
@@ -44,7 +36,7 @@ export async function createRscActionStream(
     return undefined;
   }
 
-  const action = __webpack_require__(moduleId)[exportName];
+  const action = __webpack_require__(serverReference.id)[serverReference.name];
 
   if (typeof action !== `function`) {
     console.error(

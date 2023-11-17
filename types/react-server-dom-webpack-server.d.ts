@@ -1,16 +1,12 @@
 declare module 'react-server-dom-webpack/server.edge' {
   import type {ReactElement, Thenable} from 'react';
+  import type {ReactFormState} from 'react-dom/server';
   import type {
     ClientManifest,
     ReactClientValue,
     ReactServerValue,
+    ServerManifest,
   } from 'react-server-dom-webpack';
-
-  export type LazyComponent<T, P> = {
-    $$typeof: symbol | number;
-    _payload: P;
-    _init: (payload: P) => T;
-  };
 
   export interface RenderToReadableStreamOptions {
     identifierPrefix?: string;
@@ -34,4 +30,15 @@ declare module 'react-server-dom-webpack/server.edge' {
   ): ReadableStream<Uint8Array>;
 
   export function decodeReply(body: string | FormData): Thenable<unknown[]>;
+
+  export function decodeAction(
+    body: FormData,
+    serverManifest: ServerManifest,
+  ): Promise<() => unknown> | null;
+
+  export function decodeFormState(
+    actionResult: unknown,
+    body: FormData,
+    serverManifest: ServerManifest,
+  ): Promise<ReactFormState | null>;
 }
