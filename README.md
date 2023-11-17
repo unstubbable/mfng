@@ -16,12 +16,14 @@ server?
 - [x] Server-side rendering
 - [x] Client components loaded as separate chunks
 - [x] Server actions
+- [x] Progressively enhanced form actions
 - [x] Suspensy routing
 - [x] Development server
 - [x] Production builds
-- [x] Serverless deployment (using
-      [Cloudflare Workers](https://workers.cloudflare.com))
-- [x] Server references manifest
+- [x] Serverless deployment examples
+  - using a [Cloudflare Worker](https://workers.cloudflare.com)
+  - using a
+    [Vercel Edge Function](https://vercel.com/docs/functions/edge-functions)
 - [x] Support [poisoned imports][]
 - [ ] Microfrontend composition demo
 - [ ] Advanced routing
