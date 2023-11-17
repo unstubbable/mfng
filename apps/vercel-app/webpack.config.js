@@ -108,6 +108,14 @@ export default function createConfigs(_env, argv) {
   const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**
+   * @type {import('webpack').RuleSetUseItem}
+   */
+  const serverSwcLoader = {
+    loader: `swc-loader`,
+    options: {env: {targets: {node: 18}}},
+  };
+
+  /**
    * @type {import('webpack').Configuration}
    */
   const serverConfig = {
@@ -149,25 +157,15 @@ export default function createConfigs(_env, argv) {
             {
               issuerLayer: webpackRscLayerName,
               test: /\.tsx?$/,
-              use: [rscServerLoader, `swc-loader`],
+              use: [rscServerLoader, serverSwcLoader],
               exclude: [/node_modules/],
             },
             {
               test: /\.tsx?$/,
-              use: [rscSsrLoader, `swc-loader`],
+              use: [rscSsrLoader, serverSwcLoader],
               // use: `swc-loader`,
               exclude: [/node_modules/],
             },
-          ],
-        },
-        {
-          oneOf: [
-            {
-              test: /\.js$/,
-              issuerLayer: webpackRscLayerName,
-              use: rscServerLoader,
-            },
-            {test: /\.js$/, use: rscSsrLoader},
           ],
         },
         cssRule,
@@ -218,7 +216,6 @@ export default function createConfigs(_env, argv) {
     module: {
       rules: [
         {test: /\.js$/, loader: `source-map-loader`, enforce: `pre`},
-        {test: /\.js$/, use: rscClientLoader},
         {
           test: /\.tsx?$/,
           use: [rscClientLoader, `swc-loader`],

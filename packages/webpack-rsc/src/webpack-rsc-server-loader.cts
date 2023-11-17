@@ -21,109 +21,114 @@ namespace webpackRscServerLoader {
 
 type RegisterReferenceType = 'Server' | 'Client';
 
-function webpackRscServerLoader(
-  this: webpack.LoaderContext<webpackRscServerLoader.WebpackRscServerLoaderOptions>,
-  source: string,
-): void {
-  this.cacheable(true);
+const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerLoader.WebpackRscServerLoaderOptions> =
+  function (source, sourceMap) {
+    this.cacheable(true);
 
-  const {clientReferencesMap} = this.getOptions();
-  const clientReferences: webpackRscServerLoader.ClientReference[] = [];
-  const resourcePath = this.resourcePath;
+    const {clientReferencesMap} = this.getOptions();
+    const clientReferences: webpackRscServerLoader.ClientReference[] = [];
+    const resourcePath = this.resourcePath;
 
-  const ast = parser.parse(source, {
-    sourceType: `module`,
-    sourceFilename: resourcePath,
-  });
+    const ast = parser.parse(source, {
+      sourceType: `module`,
+      sourceFilename: resourcePath,
+    });
 
-  let moduleDirective: 'use client' | 'use server' | undefined;
-  let addedRegisterReferenceCall: RegisterReferenceType | undefined;
-  const unshiftedNodes = new Set<t.Node>();
+    let moduleDirective: 'use client' | 'use server' | undefined;
+    let addedRegisterReferenceCall: RegisterReferenceType | undefined;
+    const unshiftedNodes = new Set<t.Node>();
 
-  traverse.default(ast, {
-    enter(nodePath) {
-      const {node} = nodePath;
+    traverse.default(ast, {
+      enter(nodePath) {
+        const {node} = nodePath;
 
-      if (t.isProgram(node)) {
-        if (node.directives.some(isDirective(`use client`))) {
-          moduleDirective = `use client`;
-        } else if (node.directives.some(isDirective(`use server`))) {
-          moduleDirective = `use server`;
-        } else {
-          nodePath.skip();
+        if (t.isProgram(node)) {
+          if (node.directives.some(isDirective(`use client`))) {
+            moduleDirective = `use client`;
+          } else if (node.directives.some(isDirective(`use server`))) {
+            moduleDirective = `use server`;
+          } else {
+            nodePath.skip();
+          }
+
+          return;
         }
 
-        return;
-      }
-
-      if (
-        !moduleDirective ||
-        (t.isDirective(node) && isDirective(`use client`)(node)) ||
-        unshiftedNodes.has(node)
-      ) {
-        nodePath.skip();
-
-        return;
-      }
-
-      const exportName = getExportName(node);
-
-      if (moduleDirective === `use client`) {
-        if (exportName) {
-          const id = `${path.relative(process.cwd(), resourcePath)}`;
-          clientReferences.push({id, exportName});
-          addedRegisterReferenceCall = `Client`;
-          nodePath.replaceWith(createExportedClientReference(id, exportName));
+        if (
+          !moduleDirective ||
+          (t.isDirective(node) && isDirective(`use client`)(node)) ||
+          unshiftedNodes.has(node)
+        ) {
           nodePath.skip();
-        } else {
-          nodePath.remove();
+
+          return;
         }
-      } else if (exportName) {
-        addedRegisterReferenceCall = `Server`;
-        nodePath.insertAfter(createRegisterServerReference(exportName));
-        nodePath.skip();
-      }
-    },
-    exit(nodePath) {
-      if (!t.isProgram(nodePath.node) || !addedRegisterReferenceCall) {
-        nodePath.skip();
 
-        return;
-      }
+        const exportName = getExportName(node);
 
-      const nodes: t.Node[] = [
-        createRegisterReferenceImport(addedRegisterReferenceCall),
-      ];
+        if (moduleDirective === `use client`) {
+          if (exportName) {
+            const id = `${path.relative(process.cwd(), resourcePath)}`;
+            clientReferences.push({id, exportName});
+            addedRegisterReferenceCall = `Client`;
+            nodePath.replaceWith(createExportedClientReference(id, exportName));
+            nodePath.skip();
+          } else {
+            nodePath.remove();
+          }
+        } else if (exportName) {
+          addedRegisterReferenceCall = `Server`;
+          nodePath.insertAfter(createRegisterServerReference(exportName));
+          nodePath.skip();
+        }
+      },
+      exit(nodePath) {
+        if (!t.isProgram(nodePath.node) || !addedRegisterReferenceCall) {
+          nodePath.skip();
 
-      if (addedRegisterReferenceCall === `Client`) {
-        nodes.push(createClientReferenceProxyImplementation());
-      }
+          return;
+        }
 
-      for (const node of nodes) {
-        unshiftedNodes.add(node);
-      }
+        const nodes: t.Node[] = [
+          createRegisterReferenceImport(addedRegisterReferenceCall),
+        ];
 
-      (nodePath as traverse.NodePath<t.Program>).unshiftContainer(
-        `body`,
-        nodes,
-      );
-    },
-  });
+        if (addedRegisterReferenceCall === `Client`) {
+          nodes.push(createClientReferenceProxyImplementation());
+        }
 
-  if (!moduleDirective) {
-    return this.callback(null, source);
-  }
+        for (const node of nodes) {
+          unshiftedNodes.add(node);
+        }
 
-  if (clientReferences.length > 0) {
-    clientReferencesMap.set(resourcePath, clientReferences);
-  }
+        (nodePath as traverse.NodePath<t.Program>).unshiftContainer(
+          `body`,
+          nodes,
+        );
+      },
+    });
 
-  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
+    if (!moduleDirective) {
+      return this.callback(null, source, sourceMap);
+    }
 
-  // TODO: Handle source maps.
+    if (clientReferences.length > 0) {
+      clientReferencesMap.set(resourcePath, clientReferences);
+    }
 
-  this.callback(null, code);
-}
+    const {code, map} = generate.default(
+      ast,
+      {
+        sourceFileName: this.resourcePath,
+        sourceMaps: this.sourceMap,
+        // @ts-expect-error
+        inputSourceMap: sourceMap,
+      },
+      source,
+    );
+
+    this.callback(null, code, map ?? sourceMap);
+  };
 
 function isDirective(
   value: 'use client' | 'use server',
