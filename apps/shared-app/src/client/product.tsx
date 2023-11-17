@@ -21,8 +21,13 @@ export function Product({buy}: ProductProps): JSX.Element {
     <form action={formAction}>
       <p className="my-2">
         This is a client component that renders a form with a form action. On
-        submit, the form action calls a server action with the current form
-        data, which in turn responds with a success or error result.
+        submit, a server action is called with the current form data, which in
+        turn responds with a success or error result.
+      </p>
+      <p className="my-2">
+        The form submission also works before hydration, including server-side
+        rendering of the result! This can be simulated by blocking the
+        javascript files.
       </p>
       <input
         type="number"
