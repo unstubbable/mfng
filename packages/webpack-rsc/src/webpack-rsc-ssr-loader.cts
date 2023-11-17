@@ -2,12 +2,12 @@ import generate = require('@babel/generator');
 import parser = require('@babel/parser');
 import traverse = require('@babel/traverse');
 import t = require('@babel/types');
-import type {LoaderContext} from 'webpack';
+import webpack = require('webpack');
 
-export = function webpackRscSsrLoader(
-  this: LoaderContext<{}>,
-  source: string,
-): void {
+const webpackRscSsrLoader: webpack.LoaderDefinitionFunction = function (
+  source,
+  sourceMap,
+) {
   this.cacheable(true);
 
   const resourcePath = this.resourcePath;
@@ -17,12 +17,16 @@ export = function webpackRscSsrLoader(
     sourceFilename: resourcePath,
   });
 
+  let hasUseServerDirective = false;
+
   traverse.default(ast, {
     enter(path) {
       const {node} = path;
 
       if (t.isProgram(node)) {
-        if (!node.directives.some(isUseServerDirective)) {
+        if (node.directives.some(isUseServerDirective)) {
+          hasUseServerDirective = true;
+        } else {
           path.skip();
         }
 
@@ -46,11 +50,22 @@ export = function webpackRscSsrLoader(
     },
   });
 
-  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
+  if (!hasUseServerDirective) {
+    return this.callback(null, source, sourceMap);
+  }
 
-  // TODO: Handle source maps.
+  const {code, map} = generate.default(
+    ast,
+    {
+      sourceFileName: this.resourcePath,
+      sourceMaps: this.sourceMap,
+      // @ts-expect-error
+      inputSourceMap: sourceMap,
+    },
+    source,
+  );
 
-  this.callback(null, code);
+  this.callback(null, code, map ?? sourceMap);
 };
 
 function isUseServerDirective(directive: t.Directive): boolean {
@@ -104,3 +119,5 @@ function createExportedServerReferenceStub(
     ),
   );
 }
+
+export = webpackRscSsrLoader;

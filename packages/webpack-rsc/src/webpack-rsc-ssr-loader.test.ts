@@ -65,18 +65,18 @@ export function bar() {
 
     const output = await callLoader(resourcePath);
 
-    expect(output).toEqual(
+    expect(output.toString().trim()).toEqual(
       `
 // @ts-nocheck
 'use client';
 
 import * as React from 'react';
-export function ClientComponent({
-  action
-}) {
+
+export function ClientComponent({action}) {
   React.useEffect(() => {
     action().then(console.log);
   }, []);
+
   return null;
 }`.trim(),
     );
