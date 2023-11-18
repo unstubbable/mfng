@@ -61,6 +61,7 @@ async function renderApp(
     const htmlStream = await createHtmlStream(rscAppStream, {
       reactSsrManifest,
       bootstrapScripts: [jsManifest[`main.js`]!],
+      formState,
     });
 
     return new Response(htmlStream, {
