@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "pipeline": {
+    "build": {
+      "inputs": [
+        "src/**/*",
+        "package.json",
+        "tailwind.config.cjs",
+        "webpack.config.js"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "build:dev": {
+      "inputs": [
+        "src/**/*",
+        "package.json",
+        "tailwind.config.cjs",
+        "webpack.config.js"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build:dev"]
+    }
+  }
+}

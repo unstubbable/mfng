@@ -7,6 +7,7 @@
   "type": "module",
   "workspaces": [
     "apps/cloudflare-app",
+    "apps/feature-app",
     "apps/shared-app",
     "apps/vercel-app",
     "packages/core",
@@ -20,11 +21,11 @@
     "compile:clean": "tsc --build --clean",
     "compile:watch": "tsc --build --watch --preserveWatchOutput",
     "deploy": "turbo deploy",
-    "dev": "turbo --concurrency 11 watch:dev dev",
+    "dev": "turbo --concurrency 13 watch:dev dev",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
-    "start": "turbo --concurrency 11 watch start",
+    "start": "turbo --concurrency 13 watch start",
     "test": "turbo test"
   },
   "devDependencies": {

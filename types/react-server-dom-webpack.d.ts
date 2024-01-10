@@ -35,6 +35,7 @@ declare module 'react-server-dom-webpack' {
     // chunks is a double indexed array of chunkId / chunkFilename pairs
     chunks: (string | number)[];
     name: string;
+    async?: boolean;
   }
 
   export interface ServerReference {

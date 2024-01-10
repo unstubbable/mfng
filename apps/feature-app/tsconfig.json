@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "outDir": "lib",
+    "types": [
+      "@cloudflare/workers-types",
+      "jest",
+      "react/experimental",
+      "react-dom/experimental"
+    ]
+  },
+  "include": ["src/**/*", "../../types", "*.js", "*.cjs"],
+  "exclude": ["dist"],
+  "references": [
+    {"path": "../../packages/core"},
+    {"path": "../../packages/webpack-rsc"}
+  ]
+}

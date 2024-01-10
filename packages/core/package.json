@@ -11,6 +11,13 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "exports": {
+    ".": {
+      "@mfng:internal:node": "./src/server/index.ts",
+      "@mfng:internal": "./src/client/index.ts",
+      "types": "./lib/index.d.ts",
+      "node": "./lib/server/index.js",
+      "default": "./lib/client/index.js"
+    },
     "./client": {
       "@mfng:internal": "./src/client/index.ts",
       "default": "./lib/client/index.js"

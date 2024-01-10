@@ -100,7 +100,6 @@ export default function createConfigs(_env, argv) {
       path: path.join(process.cwd(), `dist`),
       libraryTarget: `module`,
       chunkFormat: `module`,
-      publicPath: `/`,
       devtoolModuleFilenameTemplate: (
         /** @type {{ absoluteResourcePath: string; }} */ info,
       ) => info.absoluteResourcePath,

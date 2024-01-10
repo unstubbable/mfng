@@ -1,3 +1,4 @@
+import {FeatureAppLoader} from '@mfng/core';
 import * as React from 'react';
 import {CountriesSearch} from '../client/countries-search.js';
 import {Main} from '../shared/main.js';
@@ -20,6 +21,7 @@ export function FastPage(): JSX.Element {
       <Markdown text={content} />
       <CountriesSearch />
       <CountriesList />
+      <FeatureAppLoader url="http://localhost:3002" />
     </Main>
   );
 }
