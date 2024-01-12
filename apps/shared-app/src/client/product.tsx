@@ -15,14 +15,8 @@ export interface ProductProps {
 }
 
 export function Product({buy}: ProductProps): JSX.Element {
-  const [formState, formAction] = ReactDOM.useFormState(
-    async (prevResult: BuyResult | undefined, formData: FormData) => {
-      setOptimisticResult(parseInt(formData.get(`quantity`) as string, 10));
-
-      return buy(prevResult, formData);
-    },
-    undefined,
-  );
+  const [, startTransition] = React.useTransition();
+  const [formState, formAction] = ReactDOM.useFormState(buy, undefined);
 
   const [result, setOptimisticResult] = React.useOptimistic<
     BuyResult | undefined,
@@ -34,7 +28,18 @@ export function Product({buy}: ProductProps): JSX.Element {
   }));
 
   return (
-    <form action={formAction}>
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+
+        startTransition(() => {
+          setOptimisticResult(parseInt(formData.get(`quantity`) as string, 10));
+          formAction(formData);
+        });
+      }}
+    >
       <p className="my-2">
         This is a client component that renders a form with a form action. On
         submit, a server action is called with the current form data, which in
