@@ -32,7 +32,7 @@ export function Product({buy}: ProductProps): JSX.Element {
               status: `success`,
               quantity,
               totalQuantityInSession:
-                prevResult?.totalQuantityInSession ?? 0 + quantity,
+                (prevResult?.totalQuantityInSession ?? 0) + quantity,
             };
           });
         });
