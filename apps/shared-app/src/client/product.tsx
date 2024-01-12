@@ -15,7 +15,23 @@ export interface ProductProps {
 }
 
 export function Product({buy}: ProductProps): JSX.Element {
-  const [result, formAction] = ReactDOM.useFormState(buy, undefined);
+  const [formState, formAction] = ReactDOM.useFormState(
+    async (prevResult: BuyResult | undefined, formData: FormData) => {
+      setOptimisticResult(parseInt(formData.get(`quantity`) as string, 10));
+
+      return buy(prevResult, formData);
+    },
+    undefined,
+  );
+
+  const [result, setOptimisticResult] = React.useOptimistic<
+    BuyResult | undefined,
+    number
+  >(formState, (prevResult, quantity) => ({
+    status: `success`,
+    quantity,
+    totalQuantityInSession: prevResult?.totalQuantityInSession ?? 0 + quantity,
+  }));
 
   return (
     <form action={formAction}>
