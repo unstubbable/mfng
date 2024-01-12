@@ -15,7 +15,6 @@ export interface ProductProps {
 }
 
 export function Product({buy}: ProductProps): JSX.Element {
-  const [, startTransition] = React.useTransition();
   const [formState, formAction] = ReactDOM.useFormState(buy, undefined);
 
   const [result, setOptimisticResult] = React.useOptimistic<
@@ -34,7 +33,7 @@ export function Product({buy}: ProductProps): JSX.Element {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
 
-        startTransition(() => {
+        React.startTransition(() => {
           setOptimisticResult(parseInt(formData.get(`quantity`) as string, 10));
           formAction(formData);
         });
