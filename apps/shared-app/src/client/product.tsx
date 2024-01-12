@@ -16,26 +16,25 @@ export interface ProductProps {
 
 export function Product({buy}: ProductProps): JSX.Element {
   const [formState, formAction] = ReactDOM.useFormState(buy, undefined);
-
-  const [result, setOptimisticResult] = React.useOptimistic<
-    BuyResult | undefined,
-    number
-  >(formState, (prevResult, quantity) => ({
-    status: `success`,
-    quantity,
-    totalQuantityInSession: prevResult?.totalQuantityInSession ?? 0 + quantity,
-  }));
+  const [result, setOptimisticResult] = React.useOptimistic(formState);
 
   return (
     <form
       action={formAction}
       onSubmit={(event) => {
-        event.preventDefault();
         const formData = new FormData(event.currentTarget);
 
         React.startTransition(() => {
-          setOptimisticResult(parseInt(formData.get(`quantity`) as string, 10));
-          formAction(formData);
+          setOptimisticResult((prevResult) => {
+            const quantity = parseInt(formData.get(`quantity`) as string, 10);
+
+            return {
+              status: `success`,
+              quantity,
+              totalQuantityInSession:
+                prevResult?.totalQuantityInSession ?? 0 + quantity,
+            };
+          });
         });
       }}
     >
