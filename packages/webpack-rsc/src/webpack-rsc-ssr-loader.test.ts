@@ -53,6 +53,9 @@ export function foo() {
 export function bar() {
   throw new Error("Server actions must not be called during server-side rendering.");
 }
+export function baz() {
+  throw new Error("Server actions must not be called during server-side rendering.");
+}
 `.trim(),
     );
   });

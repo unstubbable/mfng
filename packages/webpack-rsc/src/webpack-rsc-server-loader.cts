@@ -64,7 +64,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           return;
         }
 
-        const exportName = getExportName(node);
+        const exportName = getFunctionExportName(node);
 
         if (moduleDirective === `use client`) {
           if (exportName) {
@@ -137,16 +137,27 @@ function isDirective(
     t.isDirectiveLiteral(directive.value) && directive.value.value === value;
 }
 
-function getExportName(node: t.Node): string | undefined {
+function getFunctionExportName(node: t.Node): string | undefined {
   if (t.isExportNamedDeclaration(node)) {
     if (t.isFunctionDeclaration(node.declaration)) {
       return node.declaration.id?.name;
     }
 
     if (t.isVariableDeclaration(node.declaration)) {
-      const id = node.declaration.declarations[0]?.id;
+      const [variableDeclarator] = node.declaration.declarations;
 
-      return t.isIdentifier(id) ? id.name : undefined;
+      if (variableDeclarator) {
+        const {id, init} = variableDeclarator;
+
+        if (
+          t.isIdentifier(id) &&
+          (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+        ) {
+          return id.name;
+        }
+      }
+
+      return undefined;
     }
   }
 
