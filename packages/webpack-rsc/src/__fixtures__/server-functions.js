@@ -6,4 +6,10 @@ export async function foo() {
 
 export const bar = async () => Promise.resolve(`bar`);
 
-export const baz = 42;
+export const baz = function () {
+  quux();
+};
+
+export const qux = 42;
+
+function quux() {}

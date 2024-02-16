@@ -96,8 +96,12 @@ export async function foo() {
 registerServerReference(foo, module.id, "foo")
 export const bar = async () => Promise.resolve(\`bar\`);
 registerServerReference(bar, module.id, "bar")
-export const baz = 42;
+export const baz = function () {
+  quux();
+};
 registerServerReference(baz, module.id, "baz")
+export const qux = 42;
+function quux() {}
 `.trim(),
     );
   });
