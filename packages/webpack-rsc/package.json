@@ -1,10 +1,10 @@
 {
   "name": "@mfng/webpack-rsc",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A set of Webpack loaders and plugins for React Server Components",
   "repository": {
     "type": "git",
-    "url": "https://github.com/unstubbable/mfng.git",
+    "url": "git+https://github.com/unstubbable/mfng.git",
     "directory": "packages/webpack-rsc"
   },
   "license": "MIT",
