@@ -8,7 +8,7 @@ export interface AppProps {
   readonly getTitle: (pathname: string) => string;
 }
 
-export function App({getTitle}: AppProps): JSX.Element {
+export function App({getTitle}: AppProps): React.ReactNode {
   const {pathname} = useRouterLocation();
 
   return (

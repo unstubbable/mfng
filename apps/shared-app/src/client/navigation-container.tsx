@@ -6,7 +6,7 @@ import * as React from 'react';
 
 export function NavigationContainer({
   children,
-}: React.PropsWithChildren): JSX.Element {
+}: React.PropsWithChildren): React.ReactNode {
   const {isPending} = useRouter();
 
   return (

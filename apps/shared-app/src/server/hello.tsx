@@ -7,7 +7,7 @@ async function fetchSubject(): Promise<string> {
   return Promise.resolve(`World`);
 }
 
-export async function Hello(): Promise<JSX.Element> {
+export async function Hello(): Promise<React.ReactElement> {
   const subject = await fetchSubject();
 
   return <Markdown text={`# Hello, *${subject}*!`} />;

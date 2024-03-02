@@ -7,7 +7,7 @@ export type LinkProps = React.PropsWithChildren<{
   readonly pathname: string;
 }>;
 
-export function Link({children, pathname}: LinkProps): JSX.Element {
+export function Link({children, pathname}: LinkProps): React.ReactNode {
   const {push} = useRouter();
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {

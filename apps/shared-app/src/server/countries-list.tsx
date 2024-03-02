@@ -2,7 +2,7 @@ import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
 import {countriesFuse} from './countries-fuse.js';
 
-export function CountriesList(): JSX.Element {
+export function CountriesList(): React.ReactNode {
   const {search} = useRouterLocation();
   const query = new URLSearchParams(search).get(`q`);
 

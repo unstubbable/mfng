@@ -4,7 +4,7 @@ import {FastPage} from './fast-page.js';
 import {HomePage} from './home-page.js';
 import {SlowPage} from './slow-page.js';
 
-export function Routes(): JSX.Element {
+export function Routes(): React.ReactNode {
   const {pathname} = useRouterLocation();
 
   switch (pathname) {

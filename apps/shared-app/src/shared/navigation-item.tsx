@@ -9,7 +9,7 @@ export type NavigationItemProps = React.PropsWithChildren<{
 export function NavigationItem({
   children,
   pathname,
-}: NavigationItemProps): JSX.Element {
+}: NavigationItemProps): React.ReactNode {
   const {pathname: currentPathname} = useRouterLocation();
 
   if (pathname === currentPathname) {

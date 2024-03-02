@@ -4,7 +4,7 @@ import {useRouter} from '@mfng/core/client';
 import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
 
-export function CountriesSearch(): JSX.Element {
+export function CountriesSearch(): React.ReactNode {
   const {search} = useRouterLocation();
   const {replace} = useRouter();
   const [, startTransition] = React.useTransition();
