@@ -37,6 +37,23 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
     let moduleDirective: 'use client' | 'use server' | undefined;
     let addedRegisterReferenceCall: RegisterReferenceType | undefined;
     const unshiftedNodes = new Set<t.Node>();
+    const localFunctionNames: string[] = [];
+
+    traverse.default(ast, {
+      enter(nodePath) {
+        const {node} = nodePath;
+
+        if (t.isExportNamedDeclaration(node)) {
+          return nodePath.skip();
+        }
+
+        const localFunctionName = getFunctionName(node);
+
+        if (localFunctionName) {
+          localFunctionNames.push(localFunctionName);
+        }
+      },
+    });
 
     traverse.default(ast, {
       enter(nodePath) {
@@ -59,27 +76,41 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           (t.isDirective(node) && isDirective(`use client`)(node)) ||
           unshiftedNodes.has(node)
         ) {
-          nodePath.skip();
-
-          return;
+          return nodePath.skip();
         }
 
-        const exportName = getFunctionExportName(node);
+        const exportNames = getFunctionExportNames(node, localFunctionNames);
 
         if (moduleDirective === `use client`) {
-          if (exportName) {
+          if (exportNames.length === 0) {
+            return nodePath.remove();
+          }
+
+          const exportedClientReferences: t.ExportNamedDeclaration[] = [];
+
+          for (const exportName of exportNames) {
             const id = `${path.relative(process.cwd(), resourcePath)}`;
             clientReferences.push({id, exportName});
             addedRegisterReferenceCall = `Client`;
-            nodePath.replaceWith(createExportedClientReference(id, exportName));
-            nodePath.skip();
-          } else {
-            nodePath.remove();
+
+            exportedClientReferences.push(
+              createExportedClientReference(id, exportName),
+            );
           }
-        } else if (exportName) {
-          addedRegisterReferenceCall = `Server`;
-          nodePath.insertAfter(createRegisterServerReference(exportName));
+
+          // I have no idea why the array of nodes needs to be duplicated for
+          // replaceWithMultiple to work properly. ¯\_(ツ)_/¯
+          nodePath.replaceWithMultiple([
+            ...exportedClientReferences,
+            ...exportedClientReferences,
+          ]);
+
           nodePath.skip();
+        } else {
+          for (const exportName of exportNames) {
+            addedRegisterReferenceCall = `Server`;
+            nodePath.insertAfter(createRegisterServerReference(exportName));
+          }
         }
       },
       exit(nodePath) {
@@ -137,28 +168,53 @@ function isDirective(
     t.isDirectiveLiteral(directive.value) && directive.value.value === value;
 }
 
-function getFunctionExportName(node: t.Node): string | undefined {
+function getFunctionExportNames(
+  node: t.Node,
+  localFunctionNames: string[],
+): string[] {
+  const functionNames: string[] = [];
+
   if (t.isExportNamedDeclaration(node)) {
-    if (t.isFunctionDeclaration(node.declaration)) {
-      return node.declaration.id?.name;
-    }
+    if (node.declaration) {
+      const functionName = getFunctionName(node.declaration);
 
-    if (t.isVariableDeclaration(node.declaration)) {
-      const [variableDeclarator] = node.declaration.declarations;
-
-      if (variableDeclarator) {
-        const {id, init} = variableDeclarator;
-
+      if (functionName) {
+        functionNames.push(functionName);
+      }
+    } else {
+      for (const specifier of node.specifiers) {
         if (
-          t.isIdentifier(id) &&
-          (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+          t.isExportSpecifier(specifier) &&
+          localFunctionNames.includes(specifier.local.name) &&
+          t.isIdentifier(specifier.exported)
         ) {
-          return id.name;
+          functionNames.push(specifier.exported.name);
         }
       }
+    }
+  }
 
+  return functionNames;
+}
+
+function getFunctionName(node: t.Node): string | undefined {
+  if (t.isFunctionDeclaration(node)) {
+    return node.id?.name;
+  }
+
+  if (t.isVariableDeclaration(node)) {
+    const [variableDeclarator] = node.declarations;
+
+    if (!variableDeclarator) {
       return undefined;
     }
+
+    const {id, init} = variableDeclarator;
+
+    return t.isIdentifier(id) &&
+      (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+      ? id.name
+      : undefined;
   }
 
   return undefined;

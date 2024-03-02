@@ -71,6 +71,9 @@ function createClientReferenceProxy(exportName) {
 export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${expectedId}", "ComponentA");
 export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${expectedId}", "ComponentB");
 export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${expectedId}", "ComponentC");
+export const ComponentD = registerClientReference(createClientReferenceProxy("ComponentD"), "${expectedId}", "ComponentD");
+export const ComponentE = registerClientReference(createClientReferenceProxy("ComponentE"), "${expectedId}", "ComponentE");
+export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${expectedId}", "ComponentF");
 `.trim(),
     );
   });
