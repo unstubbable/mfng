@@ -14,7 +14,7 @@ The pending navigation is indicated by rendering the page contents with a
 reduced opacity.
 `;
 
-export function FastPage(): JSX.Element {
+export function FastPage(): React.ReactNode {
   return (
     <Main>
       <Markdown text={content} />

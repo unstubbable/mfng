@@ -6,7 +6,7 @@ import {trackClick} from '../server/track-click.js';
 
 export type ButtonProps = React.PropsWithChildren<{}>;
 
-export function Button({children}: ButtonProps): JSX.Element {
+export function Button({children}: ButtonProps): React.ReactNode {
   const {pending} = ReactDOM.useFormStatus();
 
   return (

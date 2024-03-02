@@ -8,7 +8,7 @@ export type NotificationProps = React.PropsWithChildren<{
 export function Notification({
   children,
   status,
-}: NotificationProps): JSX.Element {
+}: NotificationProps): React.ReactNode {
   return (
     <div
       className={clsx(

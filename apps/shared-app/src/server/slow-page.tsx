@@ -11,7 +11,7 @@ from some kind of (slow) CMS. The content is _fetched and rendered on the
 server_. There is no markdown library in the client bundle.
 `;
 
-export async function SlowPage(): Promise<JSX.Element> {
+export async function SlowPage(): Promise<React.ReactElement> {
   await wait(3000);
 
   return (

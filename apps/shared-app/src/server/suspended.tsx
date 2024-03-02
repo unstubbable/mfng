@@ -9,7 +9,7 @@ async function fetchContent(): Promise<string> {
   return `This is a suspended server component.`;
 }
 
-export async function Suspended(): Promise<JSX.Element> {
+export async function Suspended(): Promise<React.ReactElement> {
   const content = await fetchContent();
 
   return <Markdown text={content} />;

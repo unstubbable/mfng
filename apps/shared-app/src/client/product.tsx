@@ -14,7 +14,7 @@ export interface ProductProps {
   ) => Promise<BuyResult>;
 }
 
-export function Product({buy}: ProductProps): JSX.Element {
+export function Product({buy}: ProductProps): React.ReactNode {
   const [result, formAction] = ReactDOM.useFormState(buy, undefined);
 
   return (

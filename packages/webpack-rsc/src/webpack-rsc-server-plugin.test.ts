@@ -259,25 +259,25 @@ async function serverFunctionPassedFromServer() {
       expect(pretty(outputFile)).toMatch(
         `
     839: (e, t, r) => {
-      async function o() {
+      async function n() {
         return Promise.resolve("server-function-imported-from-client");
       }
       r.r(t),
-        r.d(t, { serverFunctionImportedFromClient: () => o }),
+        r.d(t, { serverFunctionImportedFromClient: () => n }),
         (0, r(324).registerServerReference)(
-          o,
+          n,
           module.id,
           "serverFunctionImportedFromClient"
         );
     },
     871: (e, t, r) => {
-      async function o() {
+      async function n() {
         return Promise.resolve("server-function-passed-from-server");
       }
       r.r(t),
-        r.d(t, { serverFunctionPassedFromServer: () => o }),
+        r.d(t, { serverFunctionPassedFromServer: () => n }),
         (0, r(324).registerServerReference)(
-          o,
+          n,
           module.id,
           "serverFunctionPassedFromServer"
         );

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {NavigationItem} from './navigation-item.js';
 
-export function Navigation(): JSX.Element {
+export function Navigation(): React.ReactNode {
   return (
     <nav className="flex justify-between bg-zinc-700 px-4 py-3 sm:items-center">
       <ul className="flex flex-col gap-y-2 gap-x-3 sm:flex-row">

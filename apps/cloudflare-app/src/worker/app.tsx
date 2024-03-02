@@ -6,7 +6,7 @@
 import {App as SharedApp} from '@mfng/shared-app/app.js';
 import * as React from 'react';
 
-export function App(): JSX.Element {
+export function App(): React.ReactNode {
   return (
     <SharedApp getTitle={(pathname) => `Cloudflare RSC/SSR demo ${pathname}`} />
   );

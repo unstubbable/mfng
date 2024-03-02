@@ -5,7 +5,7 @@ export interface MarkdownProps {
   readonly text: string;
 }
 
-export function Markdown({text}: MarkdownProps): JSX.Element {
+export function Markdown({text}: MarkdownProps): React.ReactNode {
   return (
     <ReactMarkdown
       components={{

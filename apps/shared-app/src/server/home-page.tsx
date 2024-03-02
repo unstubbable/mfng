@@ -5,7 +5,7 @@ import {buy} from './buy.js';
 import {Hello} from './hello.js';
 import {Suspended} from './suspended.js';
 
-export function HomePage(): JSX.Element {
+export function HomePage(): React.ReactNode {
   return (
     <Main>
       <Hello />
