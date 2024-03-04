@@ -21,6 +21,17 @@ namespace webpackRscServerLoader {
 
 type RegisterReferenceType = 'Server' | 'Client';
 
+interface FunctionInfo {
+  readonly name: string;
+  readonly hasUseServerDirective: boolean;
+}
+
+interface ExportedFunctionInfo {
+  readonly localName: string;
+  readonly exportName: string;
+  readonly hasUseServerDirective: boolean;
+}
+
 const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerLoader.WebpackRscServerLoaderOptions> =
   function (source, sourceMap) {
     this.cacheable(true);
@@ -37,7 +48,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
     let moduleDirective: 'use client' | 'use server' | undefined;
     let addedRegisterReferenceCall: RegisterReferenceType | undefined;
     const unshiftedNodes = new Set<t.Node>();
-    const localFunctionNames: string[] = [];
+    const functions: FunctionInfo[] = [];
 
     traverse.default(ast, {
       enter(nodePath) {
@@ -47,10 +58,10 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           return nodePath.skip();
         }
 
-        const localFunctionName = getFunctionName(node);
+        const functionInfo = getFunctionInfo(node);
 
-        if (localFunctionName) {
-          localFunctionNames.push(localFunctionName);
+        if (functionInfo) {
+          functions.push(functionInfo);
         }
       },
     });
@@ -64,31 +75,28 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
             moduleDirective = `use client`;
           } else if (node.directives.some(isDirective(`use server`))) {
             moduleDirective = `use server`;
-          } else {
-            nodePath.skip();
           }
 
           return;
         }
 
         if (
-          !moduleDirective ||
           (t.isDirective(node) && isDirective(`use client`)(node)) ||
           unshiftedNodes.has(node)
         ) {
           return nodePath.skip();
         }
 
-        const exportNames = getFunctionExportNames(node, localFunctionNames);
+        const exportedFunctions = getExportedFunctions(node, functions);
 
         if (moduleDirective === `use client`) {
-          if (exportNames.length === 0) {
+          if (exportedFunctions.length === 0) {
             return nodePath.remove();
           }
 
           const exportedClientReferences: t.ExportNamedDeclaration[] = [];
 
-          for (const exportName of exportNames) {
+          for (const {exportName} of exportedFunctions) {
             const id = `${path.relative(process.cwd(), resourcePath)}`;
             clientReferences.push({id, exportName});
             addedRegisterReferenceCall = `Client`;
@@ -107,9 +115,14 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
 
           nodePath.skip();
         } else {
-          for (const exportName of exportNames) {
-            addedRegisterReferenceCall = `Server`;
-            nodePath.insertAfter(createRegisterServerReference(exportName));
+          for (const functionInfo of exportedFunctions) {
+            if (
+              moduleDirective === `use server` ||
+              functionInfo.hasUseServerDirective
+            ) {
+              addedRegisterReferenceCall = `Server`;
+              nodePath.insertAfter(createRegisterServerReference(functionInfo));
+            }
           }
         }
       },
@@ -139,7 +152,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
       },
     });
 
-    if (!moduleDirective) {
+    if (!addedRegisterReferenceCall) {
       return this.callback(null, source, sourceMap);
     }
 
@@ -168,56 +181,80 @@ function isDirective(
     t.isDirectiveLiteral(directive.value) && directive.value.value === value;
 }
 
-function getFunctionExportNames(
+function getExportedFunctions(
   node: t.Node,
-  localFunctionNames: string[],
-): string[] {
-  const functionNames: string[] = [];
+  functions: FunctionInfo[],
+): ExportedFunctionInfo[] {
+  const exportedFunctions: ExportedFunctionInfo[] = [];
 
   if (t.isExportNamedDeclaration(node)) {
     if (node.declaration) {
-      const functionName = getFunctionName(node.declaration);
+      const functionInfo = getFunctionInfo(node.declaration);
 
-      if (functionName) {
-        functionNames.push(functionName);
+      if (functionInfo) {
+        exportedFunctions.push({
+          localName: functionInfo.name,
+          exportName: functionInfo.name,
+          hasUseServerDirective: functionInfo.hasUseServerDirective,
+        });
       }
     } else {
       for (const specifier of node.specifiers) {
         if (
           t.isExportSpecifier(specifier) &&
-          localFunctionNames.includes(specifier.local.name) &&
           t.isIdentifier(specifier.exported)
         ) {
-          functionNames.push(specifier.exported.name);
+          const functionInfo = functions.find(
+            ({name}) => name === specifier.local.name,
+          );
+
+          if (functionInfo) {
+            exportedFunctions.push({
+              localName: specifier.local.name,
+              exportName: specifier.exported.name,
+              hasUseServerDirective: functionInfo.hasUseServerDirective,
+            });
+          }
         }
       }
     }
   }
 
-  return functionNames;
+  return exportedFunctions;
 }
 
-function getFunctionName(node: t.Node): string | undefined {
-  if (t.isFunctionDeclaration(node)) {
-    return node.id?.name;
-  }
+function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
+  let name: string | undefined;
+  let hasUseServerDirective = false;
 
-  if (t.isVariableDeclaration(node)) {
+  if (t.isFunctionDeclaration(node)) {
+    name = node.id?.name;
+
+    hasUseServerDirective = node.body.directives.some(
+      isDirective(`use server`),
+    );
+  } else if (t.isVariableDeclaration(node)) {
     const [variableDeclarator] = node.declarations;
 
-    if (!variableDeclarator) {
-      return undefined;
+    if (variableDeclarator) {
+      const {id, init} = variableDeclarator;
+
+      if (
+        t.isIdentifier(id) &&
+        (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
+      ) {
+        name = id.name;
+
+        if (t.isBlockStatement(init.body)) {
+          hasUseServerDirective = init.body.directives.some(
+            isDirective(`use server`),
+          );
+        }
+      }
     }
-
-    const {id, init} = variableDeclarator;
-
-    return t.isIdentifier(id) &&
-      (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
-      ? id.name
-      : undefined;
   }
 
-  return undefined;
+  return name ? {name, hasUseServerDirective} : undefined;
 }
 
 function createExportedClientReference(
@@ -273,11 +310,13 @@ function createClientReferenceProxyImplementation(): t.FunctionDeclaration {
   );
 }
 
-function createRegisterServerReference(exportName: string): t.CallExpression {
+function createRegisterServerReference(
+  functionInfo: ExportedFunctionInfo,
+): t.CallExpression {
   return t.callExpression(t.identifier(`registerServerReference`), [
-    t.identifier(exportName),
+    t.identifier(functionInfo.localName),
     t.identifier(webpack.RuntimeGlobals.moduleId),
-    t.stringLiteral(exportName),
+    t.stringLiteral(functionInfo.exportName),
   ]);
 }
 
