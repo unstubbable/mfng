@@ -48,14 +48,12 @@ async function callLoader(
 
 describe(`webpackRscServerLoader`, () => {
   test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
-    const clientReferencesMap: ClientReferencesMap = new Map();
-
     const resourcePath = path.resolve(
       currentDirname,
       `__fixtures__/client-components.js`,
     );
 
-    const output = await callLoader(resourcePath, clientReferencesMap);
+    const output = await callLoader(resourcePath, new Map());
     const expectedId = path.relative(process.cwd(), resourcePath);
 
     expect(output).toEqual(
@@ -78,15 +76,15 @@ export const ComponentF = registerClientReference(createClientReferenceProxy("Co
     );
   });
 
-  test(`adds 'registerServerReference' calls to all exported functions of a module with a 'use server' directive`, async () => {
-    const clientReferencesMap: ClientReferencesMap = new Map();
+  // TODO: Add missing expectation for clientReferencesMap.
 
+  test(`adds 'registerServerReference' calls to all exported functions of a module with a 'use server' directive`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
       `__fixtures__/server-functions.js`,
     );
 
-    const output = await callLoader(resourcePath, clientReferencesMap);
+    const output = await callLoader(resourcePath, new Map());
 
     expect(output).toEqual(
       `
@@ -109,16 +107,45 @@ function quux() {}
     );
   });
 
-  test(`does not change modules without a 'use client' or 'use server' directive`, async () => {
-    const clientReferencesMap: ClientReferencesMap = new Map();
+  test(`adds 'registerServerReference' calls to all exported functions that have a 'use server' directive`, async () => {
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/server-functions-inline-directive.js`,
+    );
 
+    const output = await callLoader(resourcePath, new Map());
+
+    expect(output).toEqual(
+      `
+import { registerServerReference } from "react-server-dom-webpack/server";
+export async function foo() {
+  'use server';
+
+  return \`foo\`;
+}
+registerServerReference(foo, module.id, "foo")
+export async function bar() {
+  return \`bar\`;
+}
+const b = () => {
+  'use server';
+
+  return \`baz\`;
+};
+export { b as baz };
+registerServerReference(b, module.id, "baz")
+`.trim(),
+    );
+  });
+
+  test(`does not change modules without a 'use client' or 'use server' directive`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
       `__fixtures__/server-component.js`,
     );
 
     const source = (await fs.readFile(resourcePath)).toString();
-    const output = await callLoader(resourcePath, clientReferencesMap);
+    const output = await callLoader(resourcePath, new Map());
 
     expect(output).toEqual(source);
   });
