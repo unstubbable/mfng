@@ -136,6 +136,7 @@ export default function createConfigs(_env, argv) {
       ) => info.absoluteResourcePath,
     },
     resolve: {
+      extensions: [`.mjs`, `...`],
       plugins: [new ResolveTypeScriptPlugin()],
       conditionNames: [`@mfng:internal:node`, `@mfng:internal`, `...`],
     },
@@ -164,6 +165,15 @@ export default function createConfigs(_env, argv) {
             {
               test: /\.tsx?$/,
               use: [rscSsrLoader, serverSwcLoader],
+            },
+            {
+              issuerLayer: webpackRscLayerName,
+              test: /\.m?js$/,
+              use: rscServerLoader,
+            },
+            {
+              test: /\.m?jsx$/,
+              use: rscSsrLoader,
             },
           ],
         },
@@ -204,16 +214,24 @@ export default function createConfigs(_env, argv) {
       publicPath: `/client/`,
     },
     resolve: {
+      extensions: [`.mjs`, `...`],
       plugins: [new ResolveTypeScriptPlugin()],
       conditionNames: [`@mfng:internal`, `...`],
     },
     module: {
       rules: [
-        {test: /\.js$/, loader: `source-map-loader`, enforce: `pre`},
+        {
+          test: /\.m?js$/,
+          loader: `source-map-loader`,
+          enforce: `pre`,
+        },
         {
           test: /\.tsx?$/,
           use: [rscClientLoader, `swc-loader`],
-          exclude: [/node_modules/],
+        },
+        {
+          test: /\.m?js$/,
+          use: rscClientLoader,
         },
         cssRule,
       ],

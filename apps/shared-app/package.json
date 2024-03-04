@@ -10,6 +10,10 @@
       "@mfng:internal": "./src/server/app.tsx",
       "default": "./lib/src/server/app.js"
     },
+    "./markdown.js": {
+      "@mfng:internal": "./src/server/markdown.tsx",
+      "default": "./lib/src/server/markdown.js"
+    },
     "./package.json": "./package.json",
     "./tailwind.config.cjs": {
       "@mfng:internal": "./tailwind.config.cjs",

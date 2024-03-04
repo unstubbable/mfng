@@ -10,7 +10,7 @@ import {Hono} from 'hono';
 import {streamHandle} from 'hono/aws-lambda';
 import * as React from 'react';
 import type {ReactFormState} from 'react-dom/server';
-import {App} from './app.js';
+import {App} from '../app/app.js';
 import {authMiddleware} from './auth-middleware.js';
 import {loggerMiddleware} from './logger-middleware.js';
 import {

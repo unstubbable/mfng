@@ -18,8 +18,12 @@
   "dependencies": {
     "@mfng/core": "*",
     "@mfng/shared-app": "*",
+    "ai": "^3.0.9",
+    "clsx": "^1.2.1",
+    "openai": "^4.28.4",
     "react": "18.3.0-canary-2f8f77602-20240229",
-    "react-dom": "18.3.0-canary-2f8f77602-20240229"
+    "react-dom": "18.3.0-canary-2f8f77602-20240229",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@hono/node-server": "^1.8.2",
