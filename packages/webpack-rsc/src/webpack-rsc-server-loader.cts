@@ -97,7 +97,11 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           const exportedClientReferences: t.ExportNamedDeclaration[] = [];
 
           for (const {exportName} of exportedFunctions) {
-            const id = `${path.relative(process.cwd(), resourcePath)}`;
+            const id = `${path.relative(
+              process.cwd(),
+              resourcePath,
+            )}#${exportName}`;
+
             clientReferences.push({id, exportName});
             addedRegisterReferenceCall = `Client`;
 

@@ -54,7 +54,7 @@ describe(`webpackRscServerLoader`, () => {
     );
 
     const output = await callLoader(resourcePath, new Map());
-    const expectedId = path.relative(process.cwd(), resourcePath);
+    const idPrefix = path.relative(process.cwd(), resourcePath);
 
     expect(output).toEqual(
       `
@@ -66,17 +66,55 @@ function createClientReferenceProxy(exportName) {
     throw new Error(\`Attempted to call \${exportName}() from the server but \${exportName} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`);
   };
 }
-export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${expectedId}", "ComponentA");
-export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${expectedId}", "ComponentB");
-export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${expectedId}", "ComponentC");
-export const ComponentD = registerClientReference(createClientReferenceProxy("ComponentD"), "${expectedId}", "ComponentD");
-export const ComponentE = registerClientReference(createClientReferenceProxy("ComponentE"), "${expectedId}", "ComponentE");
-export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${expectedId}", "ComponentF");
+export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${idPrefix}#ComponentA", "ComponentA");
+export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${idPrefix}#ComponentB", "ComponentB");
+export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${idPrefix}#ComponentC", "ComponentC");
+export const ComponentD = registerClientReference(createClientReferenceProxy("ComponentD"), "${idPrefix}#ComponentD", "ComponentD");
+export const ComponentE = registerClientReference(createClientReferenceProxy("ComponentE"), "${idPrefix}#ComponentE", "ComponentE");
+export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${idPrefix}#ComponentF", "ComponentF");
 `.trim(),
     );
   });
 
-  // TODO: Add missing expectation for clientReferencesMap.
+  test(`populates the given client references map`, async () => {
+    const clientReferencesMap: ClientReferencesMap = new Map();
+
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/client-components.js`,
+    );
+
+    await callLoader(resourcePath, clientReferencesMap);
+
+    expect(Object.fromEntries([...clientReferencesMap.entries()])).toEqual({
+      [resourcePath]: [
+        {
+          exportName: `ComponentA`,
+          id: `src/__fixtures__/client-components.js#ComponentA`,
+        },
+        {
+          exportName: `ComponentB`,
+          id: `src/__fixtures__/client-components.js#ComponentB`,
+        },
+        {
+          exportName: `ComponentC`,
+          id: `src/__fixtures__/client-components.js#ComponentC`,
+        },
+        {
+          exportName: `ComponentD`,
+          id: `src/__fixtures__/client-components.js#ComponentD`,
+        },
+        {
+          exportName: `ComponentE`,
+          id: `src/__fixtures__/client-components.js#ComponentE`,
+        },
+        {
+          exportName: `ComponentF`,
+          id: `src/__fixtures__/client-components.js#ComponentF`,
+        },
+      ],
+    });
+  });
 
   test(`adds 'registerServerReference' calls to all exported functions of a module with a 'use server' directive`, async () => {
     const resourcePath = path.resolve(
