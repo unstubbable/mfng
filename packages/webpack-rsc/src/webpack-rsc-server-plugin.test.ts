@@ -152,6 +152,41 @@ function serverFunctionImportedFromClient() {
 
       expect(outputFile).toMatch(
         `
+/***/ "(react-server)/./src/__fixtures__/main-component.js":
+/*!********************************************!*\\
+  !*** ./src/__fixtures__/main-component.js ***!
+  \\********************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Main": () => (/* binding */ Main),
+/* harmony export */   "serverFunctionWithInlineDirective": () => (/* binding */ serverFunctionWithInlineDirective)
+/* harmony export */ });
+/* harmony import */ var react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-server-dom-webpack/server */ "(react-server)/../../node_modules/react-server-dom-webpack/server.edge.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "(react-server)/../../node_modules/react/react.react-server.js");
+/* harmony import */ var _client_component_with_server_action_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./client-component-with-server-action.js */ "(react-server)/./src/__fixtures__/client-component-with-server-action.js");
+/* harmony import */ var _server_function_passed_from_server_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./server-function-passed-from-server.js */ "(react-server)/./src/__fixtures__/server-function-passed-from-server.js");
+
+
+
+
+async function serverFunctionWithInlineDirective() {
+  'use server';
+
+  return Promise.resolve(\`server-function-with-inline-directive\`);
+}
+(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionWithInlineDirective, module.id, "serverFunctionWithInlineDirective");
+
+function Main() {
+  return react__WEBPACK_IMPORTED_MODULE_1__.createElement(_client_component_with_server_action_js__WEBPACK_IMPORTED_MODULE_2__.ClientComponentWithServerAction, {
+    action1: _server_function_passed_from_server_js__WEBPACK_IMPORTED_MODULE_3__.serverFunctionPassedFromServer,
+    action2: serverFunctionWithInlineDirective
+  });
+}
+
+/***/ }),
+
 /***/ "(react-server)/./src/__fixtures__/server-function-imported-from-client.js":
 /*!******************************************************************!*\\
   !*** ./src/__fixtures__/server-function-imported-from-client.js ***!
@@ -205,6 +240,12 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
+        '(react-server)/./src/__fixtures__/main-component.js#serverFunctionWithInlineDirective':
+          {
+            chunks: [],
+            id: `(react-server)/./src/__fixtures__/main-component.js`,
+            name: `serverFunctionWithInlineDirective`,
+          },
         '(react-server)/./src/__fixtures__/server-function-imported-from-client.js#serverFunctionImportedFromClient':
           {
             chunks: [],
@@ -220,31 +261,29 @@ async function serverFunctionPassedFromServer() {
       });
     });
 
-    test(`populates the given serverReferencesMap`, async () => {
+    test(`adds module IDs to the given serverReferencesMap`, async () => {
       await runWebpack(buildConfig);
 
-      expect([...serverReferencesMap.entries()]).toEqual([
-        [
-          path.resolve(
-            currentDirname,
-            `./__fixtures__/server-function-passed-from-server.js`,
-          ),
-          {
-            exportNames: [`serverFunctionPassedFromServer`],
-            moduleId: `(react-server)/./src/__fixtures__/server-function-passed-from-server.js`,
-          },
-        ],
-        [
-          path.resolve(
-            currentDirname,
-            `./__fixtures__/server-function-imported-from-client.js`,
-          ),
-          {
-            exportNames: [`serverFunctionImportedFromClient`],
-            moduleId: `(react-server)/./src/__fixtures__/server-function-imported-from-client.js`,
-          },
-        ],
-      ]);
+      expect(Object.fromEntries(serverReferencesMap.entries())).toEqual({
+        [path.resolve(currentDirname, `./__fixtures__/main-component.js`)]: {
+          exportNames: [`serverFunctionWithInlineDirective`],
+          moduleId: `(react-server)/./src/__fixtures__/main-component.js`,
+        },
+        [path.resolve(
+          currentDirname,
+          `./__fixtures__/server-function-imported-from-client.js`,
+        )]: {
+          exportNames: [`serverFunctionImportedFromClient`],
+          moduleId: `(react-server)/./src/__fixtures__/server-function-imported-from-client.js`,
+        },
+        [path.resolve(
+          currentDirname,
+          `./__fixtures__/server-function-passed-from-server.js`,
+        )]: {
+          exportNames: [`serverFunctionPassedFromServer`],
+          moduleId: `(react-server)/./src/__fixtures__/server-function-passed-from-server.js`,
+        },
+      });
     });
   });
 
@@ -263,25 +302,57 @@ async function serverFunctionPassedFromServer() {
 
       expect(pretty(outputFile)).toMatch(
         `
-    839: (e, t, r) => {
+    799: (e, r, t) => {
+      t.r(r),
+        t.d(r, { Main: () => u, serverFunctionWithInlineDirective: () => c });
+      var n = t(324),
+        o = t(240);
+      const i = (0, n.registerClientReference)(
+        ((a = "ClientComponentWithServerAction"),
+        () => {
+          throw new Error(
+            \`Attempted to call $\{a}() from the server but $\{a} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`
+          );
+        }),
+        "src/__fixtures__/client-component-with-server-action.js#ClientComponentWithServerAction",
+        "ClientComponentWithServerAction"
+      );
+      var a,
+        s = t(871);
+      async function c() {
+        return Promise.resolve("server-function-with-inline-directive");
+      }
+      function u() {
+        return o.createElement(i, {
+          action1: s.serverFunctionPassedFromServer,
+          action2: c,
+        });
+      }
+      (0, n.registerServerReference)(
+        c,
+        module.id,
+        "serverFunctionWithInlineDirective"
+      );
+    },
+    839: (e, r, t) => {
       async function n() {
         return Promise.resolve("server-function-imported-from-client");
       }
-      r.r(t),
-        r.d(t, { serverFunctionImportedFromClient: () => n }),
-        (0, r(324).registerServerReference)(
+      t.r(r),
+        t.d(r, { serverFunctionImportedFromClient: () => n }),
+        (0, t(324).registerServerReference)(
           n,
           module.id,
           "serverFunctionImportedFromClient"
         );
     },
-    871: (e, t, r) => {
+    871: (e, r, t) => {
       async function n() {
         return Promise.resolve("server-function-passed-from-server");
       }
-      r.r(t),
-        r.d(t, { serverFunctionPassedFromServer: () => n }),
-        (0, r(324).registerServerReference)(
+      t.r(r),
+        t.d(r, { serverFunctionPassedFromServer: () => n }),
+        (0, t(324).registerServerReference)(
           n,
           module.id,
           "serverFunctionPassedFromServer"
@@ -299,6 +370,11 @@ async function serverFunctionPassedFromServer() {
       );
 
       expect(JSON.parse(manifestFile)).toEqual({
+        '799#serverFunctionWithInlineDirective': {
+          chunks: [],
+          id: 799,
+          name: `serverFunctionWithInlineDirective`,
+        },
         '839#serverFunctionImportedFromClient': {
           chunks: [],
           id: 839,
@@ -312,25 +388,23 @@ async function serverFunctionPassedFromServer() {
       });
     });
 
-    test(`populates the given serverReferencesMap`, async () => {
+    test(`adds module IDs to the given serverReferencesMap`, async () => {
       await runWebpack(buildConfig);
 
-      expect([...serverReferencesMap.entries()]).toEqual([
-        [
-          path.resolve(
-            currentDirname,
-            `./__fixtures__/server-function-passed-from-server.js`,
-          ),
-          {exportNames: [`serverFunctionPassedFromServer`], moduleId: 871},
-        ],
-        [
-          path.resolve(
-            currentDirname,
-            `./__fixtures__/server-function-imported-from-client.js`,
-          ),
-          {exportNames: [`serverFunctionImportedFromClient`], moduleId: 839},
-        ],
-      ]);
+      expect(Object.fromEntries(serverReferencesMap.entries())).toEqual({
+        [path.resolve(currentDirname, `./__fixtures__/main-component.js`)]: {
+          exportNames: [`serverFunctionWithInlineDirective`],
+          moduleId: 799,
+        },
+        [path.resolve(
+          currentDirname,
+          `./__fixtures__/server-function-imported-from-client.js`,
+        )]: {exportNames: [`serverFunctionImportedFromClient`], moduleId: 839},
+        [path.resolve(
+          currentDirname,
+          `./__fixtures__/server-function-passed-from-server.js`,
+        )]: {exportNames: [`serverFunctionPassedFromServer`], moduleId: 871},
+      });
     });
   });
 });

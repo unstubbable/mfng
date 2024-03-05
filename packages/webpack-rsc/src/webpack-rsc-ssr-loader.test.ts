@@ -79,7 +79,7 @@ export function baz() {
 
     await callLoader(resourcePath, serverReferencesMap);
 
-    expect(Object.fromEntries([...serverReferencesMap.entries()])).toEqual({
+    expect(Object.fromEntries(serverReferencesMap.entries())).toEqual({
       [resourcePath]: {exportNames: [`foo`, `bar`, `baz`]},
     });
   });

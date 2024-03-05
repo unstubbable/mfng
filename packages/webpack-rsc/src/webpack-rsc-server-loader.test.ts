@@ -88,7 +88,7 @@ export const ComponentE = registerClientReference(createClientReferenceProxy("Co
 
     await callLoader(resourcePath, clientReferencesMap, new Map());
 
-    expect(Object.fromEntries([...clientReferencesMap.entries()])).toEqual({
+    expect(Object.fromEntries(clientReferencesMap.entries())).toEqual({
       [resourcePath]: [
         {
           exportName: `ComponentA`,
@@ -195,7 +195,7 @@ export { qux };
 
     await callLoader(resourcePath, new Map(), serverReferencesMap);
 
-    expect(Object.fromEntries([...serverReferencesMap.entries()])).toEqual({
+    expect(Object.fromEntries(serverReferencesMap.entries())).toEqual({
       [resourcePath]: {exportNames: [`foo`, `bar`, `baz`]},
     });
   });
