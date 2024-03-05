@@ -41,8 +41,13 @@ import {
 
 const clientReferencesMap = new Map();
 const serverReferencesMap = new Map();
-const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
-const rscSsrLoader = createWebpackRscSsrLoader();
+
+const rscServerLoader = createWebpackRscServerLoader({
+  clientReferencesMap,
+  serverReferencesMap,
+});
+
+const rscSsrLoader = createWebpackRscSsrLoader({serverReferencesMap});
 const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
 const serverConfig = {
@@ -116,8 +121,9 @@ module with client references (objects that contain meta data about the client
 components), and removing all other parts of the client module. It also
 populates the given `clientReferencesMap`.
 
-In addtion, the loader handles server references for React server actions by
-adding meta data to all exported functions of a `use server` module.
+In addition, the loader handles server references for React server actions by
+adding meta data to all exported functions of a `use server` module, and also
+populates the given `serverReferencesMap`.
 
 ### `createWebpackRscSsrLoader`
 
@@ -126,7 +132,8 @@ config. It should be used if the `issuerLayer` is **not** `webpackRscLayerName`.
 This loader is responsible for replacing server actions in a `use server` module
 that are imported from client modules with stubs. The stubs are functions that
 throw an error, since React does not allow calling server actions during SSR (to
-avoid waterfalls). All other parts of the server module are removed.
+avoid waterfalls). All other parts of the server module are removed. It also
+populates the given `serverReferencesMap`.
 
 ### `WebpackRscServerPlugin`
 
@@ -136,7 +143,7 @@ available for server-side rendering (SSR).
 
 The plugin also generates the server manifest that is needed for validating the
 server references of server actions (also known as mutations) that are sent back
-from the client. It also populates the given `serverReferencesMap`.
+from the client. It also adds module IDs to the given `serverReferencesMap`.
 
 ### `createWebpackRscClientLoader`
 

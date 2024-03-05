@@ -103,8 +103,13 @@ export default function createConfigs(_env, argv) {
    */
   const clientReferencesMap = new Map();
   const serverReferencesMap = new Map();
-  const rscServerLoader = createWebpackRscServerLoader({clientReferencesMap});
-  const rscSsrLoader = createWebpackRscSsrLoader();
+
+  const rscServerLoader = createWebpackRscServerLoader({
+    clientReferencesMap,
+    serverReferencesMap,
+  });
+
+  const rscSsrLoader = createWebpackRscSsrLoader({serverReferencesMap});
   const rscClientLoader = createWebpackRscClientLoader({serverReferencesMap});
 
   /**

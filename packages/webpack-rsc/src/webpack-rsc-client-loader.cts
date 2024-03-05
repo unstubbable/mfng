@@ -3,18 +3,12 @@ import parser = require('@babel/parser');
 import traverse = require('@babel/traverse');
 import t = require('@babel/types');
 import type {LoaderContext, LoaderDefinitionFunction} from 'webpack';
+import type webpackRscServerLoader from './webpack-rsc-server-loader.cjs';
 
 namespace webpackRscClientLoader {
   export interface WebpackRscClientLoaderOptions {
-    readonly serverReferencesMap: ServerReferencesMap;
+    readonly serverReferencesMap: webpackRscServerLoader.ServerReferencesMap;
     readonly callServerImportSource?: string;
-  }
-
-  export type ServerReferencesMap = Map<string, ServerReferencesModuleInfo>;
-
-  export interface ServerReferencesModuleInfo {
-    readonly moduleId: string | number;
-    readonly exportNames: string[];
   }
 }
 
@@ -67,6 +61,18 @@ function webpackRscClientLoader(
       }
 
       const {moduleId, exportNames} = moduleInfo;
+
+      if (!moduleId) {
+        loaderContext.emitError(
+          new Error(
+            `Could not find server references module ID in \`serverReferencesMap\` for ${resourcePath}.`,
+          ),
+        );
+
+        path.replaceWith(t.program([]));
+
+        return;
+      }
 
       path.replaceWith(
         t.program([

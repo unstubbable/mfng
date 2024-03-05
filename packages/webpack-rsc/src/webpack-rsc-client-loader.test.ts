@@ -3,11 +3,9 @@ import path from 'path';
 import url from 'url';
 import {jest} from '@jest/globals';
 import type webpack from 'webpack';
-import type {
-  ServerReferencesMap,
-  WebpackRscClientLoaderOptions,
-} from './webpack-rsc-client-loader.cjs';
+import type {WebpackRscClientLoaderOptions} from './webpack-rsc-client-loader.cjs';
 import webpackRscClientLoader from './webpack-rsc-client-loader.cjs';
+import type {ServerReferencesMap} from './webpack-rsc-server-loader.cjs';
 
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 

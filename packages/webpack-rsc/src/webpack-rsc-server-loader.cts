@@ -8,6 +8,7 @@ import webpack = require('webpack');
 namespace webpackRscServerLoader {
   export interface WebpackRscServerLoaderOptions {
     readonly clientReferencesMap: ClientReferencesMap;
+    readonly serverReferencesMap: ServerReferencesMap;
   }
 
   export type ClientReferencesMap = Map<string, ClientReference[]>;
@@ -16,6 +17,13 @@ namespace webpackRscServerLoader {
     readonly id: string;
     readonly exportName: string;
     ssrId?: string | number;
+  }
+
+  export type ServerReferencesMap = Map<string, ServerReferencesModuleInfo>;
+
+  export interface ServerReferencesModuleInfo {
+    readonly exportNames: string[];
+    moduleId?: string | number;
   }
 }
 
@@ -34,8 +42,9 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
   function (source, sourceMap) {
     this.cacheable(true);
 
-    const {clientReferencesMap} = this.getOptions();
+    const {clientReferencesMap, serverReferencesMap} = this.getOptions();
     const clientReferences: webpackRscServerLoader.ClientReference[] = [];
+    const serverReferenceExportNames: string[] = [];
     const resourcePath = this.resourcePath;
 
     const ast = parser.parse(source, {
@@ -147,6 +156,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
               createRegisterServerReference(extendedFunctionInfo),
             );
 
+            serverReferenceExportNames.push(exportName ?? localName);
             addedRegisterReferenceCall = `Server`;
           }
 
@@ -185,6 +195,12 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
 
     if (clientReferences.length > 0) {
       clientReferencesMap.set(resourcePath, clientReferences);
+    }
+
+    if (serverReferenceExportNames.length > 0) {
+      serverReferencesMap.set(resourcePath, {
+        exportNames: serverReferenceExportNames,
+      });
     }
 
     const {code, map} = generate.default(

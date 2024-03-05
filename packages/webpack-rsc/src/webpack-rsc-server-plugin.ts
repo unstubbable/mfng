@@ -1,12 +1,13 @@
-import type {Directive, ModuleDeclaration, Statement} from 'estree';
 import type {ServerManifest} from 'react-server-dom-webpack';
 import type Webpack from 'webpack';
-import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
-import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
+import type {
+  ClientReferencesMap,
+  ServerReferencesMap,
+} from './webpack-rsc-server-loader.cjs';
 
 export interface WebpackRscServerPluginOptions {
   readonly clientReferencesMap: ClientReferencesMap;
-  readonly serverReferencesMap?: ServerReferencesMap;
+  readonly serverReferencesMap: ServerReferencesMap;
   readonly serverManifestFilename?: string;
 }
 
@@ -19,11 +20,9 @@ export const webpackRscLayerName = `react-server`;
 
 export class WebpackRscServerPlugin {
   private clientReferencesMap: ClientReferencesMap;
-  private serverReferencesMap: ServerReferencesMap | undefined;
+  private serverReferencesMap: ServerReferencesMap;
   private serverManifest: ServerManifest = {};
   private serverManifestFilename: string;
-  private clientModuleResources = new Set<string>();
-  private serverModuleResources = new Set<string>();
 
   constructor(options: WebpackRscServerPluginOptions) {
     this.clientReferencesMap = options.clientReferencesMap;
@@ -111,10 +110,10 @@ export class WebpackRscServerPlugin {
       WebpackRscServerPlugin.name,
       async (compilation) => {
         await Promise.all([
-          ...Array.from(this.clientModuleResources).map(async (resource) =>
+          ...Array.from(this.clientReferencesMap.keys()).map(async (resource) =>
             includeModule(compilation, resource),
           ),
-          ...Array.from(this.serverModuleResources).map(async (resource) =>
+          ...Array.from(this.serverReferencesMap.keys()).map(async (resource) =>
             includeModule(compilation, resource, webpackRscLayerName),
           ),
         ]);
@@ -137,11 +136,11 @@ export class WebpackRscServerPlugin {
         const onNormalModuleFactoryParser = (
           parser: Webpack.javascript.JavascriptParser,
         ) => {
-          parser.hooks.program.tap(WebpackRscServerPlugin.name, (program) => {
-            const isClientModule = program.body.some(isDirective(`use client`));
-            const isServerModule = program.body.some(isDirective(`use server`));
+          parser.hooks.program.tap(WebpackRscServerPlugin.name, () => {
             const {module} = parser.state;
             const {resource} = module;
+            const isClientModule = this.clientReferencesMap.has(resource);
+            const isServerModule = this.serverReferencesMap.has(resource);
 
             if (isServerModule && isClientModule) {
               compilation.errors.push(
@@ -153,15 +152,12 @@ export class WebpackRscServerPlugin {
               return;
             }
 
-            if (isClientModule && module.layer === webpackRscLayerName) {
-              this.clientModuleResources.add(resource);
-              void includeModule(compilation, resource);
-            }
+            if (module.layer === webpackRscLayerName) {
+              if (isClientModule) {
+                void includeModule(compilation, resource);
+              }
 
-            if (isServerModule && !hasServerReferenceDependency(module)) {
-              this.serverModuleResources.add(resource);
-
-              if (module.layer === webpackRscLayerName) {
+              if (isServerModule && !hasServerReferenceDependency(module)) {
                 module.addDependency(new ServerReferenceDependency());
               }
             }
@@ -198,7 +194,7 @@ export class WebpackRscServerPlugin {
 
               if (
                 module.layer !== webpackRscLayerName &&
-                this.clientModuleResources.has(resource)
+                this.clientReferencesMap.has(resource)
               ) {
                 const clientReferences = this.clientReferencesMap.get(resource);
 
@@ -206,24 +202,33 @@ export class WebpackRscServerPlugin {
                   for (const clientReference of clientReferences) {
                     clientReference.ssrId = moduleId;
                   }
+                } else {
+                  compilation.errors.push(
+                    new WebpackError(
+                      `Could not find client references info in \`clientReferencesMap\` for ${resource}.`,
+                    ),
+                  );
                 }
               } else if (hasServerReferenceDependency(module)) {
-                const exportNames = getExportNames(
-                  compilation.moduleGraph,
-                  module,
-                );
+                const serverReferencesModuleInfo =
+                  this.serverReferencesMap.get(resource);
 
-                this.serverReferencesMap?.set(resource, {
-                  moduleId,
-                  exportNames,
-                });
+                if (serverReferencesModuleInfo) {
+                  serverReferencesModuleInfo.moduleId = moduleId;
 
-                for (const exportName of exportNames) {
-                  this.serverManifest[`${moduleId}#${exportName}`] = {
-                    id: moduleId,
-                    chunks: [],
-                    name: exportName,
-                  };
+                  for (const exportName of serverReferencesModuleInfo.exportNames) {
+                    this.serverManifest[`${moduleId}#${exportName}`] = {
+                      id: moduleId,
+                      chunks: [],
+                      name: exportName,
+                    };
+                  }
+                } else {
+                  compilation.errors.push(
+                    new WebpackError(
+                      `Could not find server references module info in \`serverReferencesMap\` for ${resource}.`,
+                    ),
+                  );
                 }
               }
             }
@@ -239,22 +244,4 @@ export class WebpackRscServerPlugin {
       },
     );
   }
-}
-
-function isDirective(
-  value: string,
-): (node: Directive | Statement | ModuleDeclaration) => node is Directive {
-  return (node): node is Directive =>
-    node.type === `ExpressionStatement` &&
-    node.expression.type === `Literal` &&
-    node.expression.value === value;
-}
-
-function getExportNames(
-  moduleGraph: Webpack.ModuleGraph,
-  module: Webpack.Module,
-): string[] {
-  return [...moduleGraph.getExportsInfo(module).orderedExports].map(
-    ({name}) => name,
-  );
 }
