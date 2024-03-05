@@ -5,6 +5,7 @@ import {jest} from '@jest/globals';
 import type webpack from 'webpack';
 import type {
   ClientReferencesMap,
+  ServerReferencesMap,
   WebpackRscServerLoaderOptions,
 } from './webpack-rsc-server-loader.cjs';
 import webpackRscServerLoader from './webpack-rsc-server-loader.cjs';
@@ -14,6 +15,7 @@ const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 async function callLoader(
   resourcePath: string,
   clientReferencesMap: ClientReferencesMap,
+  serverReferencesMap: ServerReferencesMap,
 ): Promise<string | Buffer> {
   const input = await fs.readFile(resourcePath);
 
@@ -21,7 +23,7 @@ async function callLoader(
     const context: Partial<
       webpack.LoaderContext<WebpackRscServerLoaderOptions>
     > = {
-      getOptions: () => ({clientReferencesMap}),
+      getOptions: () => ({clientReferencesMap, serverReferencesMap}),
       resourcePath,
       cacheable: jest.fn(),
       callback: (error, content) => {
@@ -53,7 +55,7 @@ describe(`webpackRscServerLoader`, () => {
       `__fixtures__/client-components.js`,
     );
 
-    const output = await callLoader(resourcePath, new Map());
+    const output = await callLoader(resourcePath, new Map(), new Map());
     const idPrefix = path.relative(process.cwd(), resourcePath);
 
     expect(output).toEqual(
@@ -84,7 +86,7 @@ export const ComponentE = registerClientReference(createClientReferenceProxy("Co
       `__fixtures__/client-components.js`,
     );
 
-    await callLoader(resourcePath, clientReferencesMap);
+    await callLoader(resourcePath, clientReferencesMap, new Map());
 
     expect(Object.fromEntries([...clientReferencesMap.entries()])).toEqual({
       [resourcePath]: [
@@ -122,7 +124,7 @@ export const ComponentE = registerClientReference(createClientReferenceProxy("Co
       `__fixtures__/server-functions.js`,
     );
 
-    const output = await callLoader(resourcePath, new Map());
+    const output = await callLoader(resourcePath, new Map(), new Map());
 
     expect(output).toEqual(
       `
@@ -151,7 +153,7 @@ function quux() {}
       `__fixtures__/server-functions-inline-directive.js`,
     );
 
-    const output = await callLoader(resourcePath, new Map());
+    const output = await callLoader(resourcePath, new Map(), new Map());
 
     expect(output).toEqual(
       `
@@ -183,6 +185,21 @@ export { qux };
     );
   });
 
+  test(`populates the given server references map`, async () => {
+    const serverReferencesMap: ServerReferencesMap = new Map();
+
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/server-functions.js`,
+    );
+
+    await callLoader(resourcePath, new Map(), serverReferencesMap);
+
+    expect(Object.fromEntries([...serverReferencesMap.entries()])).toEqual({
+      [resourcePath]: {exportNames: [`foo`, `bar`, `baz`]},
+    });
+  });
+
   test(`does not change modules without a 'use client' or 'use server' directive`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
@@ -190,7 +207,7 @@ export { qux };
     );
 
     const source = (await fs.readFile(resourcePath)).toString();
-    const output = await callLoader(resourcePath, new Map());
+    const output = await callLoader(resourcePath, new Map(), new Map());
 
     expect(output).toEqual(source);
   });

@@ -3,70 +3,84 @@ import parser = require('@babel/parser');
 import traverse = require('@babel/traverse');
 import t = require('@babel/types');
 import webpack = require('webpack');
+import type {ServerReferencesMap} from './webpack-rsc-server-loader.cjs';
 
-const webpackRscSsrLoader: webpack.LoaderDefinitionFunction = function (
-  source,
-  sourceMap,
-) {
-  this.cacheable(true);
+namespace webpackRscSsrLoader {
+  export interface WebpackRscSsrLoaderOptions {
+    readonly serverReferencesMap: ServerReferencesMap;
+  }
+}
 
-  const resourcePath = this.resourcePath;
+const webpackRscSsrLoader: webpack.LoaderDefinitionFunction<webpackRscSsrLoader.WebpackRscSsrLoaderOptions> =
+  function (source, sourceMap) {
+    this.cacheable(true);
 
-  const ast = parser.parse(source, {
-    sourceType: `module`,
-    sourceFilename: resourcePath,
-  });
+    const {serverReferencesMap} = this.getOptions();
+    const serverReferenceExportNames: string[] = [];
+    const resourcePath = this.resourcePath;
 
-  let hasUseServerDirective = false;
+    const ast = parser.parse(source, {
+      sourceType: `module`,
+      sourceFilename: resourcePath,
+    });
 
-  traverse.default(ast, {
-    enter(path) {
-      const {node} = path;
+    let hasUseServerDirective = false;
 
-      if (t.isProgram(node)) {
-        if (node.directives.some(isUseServerDirective)) {
-          hasUseServerDirective = true;
-        } else {
-          path.skip();
+    traverse.default(ast, {
+      enter(path) {
+        const {node} = path;
+
+        if (t.isProgram(node)) {
+          if (node.directives.some(isUseServerDirective)) {
+            hasUseServerDirective = true;
+          } else {
+            path.skip();
+          }
+
+          return;
         }
 
-        return;
-      }
+        if (t.isDirective(node) && isUseServerDirective(node)) {
+          path.skip();
 
-      if (t.isDirective(node) && isUseServerDirective(node)) {
-        path.skip();
+          return;
+        }
 
-        return;
-      }
+        const exportName = getFunctionExportName(node);
 
-      const exportName = getFunctionExportName(node);
+        if (exportName) {
+          path.replaceWith(createExportedServerReferenceStub(exportName));
+          path.skip();
+          serverReferenceExportNames.push(exportName);
+        } else {
+          path.remove();
+        }
+      },
+    });
 
-      if (exportName) {
-        path.replaceWith(createExportedServerReferenceStub(exportName));
-        path.skip();
-      } else {
-        path.remove();
-      }
-    },
-  });
+    if (!hasUseServerDirective) {
+      return this.callback(null, source, sourceMap);
+    }
 
-  if (!hasUseServerDirective) {
-    return this.callback(null, source, sourceMap);
-  }
+    if (serverReferenceExportNames.length > 0) {
+      serverReferencesMap.set(resourcePath, {
+        exportNames: serverReferenceExportNames,
+      });
+    }
 
-  const {code, map} = generate.default(
-    ast,
-    {
-      sourceFileName: this.resourcePath,
-      sourceMaps: this.sourceMap,
-      // @ts-expect-error
-      inputSourceMap: sourceMap,
-    },
-    source,
-  );
+    const {code, map} = generate.default(
+      ast,
+      {
+        sourceFileName: this.resourcePath,
+        sourceMaps: this.sourceMap,
+        // @ts-expect-error
+        inputSourceMap: sourceMap,
+      },
+      source,
+    );
 
-  this.callback(null, code, map ?? sourceMap);
-};
+    this.callback(null, code, map ?? sourceMap);
+  };
 
 function isUseServerDirective(directive: t.Directive): boolean {
   return (

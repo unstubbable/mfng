@@ -3,8 +3,10 @@ import url from 'url';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
-import type {ServerReferencesMap} from './webpack-rsc-client-loader.cjs';
-import type {ClientReferencesMap} from './webpack-rsc-server-loader.cjs';
+import type {
+  ClientReferencesMap,
+  ServerReferencesMap,
+} from './webpack-rsc-server-loader.cjs';
 import {
   WebpackRscServerPlugin,
   webpackRscLayerName,
@@ -14,7 +16,7 @@ import {
   createWebpackRscSsrLoader,
 } from './index.js';
 
-const fs = new MemoryFS();
+const memFs = new MemoryFS();
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 function pretty(source: string): string {
@@ -25,7 +27,7 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
   return new Promise((resolve, reject) => {
     const compiler = webpack(config);
 
-    compiler.outputFileSystem = fs;
+    compiler.outputFileSystem = memFs;
 
     compiler.run((err, stats) => {
       if (err) {
@@ -84,10 +86,13 @@ describe(`WebpackRscServerPlugin`, () => {
             oneOf: [
               {
                 issuerLayer: webpackRscLayerName,
-                use: createWebpackRscServerLoader({clientReferencesMap}),
+                use: createWebpackRscServerLoader({
+                  clientReferencesMap,
+                  serverReferencesMap,
+                }),
               },
               {
-                use: createWebpackRscSsrLoader(),
+                use: createWebpackRscSsrLoader({serverReferencesMap}),
               },
             ],
           },
@@ -110,7 +115,7 @@ describe(`WebpackRscServerPlugin`, () => {
     test(`the generated bundle has stubbed implementations for client-side imported server actions`, async () => {
       await runWebpack(buildConfig);
 
-      const outputFile = fs.readFileSync(
+      const outputFile = memFs.readFileSync(
         path.resolve(currentDirname, `dist/bundle.js`),
         `utf-8`,
       );
@@ -140,7 +145,7 @@ function serverFunctionImportedFromClient() {
     test(`the generated bundle has registerServerReference calls for server references, with correct local and exported names`, async () => {
       await runWebpack(buildConfig);
 
-      const outputFile = fs.readFileSync(
+      const outputFile = memFs.readFileSync(
         path.resolve(currentDirname, `dist/bundle.js`),
         `utf-8`,
       );
@@ -194,7 +199,7 @@ async function serverFunctionPassedFromServer() {
     test(`creates a server references manifest`, async () => {
       await runWebpack(buildConfig);
 
-      const manifestFile = fs.readFileSync(
+      const manifestFile = memFs.readFileSync(
         path.resolve(currentDirname, `dist/react-server-manifest.json`),
         `utf-8`,
       );
@@ -251,7 +256,7 @@ async function serverFunctionPassedFromServer() {
     test(`the generated bundle has registerServerReference calls for server references, with correct local and exported names`, async () => {
       await runWebpack(buildConfig);
 
-      const outputFile = fs.readFileSync(
+      const outputFile = memFs.readFileSync(
         path.resolve(currentDirname, `dist/bundle.js`),
         `utf-8`,
       );
@@ -288,7 +293,7 @@ async function serverFunctionPassedFromServer() {
     test(`creates a server references manifest`, async () => {
       await runWebpack(buildConfig);
 
-      const manifestFile = fs.readFileSync(
+      const manifestFile = memFs.readFileSync(
         path.resolve(currentDirname, `dist/react-server-manifest.json`),
         `utf-8`,
       );
