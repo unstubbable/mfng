@@ -69,9 +69,9 @@ function createClientReferenceProxy(exportName) {
 export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${idPrefix}#ComponentA", "ComponentA");
 export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${idPrefix}#ComponentB", "ComponentB");
 export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${idPrefix}#ComponentC", "ComponentC");
+export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${idPrefix}#ComponentF", "ComponentF");
 export const ComponentD = registerClientReference(createClientReferenceProxy("ComponentD"), "${idPrefix}#ComponentD", "ComponentD");
 export const ComponentE = registerClientReference(createClientReferenceProxy("ComponentE"), "${idPrefix}#ComponentE", "ComponentE");
-export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${idPrefix}#ComponentF", "ComponentF");
 `.trim(),
     );
   });
@@ -101,16 +101,16 @@ export const ComponentF = registerClientReference(createClientReferenceProxy("Co
           id: `src/__fixtures__/client-components.js#ComponentC`,
         },
         {
+          exportName: `ComponentF`,
+          id: `src/__fixtures__/client-components.js#ComponentF`,
+        },
+        {
           exportName: `ComponentD`,
           id: `src/__fixtures__/client-components.js#ComponentD`,
         },
         {
           exportName: `ComponentE`,
           id: `src/__fixtures__/client-components.js#ComponentE`,
-        },
-        {
-          exportName: `ComponentF`,
-          id: `src/__fixtures__/client-components.js#ComponentF`,
         },
       ],
     });
@@ -132,20 +132,20 @@ import { registerServerReference } from "react-server-dom-webpack/server";
 export async function foo() {
   return Promise.resolve(\`foo\`);
 }
-registerServerReference(foo, module.id, "foo")
+registerServerReference(foo, module.id, "foo");
 export const bar = async () => Promise.resolve(\`bar\`);
-registerServerReference(bar, module.id, "bar")
+registerServerReference(bar, module.id, "bar");
 export const baz = function () {
   quux();
 };
-registerServerReference(baz, module.id, "baz")
+registerServerReference(baz, module.id, "baz");
 export const qux = 42;
 function quux() {}
 `.trim(),
     );
   });
 
-  test(`adds 'registerServerReference' calls to all exported functions that have a 'use server' directive`, async () => {
+  test(`adds 'registerServerReference' calls to all functions that have a 'use server' directive`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
       `__fixtures__/server-functions-inline-directive.js`,
@@ -161,17 +161,24 @@ export async function foo() {
 
   return \`foo\`;
 }
-registerServerReference(foo, module.id, "foo")
+registerServerReference(foo, module.id, "foo");
 export async function bar() {
-  return \`bar\`;
+  return qux();
 }
 const b = () => {
   'use server';
 
   return \`baz\`;
 };
+registerServerReference(b, module.id, "baz");
 export { b as baz };
-registerServerReference(b, module.id, "baz")
+async function qux() {
+  'use server';
+
+  return \`qux\`;
+}
+registerServerReference(qux, module.id, "qux");
+export { qux };
 `.trim(),
     );
   });

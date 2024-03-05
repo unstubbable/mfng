@@ -5,7 +5,7 @@ export async function foo() {
 }
 
 export async function bar() {
-  return `bar`;
+  return qux();
 }
 
 const b = () => {
@@ -15,3 +15,9 @@ const b = () => {
 };
 
 export {b as baz};
+
+async function qux() {
+  'use server';
+
+  return `qux`;
+}

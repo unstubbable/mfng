@@ -22,14 +22,12 @@ namespace webpackRscServerLoader {
 type RegisterReferenceType = 'Server' | 'Client';
 
 interface FunctionInfo {
-  readonly name: string;
+  readonly localName: string;
   readonly hasUseServerDirective: boolean;
 }
 
-interface ExportedFunctionInfo {
-  readonly localName: string;
-  readonly exportName: string;
-  readonly hasUseServerDirective: boolean;
+interface ExtendedFunctionInfo extends FunctionInfo {
+  readonly exportName?: string;
 }
 
 const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerLoader.WebpackRscServerLoaderOptions> =
@@ -48,20 +46,43 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
     let moduleDirective: 'use client' | 'use server' | undefined;
     let addedRegisterReferenceCall: RegisterReferenceType | undefined;
     const unshiftedNodes = new Set<t.Node>();
-    const functions: FunctionInfo[] = [];
+    const exportNamesByLocalName = new Map<string, string>();
+
+    const localTopLevelFunctionsByNode = new WeakMap<
+      traverse.Node,
+      FunctionInfo
+    >();
 
     traverse.default(ast, {
       enter(nodePath) {
         const {node} = nodePath;
 
-        if (t.isExportNamedDeclaration(node)) {
+        if (
+          !t.isProgram(node) &&
+          !t.isProgram(nodePath.parent) &&
+          !t.isExportNamedDeclaration(nodePath.parent)
+        ) {
           return nodePath.skip();
+        }
+
+        if (t.isExportNamedDeclaration(node)) {
+          for (const exportSpecifier of node.specifiers) {
+            if (
+              t.isExportSpecifier(exportSpecifier) &&
+              t.isIdentifier(exportSpecifier.exported)
+            ) {
+              exportNamesByLocalName.set(
+                exportSpecifier.local.name,
+                exportSpecifier.exported.name,
+              );
+            }
+          }
         }
 
         const functionInfo = getFunctionInfo(node);
 
         if (functionInfo) {
-          functions.push(functionInfo);
+          localTopLevelFunctionsByNode.set(node, functionInfo);
         }
       },
     });
@@ -87,47 +108,49 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           return nodePath.skip();
         }
 
-        const exportedFunctions = getExportedFunctions(node, functions);
+        const extendedFunctionInfo = getExtendedFunctionInfo(
+          node,
+          localTopLevelFunctionsByNode,
+          exportNamesByLocalName,
+        );
 
         if (moduleDirective === `use client`) {
-          if (exportedFunctions.length === 0) {
+          if (!extendedFunctionInfo?.exportName) {
             return nodePath.remove();
           }
 
-          const exportedClientReferences: t.ExportNamedDeclaration[] = [];
+          const {exportName} = extendedFunctionInfo;
 
-          for (const {exportName} of exportedFunctions) {
-            const id = `${path.relative(
-              process.cwd(),
-              resourcePath,
-            )}#${exportName}`;
+          const id = `${path.relative(
+            process.cwd(),
+            resourcePath,
+          )}#${exportName}`;
 
-            clientReferences.push({id, exportName});
-            addedRegisterReferenceCall = `Client`;
+          clientReferences.push({id, exportName});
+          addedRegisterReferenceCall = `Client`;
 
-            exportedClientReferences.push(
-              createExportedClientReference(id, exportName),
+          nodePath.replaceWith(createExportedClientReference(id, exportName));
+          nodePath.skip();
+        } else if (extendedFunctionInfo) {
+          const {localName, exportName, hasUseServerDirective} =
+            extendedFunctionInfo;
+
+          if (
+            (moduleDirective === `use server` && exportName) ||
+            hasUseServerDirective
+          ) {
+            if (hasUseServerDirective && !exportName) {
+              nodePath.insertAfter(createExportNamedDeclaration(localName));
+            }
+
+            nodePath.insertAfter(
+              createRegisterServerReference(extendedFunctionInfo),
             );
-          }
 
-          // I have no idea why the array of nodes needs to be duplicated for
-          // replaceWithMultiple to work properly. ¯\_(ツ)_/¯
-          nodePath.replaceWithMultiple([
-            ...exportedClientReferences,
-            ...exportedClientReferences,
-          ]);
+            addedRegisterReferenceCall = `Server`;
+          }
 
           nodePath.skip();
-        } else {
-          for (const functionInfo of exportedFunctions) {
-            if (
-              moduleDirective === `use server` ||
-              functionInfo.hasUseServerDirective
-            ) {
-              addedRegisterReferenceCall = `Server`;
-              nodePath.insertAfter(createRegisterServerReference(functionInfo));
-            }
-          }
         }
       },
       exit(nodePath) {
@@ -185,54 +208,44 @@ function isDirective(
     t.isDirectiveLiteral(directive.value) && directive.value.value === value;
 }
 
-function getExportedFunctions(
+function getExtendedFunctionInfo(
   node: t.Node,
-  functions: FunctionInfo[],
-): ExportedFunctionInfo[] {
-  const exportedFunctions: ExportedFunctionInfo[] = [];
+  localTopLevelFunctionsByNode: WeakMap<traverse.Node, FunctionInfo>,
+  exportNamesByLocalName: Map<string, string>,
+): ExtendedFunctionInfo | undefined {
+  if (t.isExportNamedDeclaration(node) && node.declaration) {
+    const functionInfo = localTopLevelFunctionsByNode.get(node.declaration);
 
-  if (t.isExportNamedDeclaration(node)) {
-    if (node.declaration) {
-      const functionInfo = getFunctionInfo(node.declaration);
+    if (functionInfo) {
+      return {
+        localName: functionInfo.localName,
+        exportName: functionInfo.localName,
+        hasUseServerDirective: functionInfo.hasUseServerDirective,
+      };
+    }
+  } else {
+    const functionInfo = localTopLevelFunctionsByNode.get(node);
 
-      if (functionInfo) {
-        exportedFunctions.push({
-          localName: functionInfo.name,
-          exportName: functionInfo.name,
-          hasUseServerDirective: functionInfo.hasUseServerDirective,
-        });
-      }
-    } else {
-      for (const specifier of node.specifiers) {
-        if (
-          t.isExportSpecifier(specifier) &&
-          t.isIdentifier(specifier.exported)
-        ) {
-          const functionInfo = functions.find(
-            ({name}) => name === specifier.local.name,
-          );
+    if (functionInfo) {
+      const exportName = exportNamesByLocalName.get(functionInfo.localName);
 
-          if (functionInfo) {
-            exportedFunctions.push({
-              localName: specifier.local.name,
-              exportName: specifier.exported.name,
-              hasUseServerDirective: functionInfo.hasUseServerDirective,
-            });
-          }
-        }
-      }
+      return {
+        localName: functionInfo.localName,
+        exportName,
+        hasUseServerDirective: functionInfo.hasUseServerDirective,
+      };
     }
   }
 
-  return exportedFunctions;
+  return undefined;
 }
 
 function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
-  let name: string | undefined;
+  let localName: string | undefined;
   let hasUseServerDirective = false;
 
   if (t.isFunctionDeclaration(node)) {
-    name = node.id?.name;
+    localName = node.id?.name;
 
     hasUseServerDirective = node.body.directives.some(
       isDirective(`use server`),
@@ -247,7 +260,7 @@ function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
         t.isIdentifier(id) &&
         (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
       ) {
-        name = id.name;
+        localName = id.name;
 
         if (t.isBlockStatement(init.body)) {
           hasUseServerDirective = init.body.directives.some(
@@ -258,7 +271,7 @@ function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
     }
   }
 
-  return name ? {name, hasUseServerDirective} : undefined;
+  return localName ? {localName, hasUseServerDirective} : undefined;
 }
 
 function createExportedClientReference(
@@ -315,13 +328,15 @@ function createClientReferenceProxyImplementation(): t.FunctionDeclaration {
 }
 
 function createRegisterServerReference(
-  functionInfo: ExportedFunctionInfo,
-): t.CallExpression {
-  return t.callExpression(t.identifier(`registerServerReference`), [
-    t.identifier(functionInfo.localName),
-    t.identifier(webpack.RuntimeGlobals.moduleId),
-    t.stringLiteral(functionInfo.exportName),
-  ]);
+  functionInfo: ExtendedFunctionInfo,
+): t.ExpressionStatement {
+  return t.expressionStatement(
+    t.callExpression(t.identifier(`registerServerReference`), [
+      t.identifier(functionInfo.localName),
+      t.identifier(webpack.RuntimeGlobals.moduleId),
+      t.stringLiteral(functionInfo.exportName ?? functionInfo.localName),
+    ]),
+  );
 }
 
 function createRegisterReferenceImport(
@@ -336,6 +351,14 @@ function createRegisterReferenceImport(
     ],
     t.stringLiteral(`react-server-dom-webpack/server`),
   );
+}
+
+function createExportNamedDeclaration(
+  localName: string,
+): t.ExportNamedDeclaration {
+  return t.exportNamedDeclaration(null, [
+    t.exportSpecifier(t.identifier(localName), t.identifier(localName)),
+  ]);
 }
 
 export = webpackRscServerLoader;

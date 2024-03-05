@@ -164,7 +164,7 @@ __webpack_require__.r(__webpack_exports__);
 async function serverFunctionImportedFromClient() {
   return Promise.resolve(\`server-function-imported-from-client\`);
 }
-(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionImportedFromClient, module.id, "serverFunctionImportedFromClient")
+(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionImportedFromClient, module.id, "serverFunctionImportedFromClient");
 
 /***/ }),
 
@@ -185,7 +185,7 @@ __webpack_require__.r(__webpack_exports__);
 async function serverFunctionPassedFromServer() {
   return Promise.resolve(\`server-function-passed-from-server\`);
 }
-(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionPassedFromServer, module.id, "serverFunctionPassedFromServer")
+(0,react_server_dom_webpack_server__WEBPACK_IMPORTED_MODULE_0__.registerServerReference)(serverFunctionPassedFromServer, module.id, "serverFunctionPassedFromServer");
 
 /***/ }),`,
       );
