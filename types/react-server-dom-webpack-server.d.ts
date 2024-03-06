@@ -29,7 +29,10 @@ declare module 'react-server-dom-webpack/server.edge' {
     options?: RenderToReadableStreamOptions,
   ): ReadableStream<Uint8Array>;
 
-  export function decodeReply(body: string | FormData): Thenable<unknown[]>;
+  export function decodeReply(
+    body: string | FormData,
+    serverManifest: ServerManifest,
+  ): Thenable<unknown[]>;
 
   export function decodeAction(
     body: FormData,
