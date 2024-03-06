@@ -156,7 +156,7 @@ function serverFunctionImportedFromClient() {
 /*!********************************************!*\\
   !*** ./src/__fixtures__/main-component.js ***!
   \\********************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -191,7 +191,7 @@ function Main() {
 /*!******************************************************************!*\\
   !*** ./src/__fixtures__/server-function-imported-from-client.js ***!
   \\******************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -212,7 +212,7 @@ async function serverFunctionImportedFromClient() {
 /*!****************************************************************!*\\
   !*** ./src/__fixtures__/server-function-passed-from-server.js ***!
   \\****************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -330,7 +330,7 @@ async function serverFunctionPassedFromServer() {
       }
       (0, n.registerServerReference)(
         c,
-        module.id,
+        e.id,
         "serverFunctionWithInlineDirective"
       );
     },
@@ -342,7 +342,7 @@ async function serverFunctionPassedFromServer() {
         t.d(r, { serverFunctionImportedFromClient: () => n }),
         (0, t(324).registerServerReference)(
           n,
-          module.id,
+          e.id,
           "serverFunctionImportedFromClient"
         );
     },
@@ -354,7 +354,7 @@ async function serverFunctionPassedFromServer() {
         t.d(r, { serverFunctionPassedFromServer: () => n }),
         (0, t(324).registerServerReference)(
           n,
-          module.id,
+          e.id,
           "serverFunctionPassedFromServer"
         );
     },`,
