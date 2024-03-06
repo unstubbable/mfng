@@ -49,7 +49,11 @@ export async function createRscActionStream(
     return undefined;
   }
 
-  const args = await ReactServerDOMServer.decodeReply(body);
+  const args = await ReactServerDOMServer.decodeReply(
+    body,
+    reactServerManifest,
+  );
+
   const actionPromise = action.apply(null, args);
 
   return ReactServerDOMServer.renderToReadableStream(
