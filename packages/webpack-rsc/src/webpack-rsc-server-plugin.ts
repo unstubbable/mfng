@@ -41,6 +41,7 @@ export class WebpackRscServerPlugin {
         runtime: {getEntryRuntime},
       },
       sources: {RawSource},
+      RuntimeGlobals,
     } = compiler.webpack;
 
     class ServerReferenceDependency extends NullDependency {
@@ -48,6 +49,18 @@ export class WebpackRscServerPlugin {
         return `server-reference`;
       }
     }
+
+    ServerReferenceDependency.Template = class ServerReferenceDependencyTemplate extends (
+      NullDependency.Template
+    ) {
+      override apply(
+        _dependency: ServerReferenceDependency,
+        _source: Webpack.sources.ReplaceSource,
+        {runtimeRequirements}: {runtimeRequirements: Set<string>},
+      ) {
+        runtimeRequirements.add(RuntimeGlobals.moduleId);
+      }
+    };
 
     function hasServerReferenceDependency(module: Webpack.Module): boolean {
       return module.dependencies.some(
@@ -73,7 +86,7 @@ export class WebpackRscServerPlugin {
       if (otherEntries.length > 0) {
         compilation.warnings.push(
           new WebpackError(
-            `Found multiple entries in the compilation, adding client module include (for SSR) only to the first entry.`,
+            `Found multiple entries in the compilation, adding module include for ${resource} only to the first entry.`,
           ),
         );
       }
@@ -94,11 +107,19 @@ export class WebpackRscServerPlugin {
               return reject(error);
             }
 
-            const exportsInfo = compilation.moduleGraph.getExportsInfo(module!);
+            if (!module) {
+              return reject(
+                new Error(`module was not created for ${resource}`),
+              );
+            }
 
-            exportsInfo.setUsedInUnknownWay(
-              getEntryRuntime(compilation, entryName, {name: entryName}),
-            );
+            const runtime = getEntryRuntime(compilation, entryName, {
+              name: entryName,
+            });
+
+            compilation.moduleGraph
+              .getExportsInfo(module)
+              .setUsedInUnknownWay(runtime);
 
             resolve();
           },
@@ -162,6 +183,15 @@ export class WebpackRscServerPlugin {
               }
             }
           });
+
+          parser.hooks.expression
+            .for(RuntimeGlobals.moduleId)
+            .tap(WebpackRscServerPlugin.name, () => {
+              parser.state.module.buildInfo.moduleArgument =
+                RuntimeGlobals.module;
+
+              return true;
+            });
         };
 
         normalModuleFactory.hooks.parser
