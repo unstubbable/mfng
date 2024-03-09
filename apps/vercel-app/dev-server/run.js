@@ -41,12 +41,16 @@ const buildContext = await esbuild.context({
 });
 
 const rebuild = debounce(async () => {
-  await buildContext.rebuild();
+  try {
+    await buildContext.rebuild();
 
-  const code = await fs.readFile(outfile);
+    const code = await fs.readFile(outfile);
 
-  runtime.evaluate(code.toString());
-  console.log(`Re-evaluated edge runtime.`);
+    runtime.evaluate(code.toString());
+    console.log(`Re-evaluated edge runtime.`);
+  } catch (error) {
+    console.error(error);
+  }
 }, 300);
 
 chokidar

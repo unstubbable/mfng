@@ -104,13 +104,17 @@ export class WebpackRscServerPlugin {
           {name: entryName, layer},
           (error, module) => {
             if (error) {
+              compilation.errors.push(error);
+
               return reject(error);
             }
 
             if (!module) {
-              return reject(
-                new Error(`module was not created for ${resource}`),
-              );
+              const noModuleError = new WebpackError(`Module not added`);
+              noModuleError.file = resource;
+              compilation.errors.push(noModuleError);
+
+              return reject(noModuleError);
             }
 
             const runtime = getEntryRuntime(compilation, entryName, {
@@ -130,12 +134,26 @@ export class WebpackRscServerPlugin {
     compiler.hooks.finishMake.tapPromise(
       WebpackRscServerPlugin.name,
       async (compilation) => {
+        this.serverManifest = {};
+
         await Promise.all([
-          ...Array.from(this.clientReferencesMap.keys()).map(async (resource) =>
-            includeModule(compilation, resource),
+          ...Array.from(this.clientReferencesMap.keys()).map(
+            async (resource) => {
+              try {
+                await includeModule(compilation, resource);
+              } catch (error) {
+                this.clientReferencesMap.delete(resource);
+              }
+            },
           ),
-          ...Array.from(this.serverReferencesMap.keys()).map(async (resource) =>
-            includeModule(compilation, resource, webpackRscLayerName),
+          ...Array.from(this.serverReferencesMap.keys()).map(
+            async (resource) => {
+              try {
+                await includeModule(compilation, resource, webpackRscLayerName);
+              } catch (error) {
+                this.serverReferencesMap.delete(resource);
+              }
+            },
           ),
         ]);
       },
@@ -175,7 +193,9 @@ export class WebpackRscServerPlugin {
 
             if (module.layer === webpackRscLayerName) {
               if (isClientModule) {
-                void includeModule(compilation, resource);
+                void includeModule(compilation, resource).catch(() => {
+                  this.clientReferencesMap.delete(resource);
+                });
               }
 
               if (isServerModule && !hasServerReferenceDependency(module)) {

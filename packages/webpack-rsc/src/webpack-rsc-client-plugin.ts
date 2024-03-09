@@ -1,4 +1,3 @@
-import {createRequire} from 'module';
 import type {
   ClientManifest,
   ImportManifestEntry,
@@ -12,8 +11,6 @@ export interface WebpackRscClientPluginOptions {
   readonly clientManifestFilename?: string;
   readonly ssrManifestFilename?: string;
 }
-
-const require = createRequire(import.meta.url);
 
 export class WebpackRscClientPlugin {
   private clientReferencesMap: ClientReferencesMap;
@@ -37,19 +34,94 @@ export class WebpackRscClientPlugin {
     const {
       AsyncDependenciesBlock,
       RuntimeGlobals,
+      WebpackError,
       dependencies: {ModuleDependency, NullDependency},
       sources: {RawSource},
     } = compiler.webpack;
 
     class ClientReferenceDependency extends ModuleDependency {
-      constructor(request: string) {
-        super(request);
-      }
-
       override get type(): string {
         return `client-reference`;
       }
     }
+
+    const getEntryModule = (compilation: Webpack.Compilation) => {
+      const [entryTuple, ...otherEntries] = compilation.entries.entries();
+
+      if (!entryTuple) {
+        compilation.errors.push(
+          new WebpackError(`Could not find an entry in the compilation.`),
+        );
+
+        return;
+      }
+
+      if (otherEntries.length > 0) {
+        compilation.warnings.push(
+          new WebpackError(
+            `Found multiple entries in the compilation, adding client reference chunks only to the first entry.`,
+          ),
+        );
+      }
+
+      const [, entryValue] = entryTuple;
+
+      const entryDependency = entryValue.dependencies.find(
+        (dependency) => dependency.constructor.name === `EntryDependency`,
+      );
+
+      if (!entryDependency) {
+        compilation.errors.push(
+          new WebpackError(`Could not find an entry dependency.`),
+        );
+
+        return;
+      }
+
+      return compilation.moduleGraph.getResolvedModule(entryDependency);
+    };
+
+    const addClientReferencesChunks = (entryModule: Webpack.Module) => {
+      [...this.clientReferencesMap.keys()].forEach((resourcePath, index) => {
+        const chunkName = `client${index}`;
+        this.clientChunkNameMap.set(chunkName, resourcePath);
+
+        const block = new AsyncDependenciesBlock(
+          {name: chunkName},
+          undefined,
+          resourcePath,
+        );
+
+        block.addDependency(new ClientReferenceDependency(resourcePath));
+
+        entryModule.addBlock(block);
+      });
+    };
+
+    compiler.hooks.finishMake.tap(
+      WebpackRscClientPlugin.name,
+      (compilation) => {
+        if (compiler.watchMode) {
+          this.clientManifest = {};
+          this.clientChunkNameMap.clear();
+
+          const entryModule = getEntryModule(compilation);
+
+          if (entryModule) {
+            // Remove stale client references.
+            entryModule.blocks = entryModule.blocks.filter((block) =>
+              block.dependencies.some(
+                (dependency) =>
+                  !(dependency instanceof ClientReferenceDependency) ||
+                  this.clientReferencesMap.has(dependency.request),
+              ),
+            );
+
+            addClientReferencesChunks(entryModule);
+          }
+        }
+      },
+    );
 
     compiler.hooks.thisCompilation.tap(
       WebpackRscClientPlugin.name,
@@ -64,34 +136,15 @@ export class WebpackRscClientPlugin {
           new NullDependency.Template(),
         );
 
-        const reactServerDomClientPath = require.resolve(
-          `react-server-dom-webpack/client.browser`,
-        );
-
         const onNormalModuleFactoryParser = (
           parser: Webpack.javascript.JavascriptParser,
         ) => {
           compilation.assetsInfo;
           parser.hooks.program.tap(WebpackRscClientPlugin.name, () => {
-            if (parser.state.module.resource === reactServerDomClientPath) {
-              [...this.clientReferencesMap.keys()].forEach(
-                (resourcePath, index) => {
-                  const chunkName = `client${index}`;
-                  this.clientChunkNameMap.set(chunkName, resourcePath);
+            const entryModule = getEntryModule(compilation);
 
-                  const block = new AsyncDependenciesBlock(
-                    {name: chunkName},
-                    undefined,
-                    resourcePath,
-                  );
-
-                  block.addDependency(
-                    new ClientReferenceDependency(resourcePath),
-                  );
-
-                  parser.state.module.addBlock(block);
-                },
-              );
+            if (entryModule === parser.state.module) {
+              addClientReferencesChunks(entryModule);
             }
           });
         };

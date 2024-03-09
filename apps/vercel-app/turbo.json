@@ -11,15 +11,6 @@
       ],
       "outputs": ["dist/**", ".vercel/output/**"]
     },
-    "build:node18": {
-      "inputs": [
-        "src/**/*",
-        "package.json",
-        "tailwind.config.cjs",
-        "webpack.config.js"
-      ],
-      "outputs": ["dist/**", ".vercel/output/**"]
-    },
     "build:dev": {
       "inputs": [
         "src/**/*",

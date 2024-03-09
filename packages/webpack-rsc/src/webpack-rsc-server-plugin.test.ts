@@ -32,7 +32,7 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
     compiler.run((err, stats) => {
       if (err) {
         console.error(err);
-        reject(err);
+        return reject(err);
       }
 
       if (stats) {
@@ -40,7 +40,7 @@ async function runWebpack(config: webpack.Configuration): Promise<void> {
 
         if (stats.hasErrors()) {
           console.error(info.errors);
-          reject(info.errors);
+          return reject(info.errors);
         }
 
         if (stats.hasWarnings()) {
