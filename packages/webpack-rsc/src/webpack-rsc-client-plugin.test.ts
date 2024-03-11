@@ -18,6 +18,8 @@ function pretty(source: string): string {
   return prettier.format(source, {parser: `babel`});
 }
 
+jest.setTimeout(10000);
+
 async function runWebpack(config: webpack.Configuration): Promise<void> {
   return new Promise((resolve, reject) => {
     const compiler = webpack(config);
@@ -169,7 +171,6 @@ function ClientComponent({action}) {
   describe(`in production mode`, () => {
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
-      jest.setTimeout(10000);
     });
 
     test(`creates chunks for the given client references`, async () => {
