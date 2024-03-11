@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {"parser": {"syntax": "typescript", "tsx": true}},
+  "sourceMaps": true
+}
