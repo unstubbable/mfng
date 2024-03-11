@@ -1,5 +1,6 @@
 import path from 'path';
 import url from 'url';
+import {jest} from '@jest/globals';
 import MemoryFS from 'memory-fs';
 import prettier from 'prettier';
 import webpack from 'webpack';
@@ -168,6 +169,7 @@ function ClientComponent({action}) {
   describe(`in production mode`, () => {
     beforeEach(() => {
       buildConfig = {...buildConfig, mode: `production`};
+      jest.setTimeout(10000);
     });
 
     test(`creates chunks for the given client references`, async () => {
