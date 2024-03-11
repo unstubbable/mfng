@@ -1,7 +1,7 @@
 name = "mfng"
 main = "../../dist/worker.js"
-compatibility_date = "2023-02-21"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-03-04"
+compatibility_flags = ["nodejs_als"]
 
 [dev]
 port = 3000
@@ -15,4 +15,5 @@ watch_dir = []
 [assets]
 bucket = "../../dist"
 include = ["client"]
+exclude = []
 serve_single_page_app = true

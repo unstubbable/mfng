@@ -1,3 +1,4 @@
+import type {Request} from '@cloudflare/workers-types';
 import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
 import {
   createRscActionStream,
@@ -47,11 +48,11 @@ async function renderApp(
   });
 }
 
-const handleGet: ExportedHandlerFetchHandler = async (request) => {
+const handleGet: ExportedHandlerFetchHandler = async (request: Request) => {
   return renderApp(request);
 };
 
-const handlePost: ExportedHandlerFetchHandler = async (request) => {
+const handlePost: ExportedHandlerFetchHandler = async (request: Request) => {
   const serverReferenceId = request.headers.get(`x-rsc-action`);
 
   if (serverReferenceId) {
@@ -60,7 +61,7 @@ const handlePost: ExportedHandlerFetchHandler = async (request) => {
     const contentType = request.headers.get(`content-type`);
 
     const body = await (contentType?.startsWith(`multipart/form-data`)
-      ? request.formData()
+      ? (request.formData() as Promise<FormData>)
       : request.text());
 
     const rscActionStream = await createRscActionStream({
@@ -77,7 +78,7 @@ const handlePost: ExportedHandlerFetchHandler = async (request) => {
   } else {
     // POST before hydration (progressive enhancement):
 
-    const formData = await request.formData();
+    const formData = await (request.formData() as Promise<FormData>);
     const formState = await createRscFormState(formData, reactServerManifest);
 
     return renderApp(request, formState);
@@ -85,7 +86,7 @@ const handlePost: ExportedHandlerFetchHandler = async (request) => {
 };
 
 const handler: ExportedHandler = {
-  async fetch(request, env, ctx) {
+  async fetch(request: Request, env, ctx) {
     switch (request.method) {
       case `GET`:
         return handleGet(request, env, ctx);
