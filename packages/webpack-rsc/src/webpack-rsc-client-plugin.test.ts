@@ -229,34 +229,34 @@ function ClientComponent({action}) {
 `,
       );
     });
-  });
 
-  test(`creates a client manifest`, async () => {
-    clientReferencesMap.set(
-      path.resolve(currentDirname, `__fixtures__/client-component.js`),
-      [
-        {
-          id: `__fixtures__/client-component.js#ClientComponent`,
-          exportName: `ClientComponent`,
+    test(`creates a client manifest`, async () => {
+      clientReferencesMap.set(
+        path.resolve(currentDirname, `__fixtures__/client-component.js`),
+        [
+          {
+            id: `__fixtures__/client-component.js#ClientComponent`,
+            exportName: `ClientComponent`,
+          },
+        ],
+      );
+
+      await runWebpack(buildConfig);
+
+      const manifest = JSON.parse(
+        memFs.readFileSync(
+          path.resolve(currentDirname, `dist/react-client-manifest.json`),
+          `utf-8`,
+        ),
+      );
+
+      expect(manifest).toEqual({
+        '__fixtures__/client-component.js#ClientComponent': {
+          chunks: [701, `701.main.js`],
+          id: 431,
+          name: `ClientComponent`,
         },
-      ],
-    );
-
-    await runWebpack(buildConfig);
-
-    const manifest = JSON.parse(
-      memFs.readFileSync(
-        path.resolve(currentDirname, `dist/react-client-manifest.json`),
-        `utf-8`,
-      ),
-    );
-
-    expect(manifest).toEqual({
-      '__fixtures__/client-component.js#ClientComponent': {
-        chunks: [701, `701.main.js`],
-        id: 431,
-        name: `ClientComponent`,
-      },
+      });
     });
   });
 });
