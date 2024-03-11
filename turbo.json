@@ -3,17 +3,23 @@
   "pipeline": {
     "build": {},
     "build:dev": {},
+    "build-dev-server": {
+      "dependsOn": ["build"]
+    },
+    "build-dev-server:dev": {
+      "dependsOn": ["build:dev"]
+    },
     "deploy": {
       "dependsOn": ["build"],
       "cache": false
     },
     "dev": {
-      "dependsOn": ["build:dev"],
+      "dependsOn": ["build-dev-server:dev"],
       "cache": false,
       "persistent": true
     },
     "start": {
-      "dependsOn": ["build"],
+      "dependsOn": ["build-dev-server"],
       "cache": false,
       "persistent": true
     },
@@ -25,6 +31,16 @@
     },
     "watch:dev": {
       "dependsOn": ["build:dev"],
+      "cache": false,
+      "persistent": true
+    },
+    "watch-dev-server": {
+      "dependsOn": ["build-dev-server"],
+      "cache": false,
+      "persistent": true
+    },
+    "watch-dev-server:dev": {
+      "dependsOn": ["build-dev-server:dev"],
       "cache": false,
       "persistent": true
     }

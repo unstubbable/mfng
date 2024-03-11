@@ -16,6 +16,8 @@ import {
   reactSsrManifest,
 } from './manifests.js';
 
+export type Handler = typeof handler;
+
 export default async function handler(request: Request): Promise<Response> {
   switch (request.method) {
     case `GET`:
