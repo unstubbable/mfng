@@ -5,11 +5,13 @@ import {
   createRscFormState,
 } from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
-import type {LambdaFunctionURLEvent} from 'aws-lambda';
+import type {LambdaFunctionURLHandler} from 'aws-lambda';
+import {Hono} from 'hono';
+import {streamHandle} from 'hono/aws-lambda';
 import * as React from 'react';
 import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
-import {createRequestFromEvent} from './create-request-from-event.js';
+import {logger} from './logger.js';
 import {
   cssManifest,
   jsManifest,
@@ -17,36 +19,14 @@ import {
   reactServerManifest,
   reactSsrManifest,
 } from './manifests.js';
-import {pipeResponse} from './pipe-response.js';
 
-export const handler = awslambda.streamifyResponse<LambdaFunctionURLEvent>(
-  async (event, responseStream, context) => {
-    console.log(JSON.stringify({event, context}));
+export const app = new Hono();
 
-    const request = createRequestFromEvent(event);
-    const response = await handleRequest(request);
+app.use(logger);
+app.get(`/*`, async (context) => handleGet(context.req.raw));
+app.post(`/*`, async (context) => handlePost(context.req.raw));
 
-    return pipeResponse(response, responseStream);
-  },
-);
-
-async function handleRequest(request: Request): Promise<Response> {
-  switch (request.method) {
-    case `GET`:
-      return handleGet(request);
-    case `POST`:
-      return handlePost(request);
-    case `OPTIONS`:
-      return new Response(null, {
-        status: 204,
-        headers: {Allow: `OPTIONS, GET, HEAD, POST`},
-      });
-    case `HEAD`:
-      return new Response(null, {status: 200});
-    default:
-      return new Response(null, {status: 405});
-  }
-}
+export const handler: LambdaFunctionURLHandler = streamHandle(app);
 
 const oneDay = 60 * 60 * 24;
 
