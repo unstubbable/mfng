@@ -18,7 +18,7 @@
         "tailwind.config.cjs",
         "webpack.config.js"
       ],
-      "outputs": ["dist/**", "!dist/dev-server.js", ".vercel/output/**"]
+      "outputs": ["dist/**", ".vercel/output/**"]
     }
   }
 }
