@@ -12,7 +12,8 @@
     "*.js",
     "*.cjs",
     "dev-server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "cdk/**/*"
   ],
   "exclude": ["dist"],
   "references": [
