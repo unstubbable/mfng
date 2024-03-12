@@ -1,23 +1,14 @@
 import {serve} from '@hono/node-server';
 import {serveStatic} from '@hono/node-server/serve-static';
 import {Hono} from 'hono';
-
-const app = new Hono();
-
-app.use(`/client/*`, serveStatic({root: `dist/static`}));
-
-// The global awslambda namespace can be stubbed, since it's not needed in the
-// dev server. Instead, the dev server consumes the handler app directly.
-global.awslambda = {
-  streamifyResponse: (handler) => handler,
-  // @ts-expect-error
-  HttpResponseStream: undefined,
-};
+import './stub-awslambda.js';
 
 // @ts-ignore
 const handlerModule = await import(`../dist/handler/index.js`);
 const {app: handlerApp} = handlerModule as {app: Hono};
+const app = new Hono();
 
+app.use(`/client/*`, serveStatic({root: `dist/static`}));
 app.route(`/`, handlerApp);
 
 const server = serve({fetch: app.fetch, port: 3002}, ({address, port}) => {
