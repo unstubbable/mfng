@@ -16,6 +16,10 @@ server?
 - [x] Server-side rendering
 - [x] Client components loaded as separate chunks
 - [x] Server actions
+  - [x] passed from server to client
+  - [x] imported from client
+  - [x] inline `'use server'` directive
+  - [ ] auto-binding of closed-over variables (not planned)
 - [x] Progressively enhanced form actions
 - [x] Suspensy routing
 - [x] Development server
