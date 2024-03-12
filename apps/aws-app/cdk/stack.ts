@@ -46,7 +46,11 @@ export class Stack extends cdk.Stack {
           enableAcceptEncodingBrotli: true,
           queryStringBehavior:
             cdk.aws_cloudfront.CacheQueryStringBehavior.all(),
+          headerBehavior:
+            cdk.aws_cloudfront.CacheHeaderBehavior.allowList('accept'),
         }),
+        originRequestPolicy:
+          cdk.aws_cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
       additionalBehaviors: {
         '/client/*': {
