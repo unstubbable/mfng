@@ -1,3 +1,5 @@
 coverage
 dist
 lib
+manifests.js
+cdk.out

@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* eslint-disable @typescript-eslint/no-require-imports,import/no-commonjs */
 
 // These json imports will be preserved by webpack, and then bundled by vercel
 // into the final edge function bundle. This needs to be done in this way,

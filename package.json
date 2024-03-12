@@ -6,6 +6,7 @@
   "author": "Hendrik Liebau <mail@hendrik-liebau.de>",
   "type": "module",
   "workspaces": [
+    "apps/aws-app",
     "apps/cloudflare-app",
     "apps/shared-app",
     "apps/vercel-app",
@@ -20,15 +21,15 @@
     "compile:clean": "tsc --build --clean",
     "compile:watch": "tsc --build --watch --preserveWatchOutput",
     "deploy": "turbo deploy",
-    "dev": "turbo --concurrency 16 watch:dev watch-dev-server:dev dev",
+    "dev": "turbo --concurrency 19 watch:dev watch-dev-server:dev dev",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
-    "start": "turbo --concurrency 16 watch watch-dev-server start",
+    "start": "turbo --concurrency 19 watch watch-dev-server start",
     "test": "turbo test"
   },
   "devDependencies": {
-    "@types/node": "^18.11.14",
+    "@types/node": "^20.11.26",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "cross-env": "^7.0.3",

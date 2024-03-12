@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* eslint-disable @typescript-eslint/no-require-imports,import/no-commonjs */
 
 // These json imports will be preserved by webpack, and then bundled by wrangler
 // into the final worker bundle. This needs to be done in this way,

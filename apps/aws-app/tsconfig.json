@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "outDir": "lib",
+    "resolveJsonModule": true,
+    "types": ["react/experimental", "react-dom/experimental"]
+  },
+  "include": [
+    "src/**/*",
+    "../../types",
+    "*.js",
+    "*.cjs",
+    "dev-server/**/*",
+    "types/**/*",
+    "cdk/**/*"
+  ],
+  "exclude": ["dist"],
+  "references": [
+    {"path": "../shared-app"},
+    {"path": "../../packages/core"},
+    {"path": "../../packages/webpack-rsc"}
+  ]
+}

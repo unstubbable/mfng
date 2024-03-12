@@ -24,6 +24,8 @@ server?
   - using a [Cloudflare Worker](https://workers.cloudflare.com)
   - using a
     [Vercel Edge Function](https://vercel.com/docs/functions/edge-functions)
+  - using an [AWS Lambda Function](https://aws.amazon.com/lambda/), with
+    [AWS CloudFront](https://aws.amazon.com/cloudfront/) as CDN
 - [x] Support [poisoned imports][]
 - [ ] Microfrontend composition demo
 - [ ] Advanced routing

@@ -6,3 +6,4 @@ tsconfig.tsbuildinfo
 .turbo
 .vercel
 .wrangler
+cdk.out

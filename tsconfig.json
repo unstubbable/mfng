@@ -6,6 +6,7 @@
   },
   "include": ["*.js", "*.cjs"],
   "references": [
+    {"path": "apps/aws-app"},
     {"path": "apps/cloudflare-app"},
     {"path": "apps/vercel-app"},
     {"path": "packages/core"},
