@@ -29,7 +29,7 @@
     "test": "turbo test"
   },
   "devDependencies": {
-    "@types/node": "^18.11.14",
+    "@types/node": "^20.11.26",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "cross-env": "^7.0.3",

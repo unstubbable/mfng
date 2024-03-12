@@ -5,9 +5,11 @@ import {
   createRscFormState,
 } from '@mfng/core/server/rsc';
 import {createHtmlStream} from '@mfng/core/server/ssr';
+import type {LambdaFunctionURLEvent} from 'aws-lambda';
 import * as React from 'react';
 import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
+import {createRequestFromEvent} from './create-request-from-event.js';
 import {
   cssManifest,
   jsManifest,
@@ -15,10 +17,20 @@ import {
   reactServerManifest,
   reactSsrManifest,
 } from './manifests.js';
+import {pipeResponse} from './pipe-response.js';
 
-export type Handler = typeof handler;
+export const handler = awslambda.streamifyResponse<LambdaFunctionURLEvent>(
+  async (event, responseStream, context) => {
+    console.log(JSON.stringify({event, context}));
 
-export default async function handler(request: Request): Promise<Response> {
+    const request = createRequestFromEvent(event);
+    const response = await handleRequest(request);
+
+    return pipeResponse(response, responseStream);
+  },
+);
+
+async function handleRequest(request: Request): Promise<Response> {
   switch (request.method) {
     case `GET`:
       return handleGet(request);

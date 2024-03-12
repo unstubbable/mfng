@@ -6,7 +6,14 @@
     "resolveJsonModule": true,
     "types": ["react/experimental", "react-dom/experimental"]
   },
-  "include": ["src/**/*", "../../types", "*.js", "*.cjs", "dev-server/**/*"],
+  "include": [
+    "src/**/*",
+    "../../types",
+    "*.js",
+    "*.cjs",
+    "dev-server/**/*",
+    "types/**/*"
+  ],
   "exclude": ["dist"],
   "references": [
     {"path": "../shared-app"},

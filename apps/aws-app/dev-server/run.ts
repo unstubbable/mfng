@@ -1,22 +1,25 @@
+import {Readable} from 'stream';
 import {serve} from '@hono/node-server';
 import {serveStatic} from '@hono/node-server/serve-static';
 import {Hono} from 'hono';
-import type {StatusCode} from 'hono/utils/http-status';
-// @ts-ignore
-import handler from '../dist/handler/index.js';
-import type {Handler} from '../src/handler/index.js';
-import {transformHeaders} from './transform-headers.js';
+import type {MockStreamifiedResponseHandler} from './streamify-response.js';
+
+await import(`./streamify-response.js`);
 
 const app = new Hono();
 
 app.use(`/client/*`, serveStatic({root: `dist/static`}));
 
 app.all(`*`, async (context) => {
-  const response = await (handler as Handler)(context.req.raw);
-  const status = response.status as StatusCode;
-  const headers = transformHeaders(response.headers);
+  // @ts-ignore
+  const handlerModule = await import(`../dist/handler/index.js`);
+  const handler: MockStreamifiedResponseHandler = handlerModule.handler;
+  const {body, statusCode, headers} = await handler(context);
 
-  return context.newResponse(response.body, status, headers);
+  return new Response(Readable.toWeb(body) as ReadableStream, {
+    status: statusCode,
+    headers,
+  });
 });
 
 const server = serve({fetch: app.fetch, port: 3002}, ({address, port}) => {

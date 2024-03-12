@@ -125,7 +125,7 @@ export default function createConfigs(_env, argv) {
   const serverConfig = {
     name: `server`,
     entry: `./src/handler/index.tsx`,
-    target: `webworker`,
+    target: `node`,
     output: {
       filename: `index.js`,
       path: outputHandlerDirname,
@@ -137,12 +137,7 @@ export default function createConfigs(_env, argv) {
     },
     resolve: {
       plugins: [new ResolveTypeScriptPlugin()],
-      conditionNames: [
-        `@mfng:internal:node`,
-        `@mfng:internal`,
-        `workerd`,
-        `...`,
-      ],
+      conditionNames: [`@mfng:internal:node`, `@mfng:internal`, `...`],
     },
     module: {
       rules: [
@@ -157,7 +152,7 @@ export default function createConfigs(_env, argv) {
         },
         {
           issuerLayer: webpackRscLayerName,
-          resolve: {conditionNames: [`react-server`, `workerd`, `...`]},
+          resolve: {conditionNames: [`react-server`, `...`]},
         },
         {
           oneOf: [
@@ -188,7 +183,6 @@ export default function createConfigs(_env, argv) {
       }),
     ],
     experiments: {outputModule: true, layers: true, topLevelAwait: true},
-    externals: [`node:async_hooks`],
     devtool: `source-map`,
     mode,
     stats,
