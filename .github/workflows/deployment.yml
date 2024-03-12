@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deployment:
+  deploy-cloudflare:
     runs-on: ubuntu-latest
     environment: Cloudflare Workers
     env:
@@ -25,3 +25,25 @@ jobs:
         run: npm t
       - name: Deploy
         run: npm run deploy -- -F cloudflare-app
+
+  deploy-aws:
+    runs-on: ubuntu-latest
+    environment: AWS
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Test
+        run: npm t
+      - name: Deploy
+        run: npm run deploy -- -F aws-app -- --require-approval never
