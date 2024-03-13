@@ -78,6 +78,11 @@ export async function submitUserMessage(
                 .describe(
                   `An error message to show to the user when no images were found.`,
                 ),
+              errorMessage: z
+                .string()
+                .describe(
+                  `An error message to show to the user when the search errored, most likely due to the search quota being exceeded for the current time period.`,
+                ),
               searchParams: imageSearchParams,
             }),
           ),
@@ -100,12 +105,21 @@ export async function submitUserMessage(
 
           const imageSets = await Promise.all(
             searchParamsList.map(
-              async ({searchParams, title, notFoundMessage}) => {
-                const images = await searchImages(searchParams);
+              async ({searchParams, title, notFoundMessage, errorMessage}) => {
+                const result = await searchImages(searchParams);
 
-                return images.length === 0
+                if (`error` in result) {
+                  console.error(
+                    `Error searching for images:`,
+                    JSON.stringify(result.error),
+                  );
+
+                  return {status: `error` as const, title, errorMessage};
+                }
+
+                return result.length === 0
                   ? {status: `not-found` as const, title, notFoundMessage}
-                  : {status: `found` as const, images, title};
+                  : {status: `found` as const, images: result, title};
               },
             ),
           );
@@ -148,7 +162,11 @@ export async function submitUserMessage(
                       )
                     ) : (
                       <p className="text-sm">
-                        <em>{imageSet.notFoundMessage}</em>
+                        <em>
+                          {imageSet.status === `not-found`
+                            ? imageSet.notFoundMessage
+                            : imageSet.errorMessage}
+                        </em>
                       </p>
                     )}
                   </React.Fragment>

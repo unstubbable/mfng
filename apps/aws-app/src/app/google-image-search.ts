@@ -55,38 +55,42 @@ export const imageSearchParams = z.object({
     ),
 });
 
-const imageSearchResults = z
-  .object({
-    items: z
-      .array(
-        z
-          .object({
-            link: z.string(),
-            snippet: z.string(),
-            image: z.object({
-              contextLink: z.string(),
-              thumbnailLink: z.string(),
-              width: z.number(),
-              height: z.number(),
-            }),
-          })
-          .transform(
-            ({
-              link,
-              snippet,
-              image: {contextLink, thumbnailLink, width, height},
-            }) => ({
-              website: {url: contextLink, snippet},
-              thumbnailUrl: thumbnailLink,
-              url: link,
-              width,
-              height,
-            }),
-          ),
-      )
-      .default([]),
-  })
-  .transform(({items}) => items);
+const imageSearchResults = z.union([
+  z.object({error: z.object({code: z.number(), message: z.string()})}),
+  z
+    .object({
+      kind: z.string(),
+      items: z
+        .array(
+          z
+            .object({
+              link: z.string(),
+              snippet: z.string(),
+              image: z.object({
+                contextLink: z.string(),
+                thumbnailLink: z.string(),
+                width: z.number(),
+                height: z.number(),
+              }),
+            })
+            .transform(
+              ({
+                link,
+                snippet,
+                image: {contextLink, thumbnailLink, width, height},
+              }) => ({
+                website: {url: contextLink, snippet},
+                thumbnailUrl: thumbnailLink,
+                url: link,
+                width,
+                height,
+              }),
+            ),
+        )
+        .default([]),
+    })
+    .transform(({items}) => items),
+]);
 
 export async function searchImages(
   params: z.TypeOf<typeof imageSearchParams>,
