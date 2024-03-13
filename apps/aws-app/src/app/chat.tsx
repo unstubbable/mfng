@@ -42,7 +42,7 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
   return (
     <form
       ref={formRef}
-      className="mx-auto flex max-w-3xl flex-col space-y-3 pb-16"
+      className="mx-auto flex max-w-3xl flex-col space-y-3 pb-20"
       onSubmit={handleSubmit}
     >
       {messages.length === 0 && children}
