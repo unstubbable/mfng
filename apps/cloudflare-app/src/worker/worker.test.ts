@@ -30,7 +30,7 @@ describe(`worker`, () => {
     const text = await resp.text();
 
     expect(text).toMatch(
-      `<p class="my-3">This is a suspended server component.</p>`,
+      `<p class="mb-3 last:mb-0">This is a suspended server component.</p>`,
     );
   });
 });
