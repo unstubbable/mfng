@@ -14,7 +14,6 @@ export interface WebpackRscClientPluginOptions {
 
 export class WebpackRscClientPlugin {
   private clientReferencesMap: ClientReferencesMap;
-  private clientChunkNameMap = new Map<string, string>();
   private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
   private ssrManifest: SSRManifest = {moduleMap: {}, moduleLoading: null};
@@ -84,7 +83,6 @@ export class WebpackRscClientPlugin {
     const addClientReferencesChunks = (entryModule: Webpack.Module) => {
       [...this.clientReferencesMap.keys()].forEach((resourcePath, index) => {
         const chunkName = `client${index}`;
-        this.clientChunkNameMap.set(chunkName, resourcePath);
 
         const block = new AsyncDependenciesBlock(
           {name: chunkName},
@@ -103,7 +101,6 @@ export class WebpackRscClientPlugin {
       (compilation) => {
         if (compiler.watchMode) {
           this.clientManifest = {};
-          this.clientChunkNameMap.clear();
 
           const entryModule = getEntryModule(compilation);
 
@@ -172,20 +169,16 @@ export class WebpackRscClientPlugin {
         compilation.hooks.chunkAsset.tap(
           WebpackRscClientPlugin.name,
           (chunk) => {
-            const resourcePath = this.clientChunkNameMap.get(chunk.name);
+            for (const module of compilation.chunkGraph.getChunkModulesIterable(
+              chunk,
+            )) {
+              const resourcePath = module.nameForCondition();
 
-            if (resourcePath) {
-              const clientReferences =
-                this.clientReferencesMap.get(resourcePath);
+              const clientReferences = resourcePath
+                ? this.clientReferencesMap.get(resourcePath)
+                : undefined;
 
               if (clientReferences) {
-                const module = compilation.chunkGraph
-                  .getChunkModules(chunk)
-                  .find(
-                    (chunkModule) =>
-                      chunkModule.nameForCondition() === resourcePath,
-                  );
-
                 if (module) {
                   const moduleId = compilation.chunkGraph.getModuleId(module);
 
@@ -204,7 +197,7 @@ export class WebpackRscClientPlugin {
                     // chunks is a double indexed array of chunkId / chunkFilename pairs
                     const chunks: (string | number)[] = [];
 
-                    if (chunk.id) {
+                    if (chunk.id && !chunk.isOnlyInitial()) {
                       for (const file of chunk.files) {
                         chunks.push(chunk.id, file);
                       }
