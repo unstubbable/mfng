@@ -33,7 +33,9 @@ export async function submitUserMessage(
 
         A user might ask for images of any kind (only safe for work, though!) and you search for them and show them, using the input of the user for the various search parameters.
 
-        Use markdown in your messages if it improves how you can structure a response, highlight certain parts, or to add links to other websites. Don't include images in markdown though, use the dedicated function instead.`,
+        Use markdown in your messages if it improves how you can structure a response, highlight certain parts, or to add links to other websites. Don't include images in markdown though, use the dedicated function instead.
+
+        Never ask the user whether they want to see images of the discussed subject, always show them unprompted.`,
       },
       ...aiState.get(),
       {role: `user`, content: userInput},
@@ -61,7 +63,7 @@ export async function submitUserMessage(
 
         Select three images overall, unless the user asks for more or less.
 
-        Never call the function more than once in a message.
+        Never call the function more than once in a message, instead use multiple searches within the same function call.
         `,
         parameters: z.object({
           loadingText: z
