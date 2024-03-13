@@ -13,12 +13,14 @@ export function App(): JSX.Element {
         <link rel="icon" href="/client/favicon.ico" type="image/x-icon" />
       </head>
       <body>
-        <Header />
-        <main className="m-3">
-          <AI>
-            <Chat />
-          </AI>
-        </main>
+        <div className="min-h-screen bg-zinc-100">
+          <Header />
+          <main className="p-4">
+            <AI>
+              <Chat />
+            </AI>
+          </main>
+        </div>
       </body>
     </html>
   );

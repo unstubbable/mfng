@@ -1,9 +1,9 @@
 'use client';
 
 import {useActions, useUIState} from 'ai/rsc';
-import {clsx} from 'clsx';
 import * as React from 'react';
 import type {AI} from './ai.js';
+import {ChatMessage} from './chat-message.js';
 
 export function Chat(): React.ReactNode {
   const [inputValue, setInputValue] = React.useState(``);
@@ -13,19 +13,13 @@ export function Chat(): React.ReactNode {
   return (
     <div className="space-y-3 pb-16">
       {messages.map((message) => (
-        <div
-          key={message.id}
-          className={clsx(`rounded-md p-2`, {
-            'ml-8 bg-zinc-200': message.role === `user`,
-            'mr-8 bg-zinc-700 text-white': message.role === `assistant`,
-          })}
-        >
+        <ChatMessage key={message.id} role={message.role}>
           {message.display}
-        </div>
+        </ChatMessage>
       ))}
 
       <form
-        className="fixed bottom-0 left-0 right-0 flex w-full border-t bg-zinc-50 p-3"
+        className="fixed bottom-0 left-0 right-0 flex w-full bg-white p-4 shadow"
         onSubmit={async (event) => {
           event.preventDefault();
 
@@ -41,7 +35,7 @@ export function Chat(): React.ReactNode {
         }}
       >
         <input
-          className="flex-1 rounded-sm bg-zinc-200 p-2 outline-cyan-500"
+          className="flex-1 rounded-sm bg-zinc-100 p-2 outline-cyan-500"
           placeholder="Send a message."
           value={inputValue}
           onChange={(event) => {
