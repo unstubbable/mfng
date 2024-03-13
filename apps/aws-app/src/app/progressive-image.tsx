@@ -1,5 +1,6 @@
+'use client';
+
 import * as React from 'react';
-import {PreloadedImage} from './preloaded-image.js';
 
 export interface ProgressiveImageProps {
   readonly thumbnailUrl: string;
@@ -16,20 +17,25 @@ export function ProgressiveImage({
   height,
   alt,
 }: ProgressiveImageProps): React.ReactNode {
-  return (
-    <React.Suspense
-      key={thumbnailUrl}
-      fallback={
-        <img
-          src={thumbnailUrl}
-          width={width}
-          height={height}
-          alt={alt}
-          className="blur-md"
-        />
-      }
-    >
-      <PreloadedImage src={url} width={width} height={height} alt={alt} />
-    </React.Suspense>
+  const [hasPreloadedImage, setHasPreloadedImage] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasPreloadedImage(false);
+    const preloadImage = new Image();
+
+    preloadImage.src = url;
+    preloadImage.onload = () => setHasPreloadedImage(true);
+  }, [url]);
+
+  return hasPreloadedImage ? (
+    <img src={url} width={width} height={height} alt={alt} />
+  ) : (
+    <img
+      src={thumbnailUrl}
+      width={width}
+      height={height}
+      alt={alt}
+      className="blur-md"
+    />
   );
 }
