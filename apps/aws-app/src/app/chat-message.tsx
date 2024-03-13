@@ -11,7 +11,7 @@ export function ChatMessage({
 }: ChatMessageProps): React.ReactNode {
   return (
     <div
-      className={clsx(`max-w-lg rounded-md p-4 shadow`, {
+      className={clsx(`max-w-lg rounded-md px-4 py-3 shadow`, {
         'ml-8 self-end bg-white': role === `user`,
         'mr-8 bg-zinc-800 text-white': role === `assistant`,
       })}
