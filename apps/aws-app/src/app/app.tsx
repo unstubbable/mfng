@@ -12,15 +12,13 @@ export function App(): JSX.Element {
         <title>AI SDK with Generative UI on AWS</title>
         <link rel="icon" href="/client/favicon.ico" type="image/x-icon" />
       </head>
-      <body>
-        <div className="min-h-screen bg-zinc-100">
-          <Header />
-          <main className="p-4">
-            <AI>
-              <Chat />
-            </AI>
-          </main>
-        </div>
+      <body className="bg-zinc-100">
+        <Header />
+        <main className="p-4">
+          <AI>
+            <Chat />
+          </AI>
+        </main>
       </body>
     </html>
   );
