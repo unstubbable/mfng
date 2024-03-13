@@ -11,7 +11,7 @@ export function App(): JSX.Element {
         <title>AI SDK with Generative UI on AWS</title>
         <link rel="icon" href="/client/favicon.ico" type="image/x-icon" />
       </head>
-      <body className="m-2">
+      <body className="m-3">
         <h1 className="my-2 text-2xl font-bold">
           AI SDK with Generative UI on AWS
         </h1>

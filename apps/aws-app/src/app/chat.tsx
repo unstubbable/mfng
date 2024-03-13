@@ -11,7 +11,7 @@ export function Chat(): React.ReactNode {
   const {submitUserMessage} = useActions<typeof AI>();
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pb-16">
       {messages.map((message) => (
         <div
           key={message.id}
@@ -25,7 +25,7 @@ export function Chat(): React.ReactNode {
       ))}
 
       <form
-        className="flex"
+        className="fixed bottom-0 left-0 right-0 flex w-full border-t bg-zinc-50 p-3"
         onSubmit={async (event) => {
           event.preventDefault();
 
@@ -41,8 +41,8 @@ export function Chat(): React.ReactNode {
         }}
       >
         <input
-          className=" flex-1 rounded-sm bg-zinc-100 p-1 outline-cyan-500"
-          placeholder="Send a message..."
+          className="flex-1 rounded-sm bg-zinc-200 p-2 outline-cyan-500"
+          placeholder="Send a message."
           value={inputValue}
           onChange={(event) => {
             setInputValue(event.target.value);
