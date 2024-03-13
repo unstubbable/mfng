@@ -1,6 +1,6 @@
+import {Link} from '@mfng/core/client';
 import {useRouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
-import {Link} from '../client/link.js';
 
 export type NavigationItemProps = React.PropsWithChildren<{
   readonly pathname: string;
@@ -21,10 +21,11 @@ export function NavigationItem({
   }
 
   return (
-    <Link pathname={pathname}>
-      <span className="inline-block rounded-md py-1 px-3 text-zinc-200 hover:bg-zinc-600">
-        {children}
-      </span>
+    <Link
+      to={{pathname}}
+      className="inline-block rounded-md py-1 px-3 text-zinc-200 hover:bg-zinc-600"
+    >
+      {children}
     </Link>
   );
 }
