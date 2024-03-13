@@ -2,6 +2,7 @@ import * as React from 'react';
 import {AI} from './ai.js';
 import {Chat} from './chat.js';
 import {Header} from './header.js';
+import {Welcome} from './welcome.js';
 
 export function App(): JSX.Element {
   return (
@@ -16,7 +17,9 @@ export function App(): JSX.Element {
         <Header />
         <main className="p-4">
           <AI>
-            <Chat />
+            <Chat>
+              <Welcome />
+            </Chat>
           </AI>
         </main>
       </body>
