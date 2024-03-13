@@ -152,7 +152,9 @@ export async function submitUserMessage(
                         ),
                       )
                     ) : (
-                      <p>{imageSet.notFoundMessage}</p>
+                      <p className="text-sm">
+                        <em>{imageSet.notFoundMessage}</em>
+                      </p>
                     )}
                   </React.Fragment>
                 ))}
