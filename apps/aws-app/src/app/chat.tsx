@@ -2,16 +2,49 @@
 
 import {useActions, useUIState} from 'ai/rsc';
 import * as React from 'react';
+import Textarea from 'react-textarea-autosize';
 import type {AI} from './ai.js';
 import {ChatMessage} from './chat-message.js';
+import {useEnterSubmit} from './use-enter-submit.js';
 
 export function Chat({children}: React.PropsWithChildren): React.ReactNode {
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = React.useState(``);
   const [messages, setMessages] = useUIState<typeof AI>();
   const {submitUserMessage} = useActions<typeof AI>();
+  const {formRef, handleKeyDown} = useEnterSubmit();
+
+  const handleSubmit = async (
+    event: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
+  ) => {
+    event.preventDefault();
+
+    const userInput = event.nativeEvent.submitter
+      ? event.nativeEvent.submitter.innerText
+      : inputValue;
+
+    if (!userInput) {
+      return;
+    }
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {id: Date.now(), role: `user`, display: <div>{userInput}</div>},
+    ]);
+
+    const message = await submitUserMessage(userInput);
+
+    setMessages((prevMessages) => [...prevMessages, message]);
+    setInputValue(``);
+    textareaRef.current?.focus();
+  };
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col space-y-3 pb-16">
+    <form
+      ref={formRef}
+      className="mx-auto flex max-w-3xl flex-col space-y-3 pb-16"
+      onSubmit={handleSubmit}
+    >
       {messages.length === 0 && children}
 
       {messages.map((message) => (
@@ -21,32 +54,22 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
       ))}
 
       <div className="fixed bottom-0 left-0 right-0 w-full">
-        <form
-          className="mx-auto flex max-w-3xl bg-white p-4 shadow-md md:rounded-t-xl md:p-6"
-          onSubmit={async (event) => {
-            event.preventDefault();
-
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              {id: Date.now(), role: `user`, display: <div>{inputValue}</div>},
-            ]);
-
-            const message = await submitUserMessage(inputValue);
-
-            setMessages((prevMessages) => [...prevMessages, message]);
-            setInputValue(``);
-          }}
-        >
-          <input
-            className="flex-1 rounded-md bg-zinc-100 p-2 outline-cyan-500"
+        <div className="mx-auto flex max-w-3xl border-t bg-white p-4 shadow-lg md:rounded-t-xl md:border md:p-6">
+          <Textarea
+            ref={textareaRef}
+            className="flex-1 resize-none rounded-md bg-zinc-100 p-2 outline-cyan-500"
             placeholder="Send a message."
+            rows={1}
+            autoFocus
+            maxRows={6}
             value={inputValue}
             onChange={(event) => {
               setInputValue(event.target.value);
             }}
+            onKeyDown={handleKeyDown}
           />
-        </form>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }

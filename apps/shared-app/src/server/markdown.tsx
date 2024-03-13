@@ -29,7 +29,11 @@ export function Markdown({text}: MarkdownProps): React.ReactNode {
         pre: ({children}) => (
           <pre className="bg-zinc-100 p-2 text-xs">{children}</pre>
         ),
-        a: (props) => <a {...props} className="underline" />,
+        a: ({href, children}) => (
+          <a href={href} className="underline">
+            {children}
+          </a>
+        ),
       }}
     >
       {text}

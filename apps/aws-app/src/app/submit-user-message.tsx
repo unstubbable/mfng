@@ -38,7 +38,6 @@ export async function submitUserMessage(
         Never ask the user whether they want to see images of the discussed subject, always show them unprompted.`,
       },
       ...aiState.get(),
-      {role: `user`, content: userInput},
     ],
     text: ({content, done}) => {
       lastTextContent = content;
@@ -47,11 +46,7 @@ export async function submitUserMessage(
         aiState.done([...aiState.get(), {role: `assistant`, content}]);
       }
 
-      return (
-        <div className="space-y-3">
-          <Markdown text={content} />
-        </div>
-      );
+      return <Markdown text={content} />;
     },
     tools: {
       search_and_show_images: {
@@ -91,16 +86,16 @@ export async function submitUserMessage(
           console.log(`search params`, searchParamsList);
 
           const text = lastTextContent ? (
-            <div className="space-y-3">
-              <Markdown text={lastTextContent} />
+            <div>
+              <Markdown text={`${lastTextContent}`} />
             </div>
           ) : undefined;
 
           yield (
-            <>
+            <div className="space-y-3">
               {text}
               <p>{loadingText}</p>
-            </>
+            </div>
           );
 
           const imageSets = await Promise.all(
@@ -132,9 +127,9 @@ export async function submitUserMessage(
           ]);
 
           return (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {text}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {imageSets.map((imageSet) => (
                   <React.Fragment key={imageSet.title}>
                     <h4 className="text-l font-bold">{imageSet.title}</h4>
