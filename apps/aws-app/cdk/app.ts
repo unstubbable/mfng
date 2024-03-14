@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import './env.js';
 import {MainStack} from './main-stack.js';
 import {WafStack} from './waf-stack.js';
 

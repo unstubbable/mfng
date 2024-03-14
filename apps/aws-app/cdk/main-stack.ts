@@ -2,7 +2,6 @@ import path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import type {Construct} from 'constructs';
 
-const verifyHeader = process.env.AWS_HANDLER_VERIFY_HEADER;
 const distDirname = path.join(import.meta.dirname, `../dist/`);
 
 export interface MainStackProps extends cdk.StackProps {
@@ -30,9 +29,14 @@ export class MainStack extends cdk.Stack {
         runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
         bundling: {format: cdk.aws_lambda_nodejs.OutputFormat.ESM},
         timeout: cdk.Duration.minutes(1),
-        environment: verifyHeader
-          ? {AWS_HANDLER_VERIFY_HEADER: verifyHeader}
-          : undefined,
+        environment: {
+          AWS_HANDLER_VERIFY_HEADER: process.env.AWS_HANDLER_VERIFY_HEADER,
+          GOOGLE_SEARCH_API_KEY: process.env.GOOGLE_SEARCH_API_KEY,
+          GOOGLE_SEARCH_SEARCH_ENGINE_ID:
+            process.env.GOOGLE_SEARCH_SEARCH_ENGINE_ID,
+          UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+          UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+        },
       },
     );
 
@@ -63,9 +67,9 @@ export class MainStack extends cdk.Stack {
       domainNames: customDomainName ? [customDomainName] : undefined,
       defaultBehavior: {
         origin: new cdk.aws_cloudfront_origins.FunctionUrlOrigin(functionUrl, {
-          customHeaders: verifyHeader
-            ? {'X-Origin-Verify': verifyHeader}
-            : undefined,
+          customHeaders: {
+            'X-Origin-Verify': process.env.AWS_HANDLER_VERIFY_HEADER,
+          },
         }),
         allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: new cdk.aws_cloudfront.CachePolicy(this, `cache-policy`, {
