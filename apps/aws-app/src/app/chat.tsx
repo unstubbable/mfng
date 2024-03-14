@@ -14,14 +14,8 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
   const {submitUserMessage} = useActions<typeof AI>();
   const {formRef, handleKeyDown} = useEnterSubmit();
 
-  const handleSubmit = async (
-    event: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
-  ) => {
-    event.preventDefault();
-
-    const userInput = event.nativeEvent.submitter
-      ? event.nativeEvent.submitter.innerText
-      : inputValue;
+  const formAction = async (formData: FormData) => {
+    const userInput = formData.get(`example-prompt`)?.toString() ?? inputValue;
 
     if (!userInput) {
       return;
@@ -43,7 +37,7 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
     <form
       ref={formRef}
       className="mx-auto flex max-w-3xl flex-col space-y-3 pb-20"
-      onSubmit={handleSubmit}
+      action={formAction}
     >
       {messages.length === 0 && children}
 
