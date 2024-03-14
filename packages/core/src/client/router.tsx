@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import type {RouterLocation} from '../use-router-location.js';
 import {createUrl, createUrlPath} from './router-location-utils.js';
