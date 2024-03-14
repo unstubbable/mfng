@@ -8,8 +8,8 @@
   "scripts": {
     "build": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production",
     "build:dev": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode development",
-    "predeploy": "cdk bootstrap --app 'tsx cdk/stack.ts'",
-    "deploy": "cdk diff --app 'tsx cdk/stack.ts' && cdk deploy --app 'tsx cdk/stack.ts'",
+    "predeploy": "cdk bootstrap --app 'tsx cdk/app.ts'",
+    "deploy": "cdk diff --app 'tsx cdk/app.ts' && cdk deploy --app 'tsx cdk/app.ts' --all",
     "dev": "npm start",
     "start": "tsx watch --clear-screen=false --enable-source-maps --inspect dev-server/run.ts",
     "watch": "NODE_OPTIONS='--import=tsx --conditions=@mfng:internal' webpack --mode production --watch",
