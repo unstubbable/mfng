@@ -2,9 +2,16 @@
 
 ⚠️ **Experimental**
 
-This library provides a set of Webpack loaders and plugins for integrating React
-Server Components (RSC) and Server-Side Rendering (SSR) in a React application
-that can be deployed to the edge.
+This library provides a set of Webpack loaders and plugins required for building
+a React Server Components (RSC) application bundle for the browser, as well as
+for the server, with server-side rendering (SSR).
+
+The server bundle can be deployed to any serverless, edge, or Node.js-based
+environment.
+
+`@mfng/webpack-rsc` can be used standalone as an RSC bundling solution or in
+conjunction with
+[`@mfng/core`](https://github.com/unstubbable/mfng/blob/main/packages/core/README.md).
 
 > Disclaimer: There are many moving parts involved in creating an RSC app that
 > also handles SSR, without using a framework like Next.js. This library only

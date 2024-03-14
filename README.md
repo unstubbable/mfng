@@ -1,76 +1,70 @@
-# MFNG - A React Server Components Playground
+# MFNG
 
-## Motivation
+⚗️ A Minimal React Server Components Bundler & Library
 
-### Exploring Possibilities for Next-Generation Microfrontends
+## Packages
 
-Do we still need to deploy microfrontends and their APIs (also known as BFFs)
-independently of the main app? Or can we instead compose them at build-time
-(lazily) and utilize server components to let them fetch their data on the
-server?
+MFNG offers two packages that together enable the building of a production-ready
+RSC app.
+
+### `@mfng/core`
+
+This package contains the essential building blocks required on both the server
+and the client to create a streaming, server-side rendered, and properly
+hydrated RSC app. It also provides utilities that are needed for server-centric,
+client-side navigation.
+
+↪
+[Documentation](https://github.com/unstubbable/mfng/blob/main/packages/core/README.md)
+
+### `@mfng/webpack-rsc`
+
+This package provides a set of Webpack loaders and plugins required for building
+an RSC application bundle for the browser, as well as for the server. The server
+bundle can be deployed to any serverless, edge, or Node.js-based environment.
+`@mfng/webpack-rsc` can be used standalone as an RSC bundling solution or in
+conjunction with `@mfng/core`.
+
+↪
+[Documentation](https://github.com/unstubbable/mfng/blob/main/packages/webpack-rsc/README.md)
 
 ## Features
 
-- [x] Streaming fast
 - [x] React server components
 - [x] Server-side rendering
-- [x] Client components loaded as separate chunks
+- [x] Client components, lazily loaded as separate chunks
 - [x] Server actions
-  - [x] passed from server to client
-  - [x] imported from client
-  - [x] inline `'use server'` directive
+  - [x] passed as props from the server to the client
+  - [x] imported from the client
+  - [x] top-level functions/closures with inline `'use server'` directive
   - [ ] auto-binding of closed-over variables (not planned)
 - [x] Progressively enhanced form actions
 - [x] Suspensy routing
-- [x] Development server
 - [x] Production builds
+- [x] Development server
 - [x] Serverless deployment examples
   - using a [Cloudflare Worker](https://workers.cloudflare.com)
   - using a
     [Vercel Edge Function](https://vercel.com/docs/functions/edge-functions)
   - using an [AWS Lambda Function](https://aws.amazon.com/lambda/), with
     [AWS CloudFront](https://aws.amazon.com/cloudfront/) as CDN
-- [x] Support [poisoned imports][]
-- [ ] Microfrontend composition demo
+- [x] Support for
+      [poisoned imports](https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#poisoned-imports)
+- [x] Support for the [Vercel AI SDK](https://sdk.vercel.ai/docs)
+- [ ] Partial prerendering
 - [ ] Advanced routing
 
-## Getting Started
+## Name Origin
 
-```sh
-npm install
-```
+The name MFNG stands for "Microfrontends Next Generation". The project was
+originally motivated by the following question:
 
-```sh
-npm run dev
-```
+> Do we still need to deploy microfrontends and their APIs (also known as BFFs -
+> Backend for Frontends) independently of the main app? Or can we integrate them
+> at build-time, though dynamically composed at run-time, and allow them to use
+> server components to fetch their data on the server?
 
-Open http://localhost:3000
-
-## Deployment
-
-To deploy the workers to your own workers.dev domain, first create a
-[Cloudflare API Token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/),
-then run:
-
-```sh
-CLOUDFLARE_API_TOKEN=<insert-your-token> npm run deploy
-```
-
-### Deploying via GitHub Actions
-
-To deploy via GitHub Actions, follow these steps:
-
-1. Fork the repository.
-2. Create a new
-   [environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-   with the name "Cloudflare Workers".
-3. Add the environment secret `CLOUDFLARE_API_TOKEN` using your own token as the
-   value.
-4. Push a commit to the `main` branch.
-
----
-
-_Please let me know in the issues if any of these steps do not work for you._
-
-[poisoned imports]:
-  https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#poisoned-imports
+It has since evolved into a general-purpose RSC library, not specifically
+targeted at the microfrontends use case... until we explore some form of
+federation integration, as pioneered by
+[federated-rsc](https://github.com/jacob-ebey/federated-rsc/), perhaps.
