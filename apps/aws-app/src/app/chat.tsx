@@ -10,27 +10,30 @@ import {useEnterSubmit} from './use-enter-submit.js';
 export function Chat({children}: React.PropsWithChildren): React.ReactNode {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = React.useState(``);
+  const [isPending, startTransition] = React.useTransition();
   const [messages, setMessages] = useUIState<typeof AI>();
   const {submitUserMessage} = useActions<typeof AI>();
   const {formRef, handleKeyDown} = useEnterSubmit();
 
-  const formAction = async (formData: FormData) => {
+  const formAction = (formData: FormData) => {
     const userInput = formData.get(`example-prompt`)?.toString() ?? inputValue;
 
-    if (!userInput) {
+    if (!userInput || isPending) {
       return;
     }
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {id: Date.now(), role: `user`, display: <div>{userInput}</div>},
-    ]);
+    startTransition(async () => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {id: Date.now(), role: `user`, display: <div>{userInput}</div>},
+      ]);
 
-    const message = await submitUserMessage(userInput);
+      setInputValue(``);
+      const message = await submitUserMessage(userInput);
 
-    setMessages((prevMessages) => [...prevMessages, message]);
-    setInputValue(``);
-    textareaRef.current?.focus();
+      setMessages((prevMessages) => [...prevMessages, message]);
+      textareaRef.current?.focus();
+    });
   };
 
   return (
