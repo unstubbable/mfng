@@ -12,6 +12,7 @@ const wafStack = new WafStack(app, `mfng-waf`, {
     // the US East (N. Virginia) Region, us-east-1.
     region: `us-east-1`,
   },
+  webAclName: `mfng-waf`,
 });
 
 new MainStack(app, `mfng-app`, {
@@ -20,6 +21,7 @@ new MainStack(app, `mfng-app`, {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  bucketName: `mfng-aws-app-assets`,
   customDomain: {domainName: `strict.software`, subdomainName: `mfng`},
   webAcl: wafStack.webAcl,
 });

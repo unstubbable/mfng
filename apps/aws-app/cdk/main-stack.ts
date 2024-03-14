@@ -6,6 +6,7 @@ const verifyHeader = process.env.AWS_HANDLER_VERIFY_HEADER;
 const distDirname = path.join(import.meta.dirname, `../dist/`);
 
 export interface MainStackProps extends cdk.StackProps {
+  readonly bucketName: string;
   readonly customDomain?: {
     readonly domainName: string;
     readonly subdomainName: string;
@@ -17,7 +18,7 @@ export class MainStack extends cdk.Stack {
   #webAcl: cdk.aws_wafv2.CfnWebACL | undefined;
 
   constructor(scope: Construct, id: string, props: MainStackProps) {
-    const {customDomain, webAcl, ...otherProps} = props;
+    const {bucketName, customDomain, webAcl, ...otherProps} = props;
     super(scope, id, otherProps);
     this.#webAcl = webAcl;
 
@@ -42,7 +43,7 @@ export class MainStack extends cdk.Stack {
     });
 
     const bucket = new cdk.aws_s3.Bucket(this, `assets-bucket`, {
-      bucketName: `mfng-aws-app-assets`,
+      bucketName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
