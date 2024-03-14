@@ -11,7 +11,8 @@ import {streamHandle} from 'hono/aws-lambda';
 import * as React from 'react';
 import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
-import {logger} from './logger.js';
+import {authMiddleware} from './auth-middleware.js';
+import {loggerMiddleware} from './logger-middleware.js';
 import {
   cssManifest,
   jsManifest,
@@ -22,7 +23,8 @@ import {
 
 export const app = new Hono();
 
-app.use(logger);
+app.use(authMiddleware);
+app.use(loggerMiddleware);
 app.get(`/*`, async (context) => handleGet(context.req.raw));
 app.post(`/*`, async (context) => handlePost(context.req.raw));
 

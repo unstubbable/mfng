@@ -1,7 +1,7 @@
 import type {LambdaFunctionURLEvent} from 'aws-lambda';
 import type {MiddlewareHandler} from 'hono';
 
-export const logger: MiddlewareHandler<{
+export const loggerMiddleware: MiddlewareHandler<{
   Bindings: {
     // Not available in dev server.
     event?: LambdaFunctionURLEvent;

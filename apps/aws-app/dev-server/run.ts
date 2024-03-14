@@ -1,6 +1,7 @@
 import {serve} from '@hono/node-server';
 import {serveStatic} from '@hono/node-server/serve-static';
 import {Hono} from 'hono';
+import {authMiddleware} from './auth-middleware.js';
 import './stub-awslambda.js';
 
 // @ts-ignore
@@ -8,6 +9,7 @@ const handlerModule = await import(`../dist/handler/index.js`);
 const {app: handlerApp} = handlerModule as {app: Hono};
 const app = new Hono();
 
+app.use(authMiddleware);
 app.use(`/client/*`, serveStatic({root: `dist/static`}));
 app.route(`/`, handlerApp);
 
