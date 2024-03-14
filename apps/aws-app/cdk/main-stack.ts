@@ -5,9 +5,17 @@ import type {Construct} from 'constructs';
 const verifyHeader = process.env.AWS_HANDLER_VERIFY_HEADER;
 const distDirname = path.join(import.meta.dirname, `../dist/`);
 
-export class Stack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+export interface MainStackProps extends cdk.StackProps {
+  readonly webAcl: cdk.aws_wafv2.CfnWebACL;
+}
+
+export class MainStack extends cdk.Stack {
+  #webAcl: cdk.aws_wafv2.CfnWebACL;
+
+  constructor(scope: Construct, id: string, props: MainStackProps) {
+    const {webAcl, ...otherProps} = props;
+    super(scope, id, otherProps);
+    this.#webAcl = webAcl;
 
     const lambdaFunction = new cdk.aws_lambda_nodejs.NodejsFunction(
       this,
@@ -23,15 +31,11 @@ export class Stack extends cdk.Stack {
       },
     );
 
-    const lambdaFunctionUrl = new cdk.aws_lambda.FunctionUrl(
-      this,
-      `function-url`,
-      {
-        function: lambdaFunction,
-        authType: cdk.aws_lambda.FunctionUrlAuthType.NONE,
-        invokeMode: cdk.aws_lambda.InvokeMode.RESPONSE_STREAM,
-      },
-    );
+    const functionUrl = new cdk.aws_lambda.FunctionUrl(this, `function-url`, {
+      function: lambdaFunction,
+      authType: cdk.aws_lambda.FunctionUrlAuthType.NONE,
+      invokeMode: cdk.aws_lambda.InvokeMode.RESPONSE_STREAM,
+    });
 
     const bucket = new cdk.aws_s3.Bucket(this, `assets-bucket`, {
       bucketName: `mfng-aws-app-assets`,
@@ -41,14 +45,11 @@ export class Stack extends cdk.Stack {
 
     const distribution = new cdk.aws_cloudfront.Distribution(this, `cdn`, {
       defaultBehavior: {
-        origin: new cdk.aws_cloudfront_origins.FunctionUrlOrigin(
-          lambdaFunctionUrl,
-          {
-            customHeaders: verifyHeader
-              ? {'X-Origin-Verify': verifyHeader}
-              : undefined,
-          },
-        ),
+        origin: new cdk.aws_cloudfront_origins.FunctionUrlOrigin(functionUrl, {
+          customHeaders: verifyHeader
+            ? {'X-Origin-Verify': verifyHeader}
+            : undefined,
+        }),
         allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: new cdk.aws_cloudfront.CachePolicy(this, `cache-policy`, {
           enableAcceptEncodingGzip: true,
@@ -68,6 +69,7 @@ export class Stack extends cdk.Stack {
         },
       },
       priceClass: cdk.aws_cloudfront.PriceClass.PRICE_CLASS_100,
+      webAclId: this.#webAcl.attrArn,
     });
 
     new cdk.aws_s3_deployment.BucketDeployment(this, `assets-deployment`, {
@@ -82,12 +84,14 @@ export class Stack extends cdk.Stack {
       cacheControl: [cdk.aws_s3_deployment.CacheControl.immutable()],
     });
 
-    new cdk.CfnOutput(this, `cdn-domain-name`, {
-      value: distribution.domainName,
+    new cdk.CfnOutput(this, `function-url-output`, {
+      exportName: `function-url`,
+      value: functionUrl.url,
+    });
+
+    new cdk.CfnOutput(this, `cdn-url-output`, {
+      exportName: `cdn-url`,
+      value: `https://${distribution.domainName}`,
     });
   }
 }
-
-const app = new cdk.App();
-
-new Stack(app, `mfng-aws-app`);
