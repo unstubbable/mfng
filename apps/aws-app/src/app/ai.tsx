@@ -15,7 +15,7 @@ export type AIStateItem =
 
 export interface UIStateItem {
   readonly id: number;
-  readonly role: 'user' | 'assistant';
+  readonly role: 'user' | 'assistant' | 'error';
   readonly display: React.ReactNode;
 }
 

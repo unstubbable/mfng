@@ -29,10 +29,23 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
       ]);
 
       setInputValue(``);
-      const message = await submitUserMessage(userInput);
 
-      setMessages((prevMessages) => [...prevMessages, message]);
-      textareaRef.current?.focus();
+      try {
+        const message = await submitUserMessage(userInput);
+        setMessages((prevMessages) => [...prevMessages, message]);
+        textareaRef.current?.focus();
+      } catch (error) {
+        console.error(error);
+
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now(),
+            role: `error`,
+            display: <p>An unexpected error occured.</p>,
+          },
+        ]);
+      }
     });
   };
 
