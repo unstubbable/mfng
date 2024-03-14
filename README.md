@@ -57,12 +57,12 @@ conjunction with `@mfng/core`.
 ## Name Origin
 
 The name MFNG stands for "Microfrontends Next Generation". The project was
-originally motivated by the following question:
+originally motivated by the following questions:
 
-> Do we still need to deploy microfrontends and their APIs (also known as BFFs -
-> Backend for Frontends) independently of the main app? Or can we integrate them
-> at build-time, though dynamically composed at run-time, and allow them to use
-> server components to fetch their data on the server?
+> Do we still need to deploy microfrontends and their APIs (also known as BFFs –
+> Backends for Frontends) independently of the main app? Or can we integrate
+> them at build-time, though dynamically composed at run-time, and allow them to
+> use server components to fetch their data on the server?
 
 It has since evolved into a general-purpose RSC library, not specifically
 targeted at the microfrontends use case... until we explore some form of
