@@ -2,6 +2,7 @@ import path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import type {Construct} from 'constructs';
 
+const verifyHeader = process.env.AWS_HANDLER_VERIFY_HEADER;
 const distDirname = path.join(import.meta.dirname, `../dist/`);
 
 export class Stack extends cdk.Stack {
@@ -15,7 +16,10 @@ export class Stack extends cdk.Stack {
         entry: path.join(distDirname, `handler/index.js`),
         runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
         bundling: {format: cdk.aws_lambda_nodejs.OutputFormat.ESM},
-        timeout: cdk.Duration.seconds(28),
+        timeout: cdk.Duration.minutes(1),
+        environment: verifyHeader
+          ? {AWS_HANDLER_VERIFY_HEADER: verifyHeader}
+          : undefined,
       },
     );
 
@@ -39,6 +43,11 @@ export class Stack extends cdk.Stack {
       defaultBehavior: {
         origin: new cdk.aws_cloudfront_origins.FunctionUrlOrigin(
           lambdaFunctionUrl,
+          {
+            customHeaders: verifyHeader
+              ? {'X-Origin-Verify': verifyHeader}
+              : undefined,
+          },
         ),
         allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: new cdk.aws_cloudfront.CachePolicy(this, `cache-policy`, {
