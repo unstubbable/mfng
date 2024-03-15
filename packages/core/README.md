@@ -61,6 +61,7 @@ npm install @mfng/core react@canary react-dom@canary
 
 - `useRouter`
 - `Link`
+- `CallServerError`
 
 ### Universal (Client & Server)
 
