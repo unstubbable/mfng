@@ -15,7 +15,7 @@ high-level steps:
 1. Install the library along with React Canary:
 
 ```sh
-npm install @mfng/core react@canary react-dom@canary
+npm install @mfng/core react@canary react-dom@canary react-server-dom-webpack@canary
 ```
 
 2. Create a server entry that handles GET requests to create RSC app streams and
