@@ -6,9 +6,9 @@ import type {ReactFormState} from 'react-dom/server';
 import ReactDOMServer from 'react-dom/server.edge';
 import type {SSRManifest} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
+import type {RscAppResult} from '../rsc/create-rsc-app-stream.js';
 import {createBufferedTransformStream} from './create-buffered-transform-stream.js';
 import {createInitialRscResponseTransformStream} from './create-initial-rsc-response-transform-stream.js';
-import type {RscAppResult} from './create-rsc-app-stream.js';
 
 export interface CreateHtmlStreamOptions {
   readonly reactSsrManifest: SSRManifest;

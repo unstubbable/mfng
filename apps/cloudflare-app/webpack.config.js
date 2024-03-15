@@ -121,13 +121,12 @@ export default function createConfigs(_env, argv) {
     module: {
       rules: [
         {
-          resource: [/rsc\.ts$/, /\/app\.tsx$/],
+          resource: [/\/server\/rsc\//, /\/app\.tsx$/],
           layer: webpackRscLayerName,
         },
         {
-          // AsyncLocalStorage module instances must be in a shared layer.
+          resource: /\/server\/shared\//,
           layer: `shared`,
-          test: /(router-location-async-local-storage|use-router-location)/,
         },
         {
           issuerLayer: webpackRscLayerName,

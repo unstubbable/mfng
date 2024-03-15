@@ -20,23 +20,23 @@
       "default": "./lib/client/browser.js"
     },
     "./server/rsc": {
-      "@mfng:internal": "./src/server/rsc.ts",
-      "default": "./lib/server/rsc.js"
+      "@mfng:internal": "./src/server/rsc/index.ts",
+      "default": "./lib/server/rsc/index.js"
     },
     "./server/ssr": {
-      "@mfng:internal": "./src/server/ssr.ts",
-      "default": "./lib/server/ssr.js"
+      "@mfng:internal": "./src/server/ssr/index.ts",
+      "default": "./lib/server/ssr/index.js"
     },
     "./use-router-location": {
-      "@mfng:internal:node": "./src/server/use-router-location.ts",
+      "@mfng:internal:node": "./src/server/shared/use-router-location.ts",
       "@mfng:internal": "./src/client/use-router-location.ts",
       "types": "./lib/use-router-location.d.ts",
-      "node": "./lib/server/use-router-location.js",
+      "node": "./lib/server/shared/use-router-location.js",
       "default": "./lib/client/use-router-location.js"
     },
     "./router-location-async-local-storage": {
-      "@mfng:internal": "./src/server/router-location-async-local-storage.ts",
-      "default": "./lib/server/router-location-async-local-storage.js"
+      "@mfng:internal": "./src/server/shared/router-location-async-local-storage.ts",
+      "default": "./lib/server/shared/router-location-async-local-storage.js"
     }
   },
   "files": [
