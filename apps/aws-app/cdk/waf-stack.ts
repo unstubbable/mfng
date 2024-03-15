@@ -7,10 +7,13 @@ export interface WafStackProps extends cdk.StackProps {
 
 export class WafStack extends cdk.Stack {
   #webAcl: cdk.aws_wafv2.CfnWebACL;
+  #webAclName: string;
+  #rulePriority = 0;
 
   constructor(scope: Construct, id: string, props: WafStackProps) {
     const {webAclName, ...otherProps} = props;
     super(scope, id, otherProps);
+    this.#webAclName = webAclName;
 
     this.#webAcl = new cdk.aws_wafv2.CfnWebACL(this, `waf`, {
       name: webAclName,
@@ -24,14 +27,20 @@ export class WafStack extends cdk.Stack {
         sampledRequestsEnabled: true,
       },
       rules: [
-        {
-          priority: 1,
-          name: `rate-limit`,
-          visibilityConfig: {
-            cloudWatchMetricsEnabled: false,
-            metricName: `${webAclName}-rate-limit`,
-            sampledRequestsEnabled: true,
+        this.#createWebAclRule({
+          name: `request-body-size-limit`,
+          statement: {
+            sizeConstraintStatement: {
+              fieldToMatch: {body: {}},
+              comparisonOperator: `GT`,
+              size: 1024,
+              textTransformations: [{priority: 0, type: `NONE`}],
+            },
           },
+          action: {block: {customResponse: {responseCode: 413}}},
+        }),
+        this.#createWebAclRule({
+          name: `rate-limit`,
           statement: {
             rateBasedStatement: {
               aggregateKeyType: `CONSTANT`,
@@ -47,12 +56,29 @@ export class WafStack extends cdk.Stack {
             },
           },
           action: {block: {customResponse: {responseCode: 429}}},
-        },
+        }),
       ],
     });
   }
 
   get webAcl(): cdk.aws_wafv2.CfnWebACL {
     return this.#webAcl;
+  }
+
+  #createWebAclRule(
+    rule: Omit<
+      cdk.aws_wafv2.CfnWebACL.RuleProperty,
+      'priority' | 'visibilityConfig'
+    >,
+  ): cdk.aws_wafv2.CfnWebACL.RuleProperty {
+    return {
+      ...rule,
+      priority: (this.#rulePriority += 1),
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: false,
+        metricName: `${this.#webAclName}-${rule.name}`,
+        sampledRequestsEnabled: true,
+      },
+    };
   }
 }
