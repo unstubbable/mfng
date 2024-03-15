@@ -5,6 +5,7 @@ import * as React from 'react';
 import Textarea from 'react-textarea-autosize';
 import type {AI} from './ai.js';
 import {ChatMessage} from './chat-message.js';
+import {getErrorMessage} from './get-error-message.js';
 import {useEnterSubmit} from './use-enter-submit.js';
 
 export function Chat({children}: React.PropsWithChildren): React.ReactNode {
@@ -16,36 +17,40 @@ export function Chat({children}: React.PropsWithChildren): React.ReactNode {
   const {formRef, handleKeyDown} = useEnterSubmit();
 
   const formAction = (formData: FormData) => {
-    const userInput = formData.get(`example-prompt`)?.toString() ?? inputValue;
+    const examplePrompt = formData.get(`example-prompt`)?.toString();
+
+    if (examplePrompt && textareaRef.current) {
+      setInputValue(examplePrompt);
+    }
+
+    const userInput = examplePrompt ?? inputValue;
 
     if (!userInput || isPending) {
       return;
     }
 
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {id: Date.now(), role: `user`, display: <div>{userInput}</div>},
+    ]);
+
     startTransition(async () => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {id: Date.now(), role: `user`, display: <div>{userInput}</div>},
-      ]);
-
-      setInputValue(``);
-
       try {
         const message = await submitUserMessage(userInput);
+
         setMessages((prevMessages) => [...prevMessages, message]);
-        textareaRef.current?.focus();
+        setInputValue(``);
       } catch (error) {
         console.error(error);
+        const errorMessage = getErrorMessage(error);
 
         setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: Date.now(),
-            role: `error`,
-            display: <p>An unexpected error occured.</p>,
-          },
+          ...prevMessages.slice(0, -1),
+          {id: Date.now(), role: `error`, display: <p>{errorMessage}</p>},
         ]);
       }
+
+      textareaRef.current?.focus();
     });
   };
 
