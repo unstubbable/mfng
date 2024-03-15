@@ -1,6 +1,8 @@
+// Do not import CallServerError relatively. This must be the same import source
+// as consumers would use it when importing it into their client components.
+import {CallServerError} from '@mfng/core/client';
 import type {ReactServerValue} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
-import {CallServerError} from './call-server-error.js';
 
 export async function callServer(
   id: string,
