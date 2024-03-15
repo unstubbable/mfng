@@ -7,3 +7,4 @@ tsconfig.tsbuildinfo
 .vercel
 .wrangler
 cdk.out
+cdk.context.json

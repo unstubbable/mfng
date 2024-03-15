@@ -6,14 +6,18 @@ const verifyHeader = process.env.AWS_HANDLER_VERIFY_HEADER;
 const distDirname = path.join(import.meta.dirname, `../dist/`);
 
 export interface MainStackProps extends cdk.StackProps {
-  readonly webAcl: cdk.aws_wafv2.CfnWebACL;
+  readonly customDomain?: {
+    readonly domainName: string;
+    readonly subdomainName: string;
+  };
+  readonly webAcl?: cdk.aws_wafv2.CfnWebACL;
 }
 
 export class MainStack extends cdk.Stack {
-  #webAcl: cdk.aws_wafv2.CfnWebACL;
+  #webAcl: cdk.aws_wafv2.CfnWebACL | undefined;
 
   constructor(scope: Construct, id: string, props: MainStackProps) {
-    const {webAcl, ...otherProps} = props;
+    const {customDomain, webAcl, ...otherProps} = props;
     super(scope, id, otherProps);
     this.#webAcl = webAcl;
 
@@ -43,7 +47,19 @@ export class MainStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
+    const customDomainName = customDomain
+      ? `${customDomain.subdomainName}.${customDomain.domainName}`
+      : undefined;
+
+    const certificate = customDomainName
+      ? new cdk.aws_certificatemanager.Certificate(this, `certificate`, {
+          domainName: customDomainName,
+        })
+      : undefined;
+
     const distribution = new cdk.aws_cloudfront.Distribution(this, `cdn`, {
+      certificate,
+      domainNames: customDomainName ? [customDomainName] : undefined,
       defaultBehavior: {
         origin: new cdk.aws_cloudfront_origins.FunctionUrlOrigin(functionUrl, {
           customHeaders: verifyHeader
@@ -69,8 +85,32 @@ export class MainStack extends cdk.Stack {
         },
       },
       priceClass: cdk.aws_cloudfront.PriceClass.PRICE_CLASS_100,
-      webAclId: this.#webAcl.attrArn,
+      webAclId: this.#webAcl?.attrArn,
     });
+
+    if (customDomain) {
+      const hostedZone = cdk.aws_route53.HostedZone.fromLookup(
+        this,
+        `hosted-zone-lookup`,
+        {domainName: customDomain.domainName},
+      );
+
+      new cdk.aws_route53.ARecord(this, `a-record`, {
+        zone: hostedZone,
+        recordName: customDomain.subdomainName,
+        target: cdk.aws_route53.RecordTarget.fromAlias(
+          new cdk.aws_route53_targets.CloudFrontTarget(distribution),
+        ),
+      });
+
+      new cdk.aws_route53.AaaaRecord(this, `aaaa-record`, {
+        zone: hostedZone,
+        recordName: customDomain.subdomainName,
+        target: cdk.aws_route53.RecordTarget.fromAlias(
+          new cdk.aws_route53_targets.CloudFrontTarget(distribution),
+        ),
+      });
+    }
 
     new cdk.aws_s3_deployment.BucketDeployment(this, `assets-deployment`, {
       destinationBucket: bucket,
@@ -85,13 +125,17 @@ export class MainStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, `function-url-output`, {
-      exportName: `function-url`,
       value: functionUrl.url,
     });
 
-    new cdk.CfnOutput(this, `cdn-url-output`, {
-      exportName: `cdn-url`,
+    new cdk.CfnOutput(this, `cdn-cloudfront-url-output`, {
       value: `https://${distribution.domainName}`,
     });
+
+    if (customDomainName) {
+      new cdk.CfnOutput(this, `cdn-custom-domain-url-output`, {
+        value: `https://${customDomainName}`,
+      });
+    }
   }
 }
