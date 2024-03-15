@@ -1,4 +1,4 @@
-import type {RouterLocation} from '../use-router-location.js';
+import type {RouterLocation} from '../../use-router-location.js';
 import {routerLocationAsyncLocalStorage} from './router-location-async-local-storage.js';
 
 export function useRouterLocation(): RouterLocation {

@@ -63,9 +63,14 @@ const serverConfig = {
   module: {
     rules: [
       {
-        // Match the resource path of the modules that create RSC streams, e.g.:
-        resource: (value) => /create-rsc-\w+-stream\.tsx?$/.test(value),
+        // Match the entry modules that should end up in the RSC layer:
+        resource: [/\/server\/rsc\//, /\/app\.tsx$/],
         layer: webpackRscLayerName,
+      },
+      {
+        // Match the modules that should end up in a shared layer (RSC & SSR):
+        resource: /\/server\/shared\//,
+        layer: 'shared',
       },
       {
         issuerLayer: webpackRscLayerName,
