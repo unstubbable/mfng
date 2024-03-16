@@ -46,6 +46,7 @@
     "tsx": "^4.7.1",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1",
-    "webpack-manifest-plugin": "^5.0.0"
+    "webpack-manifest-plugin": "^5.0.0",
+    "zod": "^3.22.4"
   }
 }
