@@ -7,7 +7,6 @@ import ReactDOMServer from 'react-dom/server.edge';
 import type {SSRManifest} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
 import type {RscAppResult} from '../rsc/create-rsc-app-stream.js';
-import {createBufferedTransformStream} from './create-buffered-transform-stream.js';
 import {createInitialRscResponseTransformStream} from './create-initial-rsc-response-transform-stream.js';
 
 export interface CreateHtmlStreamOptions {
@@ -54,7 +53,7 @@ export async function createHtmlStream(
     },
   );
 
-  return htmlStream
-    .pipeThrough(createBufferedTransformStream())
-    .pipeThrough(createInitialRscResponseTransformStream(rscStream2));
+  return htmlStream.pipeThrough(
+    createInitialRscResponseTransformStream(rscStream2),
+  );
 }
