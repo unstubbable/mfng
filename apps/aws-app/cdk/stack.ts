@@ -28,6 +28,7 @@ export class Stack extends cdk.Stack {
         environment: {
           AWS_HANDLER_VERIFY_HEADER: process.env.AWS_HANDLER_VERIFY_HEADER,
         },
+        memorySize: 1769, // equivalent of one vCPU
       },
     );
 
