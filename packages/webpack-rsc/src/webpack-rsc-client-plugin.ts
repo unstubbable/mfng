@@ -14,9 +14,7 @@ export interface WebpackRscClientPluginOptions {
 
 export class WebpackRscClientPlugin {
   private clientReferencesMap: ClientReferencesMap;
-  private clientManifest: ClientManifest = {};
   private clientManifestFilename: string;
-  private ssrManifest: SSRManifest = {moduleMap: {}, moduleLoading: null};
   private ssrManifestFilename: string;
 
   constructor(options: WebpackRscClientPluginOptions) {
@@ -100,8 +98,6 @@ export class WebpackRscClientPlugin {
       WebpackRscClientPlugin.name,
       (compilation) => {
         if (compiler.watchMode) {
-          this.clientManifest = {};
-
           const entryModule = getEntryModule(compilation);
 
           if (entryModule) {
@@ -166,75 +162,89 @@ export class WebpackRscClientPlugin {
           },
         );
 
-        compilation.hooks.chunkAsset.tap(
-          WebpackRscClientPlugin.name,
-          (chunk) => {
-            for (const module of compilation.chunkGraph.getChunkModulesIterable(
-              chunk,
-            )) {
-              const resourcePath = module.nameForCondition();
+        compilation.hooks.processAssets.tap(WebpackRscClientPlugin.name, () => {
+          const clientManifest: ClientManifest = {};
+          const ssrManifest: SSRManifest = {moduleMap: {}, moduleLoading: null};
+          const {chunkGraph, moduleGraph, modules} = compilation;
 
-              const clientReferences = resourcePath
-                ? this.clientReferencesMap.get(resourcePath)
-                : undefined;
+          for (const module of modules) {
+            const resourcePath = module.nameForCondition();
 
-              if (clientReferences) {
-                if (module) {
-                  const moduleId = compilation.chunkGraph.getModuleId(module);
+            const clientReferences = resourcePath
+              ? this.clientReferencesMap.get(resourcePath)
+              : undefined;
 
-                  const ssrModuleMetaData: Record<string, ImportManifestEntry> =
-                    {};
+            if (clientReferences) {
+              const moduleId = chunkGraph.getModuleId(module);
 
-                  for (const {id, exportName, ssrId} of clientReferences) {
-                    // Theoretically the used client and SSR export names should
-                    // be used here. These might differ from the original export
-                    // names that the loader has recorded. But with the current
-                    // setup (i.e. how the client entries are added on both
-                    // sides), the original export names are preserved.
-                    const clientExportName = exportName;
-                    const ssrExportName = exportName;
+              const ssrModuleMetaData: Record<string, ImportManifestEntry> = {};
 
-                    // chunks is a double indexed array of chunkId / chunkFilename pairs
-                    const chunks: (string | number)[] = [];
+              for (const {id, exportName, ssrId} of clientReferences) {
+                // Theoretically the used client and SSR export names should
+                // be used here. These might differ from the original export
+                // names that the loader has recorded. But with the current
+                // setup (i.e. how the client entries are added on both
+                // sides), the original export names are preserved.
+                const clientExportName = exportName;
+                const ssrExportName = exportName;
 
-                    if (chunk.id && !chunk.isOnlyInitial()) {
-                      for (const file of chunk.files) {
-                        chunks.push(chunk.id, file);
-                      }
-                    }
+                const chunksSet = new Set<Webpack.Chunk>();
 
-                    this.clientManifest[id] = {
-                      id: moduleId,
-                      name: clientExportName,
-                      chunks,
-                    };
+                for (const chunk of chunkGraph.getModuleChunksIterable(
+                  module,
+                )) {
+                  chunksSet.add(chunk);
+                }
 
-                    if (ssrId) {
-                      ssrModuleMetaData[clientExportName] = {
-                        id: ssrId,
-                        name: ssrExportName,
-                        chunks: [],
-                      };
+                for (const connection of moduleGraph.getOutgoingConnections(
+                  module,
+                )) {
+                  for (const chunk of chunkGraph.getModuleChunksIterable(
+                    connection.module,
+                  )) {
+                    chunksSet.add(chunk);
+                  }
+                }
+
+                // chunks is a double indexed array of chunkId / chunkFilename pairs
+                const chunks: (string | number)[] = [];
+
+                for (const chunk of chunksSet) {
+                  if (chunk.id && !chunk.isOnlyInitial()) {
+                    for (const file of chunk.files) {
+                      chunks.push(chunk.id, file);
                     }
                   }
+                }
 
-                  this.ssrManifest.moduleMap[moduleId] = ssrModuleMetaData;
+                clientManifest[id] = {
+                  id: moduleId,
+                  name: clientExportName,
+                  chunks,
+                };
+
+                if (ssrId) {
+                  ssrModuleMetaData[clientExportName] = {
+                    id: ssrId,
+                    name: ssrExportName,
+                    chunks: [],
+                  };
                 }
               }
-            }
-          },
-        );
 
-        compilation.hooks.processAssets.tap(WebpackRscClientPlugin.name, () => {
+              ssrManifest.moduleMap[moduleId] = ssrModuleMetaData;
+            }
+          }
+
           compilation.emitAsset(
             this.clientManifestFilename,
-            new RawSource(JSON.stringify(this.clientManifest, null, 2), false),
+            new RawSource(JSON.stringify(clientManifest, null, 2), false),
           );
 
           const {crossOriginLoading, publicPath = ``} =
             compilation.outputOptions;
 
-          this.ssrManifest.moduleLoading = {
+          ssrManifest.moduleLoading = {
             // https://github.com/webpack/webpack/blob/87660921808566ef3b8796f8df61bd79fc026108/lib/runtime/PublicPathRuntimeModule.js#L30-L32
             prefix: compilation.getPath(publicPath, {
               hash: compilation.hash ?? `XXXX`,
@@ -248,7 +258,7 @@ export class WebpackRscClientPlugin {
 
           compilation.emitAsset(
             this.ssrManifestFilename,
-            new RawSource(JSON.stringify(this.ssrManifest, null, 2), false),
+            new RawSource(JSON.stringify(ssrManifest, null, 2), false),
           );
         });
       },

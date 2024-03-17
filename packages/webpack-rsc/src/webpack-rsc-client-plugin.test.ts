@@ -13,6 +13,7 @@ import {createWebpackRscClientLoader} from './index.js';
 
 const memFs = new MemoryFS();
 const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
+const distDirname = path.resolve(currentDirname, `dist`);
 
 function pretty(source: string): string {
   return prettier.format(source, {parser: `babel`});
@@ -56,13 +57,17 @@ describe(`WebpackRscClientPlugin`, () => {
   let serverReferencesMap: ServerReferencesMap;
 
   beforeEach(() => {
+    if (memFs.existsSync(distDirname)) {
+      memFs.rmdirSync(distDirname);
+    }
+
     clientReferencesMap = new Map();
     serverReferencesMap = new Map();
 
     buildConfig = {
       entry: path.resolve(currentDirname, `__fixtures__/client-entry.js`),
       output: {
-        path: path.resolve(currentDirname, `dist`),
+        path: distDirname,
         filename: `main.js`,
       },
       module: {
@@ -166,6 +171,111 @@ function ClientComponent({action}) {
         },
       });
     });
+
+    test(`handles common dependency chunks`, async () => {
+      clientReferencesMap.set(
+        path.resolve(
+          currentDirname,
+          `__fixtures__/client-components-shared-dependency/client-component-1.js`,
+        ),
+        [
+          {
+            id: `__fixtures__/client-components-shared-dependency/client-component-1.js#ClientComponent1`,
+            exportName: `ClientComponent1`,
+          },
+        ],
+      );
+
+      clientReferencesMap.set(
+        path.resolve(
+          currentDirname,
+          `__fixtures__/client-components-shared-dependency/client-component-2.js`,
+        ),
+        [
+          {
+            id: `__fixtures__/client-components-shared-dependency/client-component-2.js#ClientComponent1`,
+            exportName: `ClientComponent2`,
+          },
+        ],
+      );
+
+      await runWebpack(buildConfig);
+
+      expect(memFs.readdirSync(distDirname)).toEqual([
+        `main.js`,
+        `client0.main.js`,
+        `client1.main.js`,
+        `vendors-node_modules_ai_rsc_dist_rsc-shared_mjs.main.js`,
+        `react-client-manifest.json`,
+        `react-ssr-manifest.json`,
+      ]);
+
+      const chunk1 = memFs.readFileSync(
+        path.resolve(currentDirname, `dist/client0.main.js`),
+        `utf-8`,
+      );
+
+      expect(chunk1).toMatch(
+        `/* harmony import */ var ai_rsc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ai/rsc */ "../../node_modules/ai/rsc/dist/rsc-shared.mjs");`,
+      );
+
+      const chunk2 = memFs.readFileSync(
+        path.resolve(currentDirname, `dist/client1.main.js`),
+        `utf-8`,
+      );
+
+      expect(chunk2).toMatch(
+        `/* harmony import */ var ai_rsc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ai/rsc */ "../../node_modules/ai/rsc/dist/rsc-shared.mjs");`,
+      );
+
+      const sharedChunk = memFs.readFileSync(
+        path.resolve(
+          currentDirname,
+          `dist/vendors-node_modules_ai_rsc_dist_rsc-shared_mjs.main.js`,
+        ),
+        `utf-8`,
+      );
+
+      expect(sharedChunk).toMatch(
+        `
+/***/ "../../node_modules/ai/rsc/dist/rsc-shared.mjs":
+/*!*****************************************************!*\\
+  !*** ../../node_modules/ai/rsc/dist/rsc-shared.mjs ***!
+  \\*****************************************************/`,
+      );
+
+      const manifest = JSON.parse(
+        memFs.readFileSync(
+          path.resolve(currentDirname, `dist/react-client-manifest.json`),
+          `utf-8`,
+        ),
+      );
+
+      expect(manifest).toEqual({
+        '__fixtures__/client-components-shared-dependency/client-component-1.js#ClientComponent1':
+          {
+            id: `./src/__fixtures__/client-components-shared-dependency/client-component-1.js`,
+            name: `ClientComponent1`,
+            chunks: [
+              `client0`,
+              `client0.main.js`,
+              `vendors-node_modules_ai_rsc_dist_rsc-shared_mjs`,
+              `vendors-node_modules_ai_rsc_dist_rsc-shared_mjs.main.js`,
+            ],
+          },
+        '__fixtures__/client-components-shared-dependency/client-component-2.js#ClientComponent1':
+          {
+            id: `./src/__fixtures__/client-components-shared-dependency/client-component-2.js`,
+            name: `ClientComponent2`,
+            chunks: [
+              `client1`,
+              `client1.main.js`,
+              `vendors-node_modules_ai_rsc_dist_rsc-shared_mjs`,
+              `vendors-node_modules_ai_rsc_dist_rsc-shared_mjs.main.js`,
+            ],
+          },
+      });
+    });
   });
 
   describe(`in production mode`, () => {
@@ -187,46 +297,28 @@ function ClientComponent({action}) {
       await runWebpack(buildConfig);
 
       const outputFile = memFs.readFileSync(
-        path.resolve(currentDirname, `dist/client0.main.js`),
+        path.resolve(currentDirname, `dist/701.main.js`),
         `utf-8`,
       );
 
       expect(pretty(outputFile)).toEqual(
         `"use strict";
-(self["webpackChunk_mfng_webpack_rsc"] =
-  self["webpackChunk_mfng_webpack_rsc"] || []).push([
-  ["client0"],
+(self.webpackChunk_mfng_webpack_rsc =
+  self.webpackChunk_mfng_webpack_rsc || []).push([
+  [701],
   {
-    /***/ "./src/__fixtures__/client-component.js":
-      /*!**********************************************!*\\
-  !*** ./src/__fixtures__/client-component.js ***!
-  \\**********************************************/
-      /***/ (
-        __unused_webpack___webpack_module__,
-        __webpack_exports__,
-        __webpack_require__
-      ) => {
-        __webpack_require__.r(__webpack_exports__);
-        /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-          /* harmony export */ ClientComponent: () =>
-            /* binding */ ClientComponent,
-          /* harmony export */
-        });
-        /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ =
-          __webpack_require__(/*! react */ "../../node_modules/react/index.js");
-        // @ts-nocheck
-        ("use client");
-
-        function ClientComponent({ action }) {
-          react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
-            action().then(console.log);
-          }, []);
-
-          return null;
-        }
-
-        /***/
-      },
+    431: (e, n, c) => {
+      c.r(n), c.d(n, { ClientComponent: () => t });
+      var s = c(423);
+      function t({ action: e }) {
+        return (
+          s.useEffect(() => {
+            e().then(console.log);
+          }, []),
+          null
+        );
+      }
+    },
   },
 ]);
 `,
