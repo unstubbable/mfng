@@ -25,10 +25,13 @@
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
+    "prerelease": "npm run compile",
+    "release": "changeset publish",
     "start": "turbo --concurrency 19 watch watch-dev-server start",
     "test": "turbo test"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@types/node": "^20.11.26",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
