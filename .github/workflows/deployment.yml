@@ -9,6 +9,9 @@ jobs:
   deploy-cloudflare:
     runs-on: ubuntu-latest
     environment: Cloudflare Workers
+    concurrency:
+      group: deploy-cloudflare
+      cancel-in-progress: false
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
@@ -29,6 +32,9 @@ jobs:
   deploy-aws:
     runs-on: ubuntu-latest
     environment: AWS
+    concurrency:
+      group: deploy-aws
+      cancel-in-progress: false
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
