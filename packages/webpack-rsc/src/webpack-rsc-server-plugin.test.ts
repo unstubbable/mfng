@@ -302,11 +302,11 @@ async function serverFunctionPassedFromServer() {
 
       expect(pretty(outputFile)).toMatch(
         `
-    799: (e, r, t) => {
-      t.r(r),
-        t.d(r, { Main: () => u, serverFunctionWithInlineDirective: () => c });
-      var n = t(324),
-        o = t(240);
+    799: (e, t, r) => {
+      r.r(t),
+        r.d(t, { Main: () => c, serverFunctionWithInlineDirective: () => u });
+      var n = r(324),
+        o = r(240);
       const i = (0, n.registerClientReference)(
         ((a = "ClientComponentWithServerAction"),
         () => {
@@ -318,41 +318,41 @@ async function serverFunctionPassedFromServer() {
         "ClientComponentWithServerAction"
       );
       var a,
-        s = t(871);
-      async function c() {
+        s = r(871);
+      async function u() {
         return Promise.resolve("server-function-with-inline-directive");
       }
-      function u() {
+      function c() {
         return o.createElement(i, {
           action1: s.serverFunctionPassedFromServer,
-          action2: c,
+          action2: u,
         });
       }
       (0, n.registerServerReference)(
-        c,
+        u,
         e.id,
         "serverFunctionWithInlineDirective"
       );
     },
-    839: (e, r, t) => {
+    839: (e, t, r) => {
       async function n() {
         return Promise.resolve("server-function-imported-from-client");
       }
-      t.r(r),
-        t.d(r, { serverFunctionImportedFromClient: () => n }),
-        (0, t(324).registerServerReference)(
+      r.r(t),
+        r.d(t, { serverFunctionImportedFromClient: () => n }),
+        (0, r(324).registerServerReference)(
           n,
           e.id,
           "serverFunctionImportedFromClient"
         );
     },
-    871: (e, r, t) => {
+    871: (e, t, r) => {
       async function n() {
         return Promise.resolve("server-function-passed-from-server");
       }
-      t.r(r),
-        t.d(r, { serverFunctionPassedFromServer: () => n }),
-        (0, t(324).registerServerReference)(
+      r.r(t),
+        r.d(t, { serverFunctionPassedFromServer: () => n }),
+        (0, r(324).registerServerReference)(
           n,
           e.id,
           "serverFunctionPassedFromServer"

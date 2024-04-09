@@ -2,7 +2,6 @@
 
 import {clsx} from 'clsx';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import type {BuyResult} from '../server/buy.js';
 import {Notification} from '../shared/notification.js';
 import {Button} from './button.js';
@@ -15,7 +14,7 @@ export interface ProductProps {
 }
 
 export function Product({buy}: ProductProps): React.ReactNode {
-  const [result, formAction] = ReactDOM.useFormState(buy, undefined);
+  const [result, formAction, isPending] = React.useActionState(buy, undefined);
 
   return (
     <form action={formAction}>
@@ -44,7 +43,7 @@ export function Product({buy}: ProductProps): React.ReactNode {
         )}
       />
       {` `}
-      <Button>Buy now</Button>
+      <Button disabled={isPending}>Buy now</Button>
       {result && (
         <Notification status={result.status}>
           {result.status === `success` ? (
