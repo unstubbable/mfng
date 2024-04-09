@@ -11,4 +11,13 @@ declare module 'react-dom/server' {
   export interface RenderToReadableStreamOptions {
     formState?: ReactFormState | null;
   }
+
+  export interface PostponedState {
+    nextSegmentId: number;
+    rootFormatContext: unknown;
+    progressiveChunkSize: number;
+    resumableState: unknown;
+    replayNodes: unknown[];
+    replaySlots: unknown;
+  }
 }

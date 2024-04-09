@@ -5,7 +5,7 @@ import {
   createRscAppStream,
   createRscFormState,
 } from '@mfng/core/server/rsc';
-import {createHtmlStream} from '@mfng/core/server/ssr';
+import {type PrerenderCache, getPrerenderedHtml} from '@mfng/core/server/ssr';
 import * as React from 'react';
 import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
@@ -16,6 +16,9 @@ import {
   reactServerManifest,
   reactSsrManifest,
 } from './manifests.js';
+
+// TODO: Use a proper cache solution that also respects cache control headers.
+const prerenderCache: PrerenderCache = new Map();
 
 async function renderApp(
   request: Request,
@@ -36,13 +39,14 @@ async function renderApp(
       });
     }
 
-    const htmlStream = await createHtmlStream(rscAppStream, {
+    const html = await getPrerenderedHtml(request.url, rscAppStream, {
       reactSsrManifest,
       bootstrapScripts: [jsManifest[`main.js`]!],
       formState,
+      prerenderCache,
     });
 
-    return new Response(htmlStream, {
+    return new Response(html, {
       headers: {'Content-Type': `text/html; charset=utf-8`},
     });
   });
