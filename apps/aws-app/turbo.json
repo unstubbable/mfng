@@ -4,6 +4,8 @@
   "pipeline": {
     "build": {
       "inputs": [
+        "../../packages/core/src/**/*",
+        "../shared-app/src/**/*",
         "src/**/*",
         "package.json",
         "tailwind.config.cjs",
@@ -13,6 +15,8 @@
     },
     "build:dev": {
       "inputs": [
+        "../../packages/core/src/**/*",
+        "../shared-app/src/**/*",
         "src/**/*",
         "package.json",
         "tailwind.config.cjs",
