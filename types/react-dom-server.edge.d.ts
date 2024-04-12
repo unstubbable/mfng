@@ -17,7 +17,7 @@ declare module 'react-dom/server.edge' {
   export interface ResumeOptions {
     nonce?: string;
     signal?: AbortSignal;
-    onError?: (error: unknown) => string | undefined;
+    onError?: (error: unknown) => string | void;
     onPostpone?: (reason: string) => void;
   }
 
