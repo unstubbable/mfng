@@ -29,8 +29,6 @@ describe(`worker`, () => {
     const resp = await worker.fetch();
     const text = await resp.text();
 
-    expect(text).toMatch(
-      `<p class="my-3">This is a suspended server component.</p>`,
-    );
+    expect(text).toMatch(`Hello, <em>World</em>!`);
   });
 });

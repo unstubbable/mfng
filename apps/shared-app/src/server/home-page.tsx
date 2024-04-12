@@ -3,17 +3,16 @@ import {Product} from '../client/product.js';
 import {Main} from '../shared/main.js';
 import {buy} from './buy.js';
 import {Hello} from './hello.js';
-import {Suspended} from './suspended.js';
 
 export function HomePage(): React.ReactNode {
   return (
     <Main>
       <Hello />
-      <React.Suspense fallback={<p className="my-3">Loading...</p>}>
-        <Suspended />
-      </React.Suspense>
       <React.Suspense>
-        <Product buy={buy.bind(null, `some-product-id`)} />
+        <div className="space-y-3">
+          <Product name="Product A" buy={buy.bind(null, `a`)} />
+          <Product name="Product B" buy={buy.bind(null, `b`)} />
+        </div>
       </React.Suspense>
     </Main>
   );
