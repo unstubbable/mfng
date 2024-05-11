@@ -43,9 +43,9 @@
     "jest-config": "^29.5.0",
     "memory-fs": "^0.5.0",
     "prettier": "^2.8.7",
-    "react": "0.0.0-experimental-e3ebcd54b-20240405",
-    "react-dom": "0.0.0-experimental-e3ebcd54b-20240405",
-    "react-server-dom-webpack": "0.0.0-experimental-e3ebcd54b-20240405",
+    "react": "0.0.0-experimental-04b058868c-20240508",
+    "react-dom": "0.0.0-experimental-04b058868c-20240508",
+    "react-server-dom-webpack": "0.0.0-experimental-04b058868c-20240508",
     "webpack": "^5.75.0"
   },
   "peerDependencies": {

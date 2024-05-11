@@ -308,23 +308,23 @@ async function serverFunctionPassedFromServer() {
       var n = r(324),
         o = r(240);
       const i = (0, n.registerClientReference)(
-        ((a = "ClientComponentWithServerAction"),
+        ((s = "ClientComponentWithServerAction"),
         () => {
           throw new Error(
-            \`Attempted to call $\{a}() from the server but $\{a} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`
+            \`Attempted to call \${s}() from the server but \${s} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`
           );
         }),
         "src/__fixtures__/client-component-with-server-action.js#ClientComponentWithServerAction",
         "ClientComponentWithServerAction"
       );
-      var a,
-        s = r(871);
+      var s,
+        a = r(871);
       async function u() {
         return Promise.resolve("server-function-with-inline-directive");
       }
       function c() {
         return o.createElement(i, {
-          action1: s.serverFunctionPassedFromServer,
+          action1: a.serverFunctionPassedFromServer,
           action2: u,
         });
       }

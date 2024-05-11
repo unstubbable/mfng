@@ -3,6 +3,7 @@ import type {ReactFormState} from 'react-dom/client';
 import ReactDOMClient from 'react-dom/client';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.browser';
 import {callServer} from './call-server.js';
+import {createSimplePromiseCache} from './create-simple-promise-cache.js';
 import {createUrlPath} from './router-location-utils.js';
 import {Router} from './router.js';
 
@@ -20,20 +21,17 @@ export async function hydrateApp(): Promise<void> {
 
   const initialUrlPath = createUrlPath(document.location);
 
-  const fetchRoot = React.cache(async function fetchRoot(
-    urlPath: string,
-  ): Promise<React.ReactElement> {
-    if (urlPath === initialUrlPath) {
-      return initialRoot;
-    }
+  const fetchRoot = createSimplePromiseCache(
+    async function fetchRoot(urlPath: string): Promise<React.ReactElement> {
+      const {root} = await ReactServerDOMClient.createFromFetch<RscAppResult>(
+        fetch(urlPath, {headers: {accept: `text/x-component`}}),
+        {callServer},
+      );
 
-    const {root} = await ReactServerDOMClient.createFromFetch<RscAppResult>(
-      fetch(urlPath, {headers: {accept: `text/x-component`}}),
-      {callServer},
-    );
-
-    return root;
-  });
+      return root;
+    },
+    [[initialUrlPath, Promise.resolve(initialRoot)]],
+  );
 
   React.startTransition(() => {
     ReactDOMClient.hydrateRoot(
