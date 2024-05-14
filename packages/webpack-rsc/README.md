@@ -87,6 +87,15 @@ const serverConfig = {
             test: /\.tsx?$/,
             use: [rscSsrLoader, 'swc-loader'],
           },
+          {
+            issuerLayer: webpackRscLayerName,
+            test: /\.m?js$/,
+            use: rscServerLoader,
+          },
+          {
+            test: /\.m?js$/,
+            use: rscSsrLoader,
+          },
         ],
       },
     ],
@@ -107,6 +116,10 @@ const clientConfig = {
       {
         test: /\.tsx?$/,
         use: [rscClientLoader, 'swc-loader'],
+      },
+      {
+        test: /\.m?js$/,
+        use: rscClientLoader,
       },
     ],
   },
