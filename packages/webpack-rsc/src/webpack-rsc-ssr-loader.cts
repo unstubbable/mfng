@@ -22,6 +22,7 @@ const webpackRscSsrLoader: webpack.LoaderDefinitionFunction<webpackRscSsrLoader.
     const ast = parser.parse(source, {
       sourceType: `module`,
       sourceFilename: resourcePath,
+      plugins: [`importAssertions`],
     });
 
     let hasUseServerDirective = false;
