@@ -108,4 +108,30 @@ export function ClientComponent({action}) {
 }`.trim(),
     );
   });
+
+  test(`can parse import assertions`, async () => {
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/import-assertions.js`,
+    );
+
+    const output = await callLoader(resourcePath, new Map());
+
+    expect(output.toString().trim()).toEqual(
+      `await import('./foo.json', {assert: {type: 'json'}});`,
+    );
+  });
+
+  test(`can parse import attributes`, async () => {
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/import-attributes.js`,
+    );
+
+    const output = await callLoader(resourcePath, new Map());
+
+    expect(output.toString().trim()).toEqual(
+      `await import('./foo.json', {with: {type: 'json'}});`,
+    );
+  });
 });

@@ -3,3 +3,5 @@ dist
 lib
 manifests.js
 cdk.out
+packages/webpack-rsc/src/__fixtures__/import-attributes.js
+packages/webpack-rsc/src/__fixtures__/import-assertions.js
