@@ -50,6 +50,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
     const ast = parser.parse(source, {
       sourceType: `module`,
       sourceFilename: resourcePath,
+      plugins: [`importAssertions`],
     });
 
     let moduleDirective: 'use client' | 'use server' | undefined;

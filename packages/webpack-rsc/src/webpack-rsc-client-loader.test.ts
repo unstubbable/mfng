@@ -133,4 +133,32 @@ export const foo = createServerReference("test#foo", callServer);
 
     expect(output).toEqual(source);
   });
+
+  test(`can parse import assertions`, async () => {
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/import-assertions.js`,
+    );
+
+    const serverReferencesMap = new Map();
+    const output = await callLoader(resourcePath, {serverReferencesMap});
+
+    expect(output.toString().trim()).toEqual(
+      `await import('./foo.json', {assert: {type: 'json'}});`,
+    );
+  });
+
+  test(`can parse import attributes`, async () => {
+    const resourcePath = path.resolve(
+      currentDirname,
+      `__fixtures__/import-attributes.js`,
+    );
+
+    const serverReferencesMap = new Map();
+    const output = await callLoader(resourcePath, {serverReferencesMap});
+
+    expect(output.toString().trim()).toEqual(
+      `await import('./foo.json', {with: {type: 'json'}});`,
+    );
+  });
 });
