@@ -33,7 +33,10 @@
       "files": ["**/*.cts", "**/*.ts", "**/*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "EXPERIMENTAL_useProjectService": true,
+        "EXPERIMENTAL_useProjectService": {
+          // https://github.com/typescript-eslint/typescript-eslint/issues/9032
+          "maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING": 1000
+        },
         "EXPERIMENTAL_useSourceOfProjectReferenceRedirect": true
       },
       "rules": {
