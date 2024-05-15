@@ -29,7 +29,9 @@
     "prerelease": "npm run compile",
     "release": "changeset publish",
     "start": "turbo --concurrency 19 watch watch-dev-server start",
-    "test": "turbo test"
+    "test": "turbo test",
+    "version": "changeset version",
+    "postversion": "npm install --package-lock-only"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
