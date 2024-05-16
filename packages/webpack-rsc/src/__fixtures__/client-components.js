@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import {ClientComponentWithServerAction} from './client-component-with-server-action.js';
 
-export function ComponentA() {
+export function ComponentA(arg0) {
   return React.createElement(`div`);
 }
+
+export const MemoizedComponentA = React.memo(ComponentA);
 
 export const ComponentB = function () {
   return React.createElement(`div`);
@@ -13,9 +14,9 @@ export const ComponentB = function () {
 
 export const foo = 1;
 
-export const ComponentC = () => {
-  return React.createElement(ClientComponentWithServerAction);
-};
+export class ClassComponent extends React.Component {}
+
+export {ClientComponentWithServerAction as ComponentC} from './client-component-with-server-action.js';
 
 const bar = 2;
 
@@ -29,4 +30,8 @@ function D() {
 
 function ComponentE() {
   return React.createElement(`div`);
+}
+
+export default function () {
+  return null;
 }

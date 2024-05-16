@@ -105,7 +105,10 @@ export function ClientComponent({action}) {
   }, []);
 
   return null;
-}`.trim(),
+}
+
+export default ClientComponent;
+`.trim(),
     );
   });
 

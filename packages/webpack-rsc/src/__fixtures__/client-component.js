@@ -10,3 +10,5 @@ export function ClientComponent({action}) {
 
   return null;
 }
+
+export default ClientComponent;

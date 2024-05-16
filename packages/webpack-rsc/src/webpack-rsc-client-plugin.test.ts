@@ -120,7 +120,8 @@ describe(`WebpackRscClientPlugin`, () => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ClientComponent": () => (/* binding */ ClientComponent)
+/* harmony export */   "ClientComponent": () => (/* binding */ ClientComponent),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../node_modules/react/index.js");
 // @ts-nocheck
@@ -136,6 +137,8 @@ function ClientComponent({action}) {
   return null;
 }
 
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ClientComponent);
+
 
 /***/ })
 
@@ -147,6 +150,10 @@ function ClientComponent({action}) {
       clientReferencesMap.set(
         path.resolve(currentDirname, `__fixtures__/client-component.js`),
         [
+          {
+            id: `__fixtures__/client-component.js#`,
+            exportName: ``,
+          },
           {
             id: `__fixtures__/client-component.js#ClientComponent`,
             exportName: `ClientComponent`,
@@ -164,6 +171,11 @@ function ClientComponent({action}) {
       );
 
       expect(manifest).toEqual({
+        '__fixtures__/client-component.js#': {
+          chunks: [`client0`, `client0.main.js`],
+          id: `./src/__fixtures__/client-component.js`,
+          name: ``,
+        },
         '__fixtures__/client-component.js#ClientComponent': {
           chunks: [`client0`, `client0.main.js`],
           id: `./src/__fixtures__/client-component.js`,
@@ -308,16 +320,17 @@ function ClientComponent({action}) {
   [701],
   {
     431: (e, n, c) => {
-      c.r(n), c.d(n, { ClientComponent: () => t });
-      var s = c(423);
-      function t({ action: e }) {
+      c.r(n), c.d(n, { ClientComponent: () => s, default: () => u });
+      var t = c(423);
+      function s({ action: e }) {
         return (
-          s.useEffect(() => {
+          t.useEffect(() => {
             e().then(console.log);
           }, []),
           null
         );
       }
+      const u = s;
     },
   },
 ]);
