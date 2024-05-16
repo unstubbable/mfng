@@ -38,6 +38,7 @@ interface ExtendedFunctionInfo extends FunctionInfo {
   readonly exportName?: string;
 }
 
+// TODO: Refactor to better separate logic for server and client modules.
 const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerLoader.WebpackRscServerLoaderOptions> =
   function (source, sourceMap) {
     this.cacheable(true);
@@ -56,6 +57,7 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
     let moduleDirective: 'use client' | 'use server' | undefined;
     let addedRegisterReferenceCall: RegisterReferenceType | undefined;
     const unshiftedNodes = new Set<t.Node>();
+    const exportNames = new Set<string>();
     const exportNamesByLocalName = new Map<string, string>();
 
     const localTopLevelFunctionsByNode = new WeakMap<
@@ -76,15 +78,25 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
         }
 
         if (t.isExportNamedDeclaration(node)) {
+          for (const exportName of Object.keys(
+            // TODO: This is potentially to broad.
+            t.getBindingIdentifiers(node, false, true),
+          )) {
+            exportNames.add(exportName);
+          }
+
           for (const exportSpecifier of node.specifiers) {
             if (
               t.isExportSpecifier(exportSpecifier) &&
               t.isIdentifier(exportSpecifier.exported)
             ) {
-              exportNamesByLocalName.set(
-                exportSpecifier.local.name,
-                exportSpecifier.exported.name,
-              );
+              const {
+                exported: {name: exportName},
+                local: {name: localName},
+              } = exportSpecifier;
+
+              exportNames.add(exportName);
+              exportNamesByLocalName.set(localName, exportName);
             }
           }
         }
@@ -118,30 +130,35 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
           return nodePath.skip();
         }
 
+        if (moduleDirective === `use client`) {
+          if (t.isExportDefaultDeclaration(node)) {
+            const exportName = ``;
+
+            const id = `${path.relative(
+              process.cwd(),
+              resourcePath,
+            )}#${exportName}`;
+
+            clientReferences.push({id, exportName});
+            addedRegisterReferenceCall = `Client`;
+
+            nodePath.replaceWith(
+              createDefaultExportedClientReference(id, resourcePath),
+            );
+
+            return nodePath.skip();
+          }
+
+          return nodePath.remove();
+        }
+
         const extendedFunctionInfo = getExtendedFunctionInfo(
           node,
           localTopLevelFunctionsByNode,
           exportNamesByLocalName,
         );
 
-        if (moduleDirective === `use client`) {
-          if (!extendedFunctionInfo?.exportName) {
-            return nodePath.remove();
-          }
-
-          const {exportName} = extendedFunctionInfo;
-
-          const id = `${path.relative(
-            process.cwd(),
-            resourcePath,
-          )}#${exportName}`;
-
-          clientReferences.push({id, exportName});
-          addedRegisterReferenceCall = `Client`;
-
-          nodePath.replaceWith(createExportedClientReference(id, exportName));
-          nodePath.skip();
-        } else if (extendedFunctionInfo) {
+        if (extendedFunctionInfo) {
           const {localName, exportName, hasUseServerDirective} =
             extendedFunctionInfo;
 
@@ -165,19 +182,38 @@ const webpackRscServerLoader: webpack.LoaderDefinitionFunction<webpackRscServerL
         }
       },
       exit(nodePath) {
-        if (!t.isProgram(nodePath.node) || !addedRegisterReferenceCall) {
+        if (!t.isProgram(nodePath.node)) {
           nodePath.skip();
 
           return;
         }
 
-        const nodes: t.Node[] = [
-          createRegisterReferenceImport(addedRegisterReferenceCall),
-        ];
+        const nodes: t.Node[] = [];
 
-        if (addedRegisterReferenceCall === `Client`) {
-          nodes.push(createClientReferenceProxyImplementation());
+        if (moduleDirective === `use client` && exportNames.size > 0) {
+          nodes.unshift(createClientReferenceProxyImplementation());
+
+          for (const exportName of exportNames) {
+            const id = `${path.relative(
+              process.cwd(),
+              resourcePath,
+            )}#${exportName}`;
+
+            clientReferences.push({id, exportName});
+            addedRegisterReferenceCall = `Client`;
+            nodes.push(createNamedExportedClientReference(id, exportName));
+          }
         }
+
+        if (!addedRegisterReferenceCall) {
+          nodePath.skip();
+
+          return;
+        }
+
+        nodes.unshift(
+          createRegisterReferenceImport(addedRegisterReferenceCall),
+        );
 
         for (const node of nodes) {
           unshiftedNodes.add(node);
@@ -291,7 +327,7 @@ function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
   return localName ? {localName, hasUseServerDirective} : undefined;
 }
 
-function createExportedClientReference(
+function createNamedExportedClientReference(
   id: string,
   exportName: string,
 ): t.ExportNamedDeclaration {
@@ -307,6 +343,30 @@ function createExportedClientReference(
           t.stringLiteral(exportName),
         ]),
       ),
+    ]),
+  );
+}
+
+function createDefaultExportedClientReference(
+  id: string,
+  resourcePath: string,
+): t.ExportNamedDeclaration | t.ExportDefaultDeclaration {
+  return t.exportDefaultDeclaration(
+    t.callExpression(t.identifier(`registerClientReference`), [
+      t.arrowFunctionExpression(
+        [],
+        t.blockStatement([
+          t.throwStatement(
+            t.newExpression(t.identifier(`Error`), [
+              t.stringLiteral(
+                `Attempted to call the default export of ${resourcePath} from the server but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.`,
+              ),
+            ]),
+          ),
+        ]),
+      ),
+      t.stringLiteral(id),
+      t.stringLiteral(``),
     ]),
   );
 }

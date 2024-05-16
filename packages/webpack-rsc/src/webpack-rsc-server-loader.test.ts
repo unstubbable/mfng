@@ -49,7 +49,7 @@ async function callLoader(
 }
 
 describe(`webpackRscServerLoader`, () => {
-  test(`keeps only the 'use client' directive, and exported functions that are transformed to client references`, async () => {
+  test(`keeps only the 'use client' directive, and client references for all exports`, async () => {
     const resourcePath = path.resolve(
       currentDirname,
       `__fixtures__/client-components.js`,
@@ -69,11 +69,18 @@ function createClientReferenceProxy(exportName) {
   };
 }
 export const ComponentA = registerClientReference(createClientReferenceProxy("ComponentA"), "${idPrefix}#ComponentA", "ComponentA");
+export const MemoizedComponentA = registerClientReference(createClientReferenceProxy("MemoizedComponentA"), "${idPrefix}#MemoizedComponentA", "MemoizedComponentA");
 export const ComponentB = registerClientReference(createClientReferenceProxy("ComponentB"), "${idPrefix}#ComponentB", "ComponentB");
+export const foo = registerClientReference(createClientReferenceProxy("foo"), "${idPrefix}#foo", "foo");
+export const ClassComponent = registerClientReference(createClientReferenceProxy("ClassComponent"), "${idPrefix}#ClassComponent", "ClassComponent");
 export const ComponentC = registerClientReference(createClientReferenceProxy("ComponentC"), "${idPrefix}#ComponentC", "ComponentC");
-export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${idPrefix}#ComponentF", "ComponentF");
 export const ComponentD = registerClientReference(createClientReferenceProxy("ComponentD"), "${idPrefix}#ComponentD", "ComponentD");
+export const bar = registerClientReference(createClientReferenceProxy("bar"), "${idPrefix}#bar", "bar");
 export const ComponentE = registerClientReference(createClientReferenceProxy("ComponentE"), "${idPrefix}#ComponentE", "ComponentE");
+export const ComponentF = registerClientReference(createClientReferenceProxy("ComponentF"), "${idPrefix}#ComponentF", "ComponentF");
+export default registerClientReference(() => {
+  throw new Error("Attempted to call the default export of ${resourcePath} from the server but it's on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.");
+}, "${idPrefix}#", "");
 `.trim(),
     );
   });
@@ -91,28 +98,48 @@ export const ComponentE = registerClientReference(createClientReferenceProxy("Co
     expect(Object.fromEntries(clientReferencesMap.entries())).toEqual({
       [resourcePath]: [
         {
+          exportName: ``,
+          id: `src/__fixtures__/client-components.js#`,
+        },
+        {
           exportName: `ComponentA`,
           id: `src/__fixtures__/client-components.js#ComponentA`,
+        },
+        {
+          exportName: `MemoizedComponentA`,
+          id: `src/__fixtures__/client-components.js#MemoizedComponentA`,
         },
         {
           exportName: `ComponentB`,
           id: `src/__fixtures__/client-components.js#ComponentB`,
         },
         {
-          exportName: `ComponentC`,
-          id: `src/__fixtures__/client-components.js#ComponentC`,
+          exportName: `foo`,
+          id: `src/__fixtures__/client-components.js#foo`,
         },
         {
-          exportName: `ComponentF`,
-          id: `src/__fixtures__/client-components.js#ComponentF`,
+          exportName: `ClassComponent`,
+          id: `src/__fixtures__/client-components.js#ClassComponent`,
+        },
+        {
+          exportName: `ComponentC`,
+          id: `src/__fixtures__/client-components.js#ComponentC`,
         },
         {
           exportName: `ComponentD`,
           id: `src/__fixtures__/client-components.js#ComponentD`,
         },
         {
+          exportName: `bar`,
+          id: `src/__fixtures__/client-components.js#bar`,
+        },
+        {
           exportName: `ComponentE`,
           id: `src/__fixtures__/client-components.js#ComponentE`,
+        },
+        {
+          exportName: `ComponentF`,
+          id: `src/__fixtures__/client-components.js#ComponentF`,
         },
       ],
     });
