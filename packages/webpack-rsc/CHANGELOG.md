@@ -1,5 +1,11 @@
 # @mfng/webpack-rsc
 
+## 4.2.0
+
+### Minor Changes
+
+- fb39d01: Support default exports and non-function client components
+
 ## 4.1.0
 
 ### Minor Changes
