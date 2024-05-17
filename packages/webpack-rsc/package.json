@@ -1,6 +1,6 @@
 {
   "name": "@mfng/webpack-rsc",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "A set of Webpack loaders and plugins for React Server Components",
   "repository": {
     "type": "git",
