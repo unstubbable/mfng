@@ -131,31 +131,46 @@ export class WebpackRscServerPlugin {
       });
     };
 
+    let needsAdditionalPass = false;
+
     compiler.hooks.finishMake.tapPromise(
       WebpackRscServerPlugin.name,
       async (compilation) => {
         this.serverManifest = {};
+        const clientReferences = [...this.clientReferencesMap.keys()];
+        const serverReferences = [...this.serverReferencesMap.keys()];
+        const referencesBefore = [...clientReferences, ...serverReferences];
 
         await Promise.all([
-          ...Array.from(this.clientReferencesMap.keys()).map(
-            async (resource) => {
-              try {
-                await includeModule(compilation, resource);
-              } catch (error) {
-                this.clientReferencesMap.delete(resource);
-              }
-            },
-          ),
-          ...Array.from(this.serverReferencesMap.keys()).map(
-            async (resource) => {
-              try {
-                await includeModule(compilation, resource, webpackRscLayerName);
-              } catch (error) {
-                this.serverReferencesMap.delete(resource);
-              }
-            },
-          ),
+          ...clientReferences.map(async (resource) => {
+            try {
+              await includeModule(compilation, resource);
+            } catch (error) {
+              this.clientReferencesMap.delete(resource);
+            }
+          }),
+          ...serverReferences.map(async (resource) => {
+            try {
+              await includeModule(compilation, resource, webpackRscLayerName);
+            } catch (error) {
+              this.serverReferencesMap.delete(resource);
+            }
+          }),
         ]);
+
+        const referencesAfter = [
+          ...this.clientReferencesMap.keys(),
+          ...this.serverReferencesMap.keys(),
+        ];
+
+        if (
+          referencesBefore.length !== referencesAfter.length ||
+          !referencesAfter.every((reference) =>
+            referencesBefore.includes(reference),
+          )
+        ) {
+          needsAdditionalPass = true;
+        }
       },
     );
 
@@ -191,16 +206,12 @@ export class WebpackRscServerPlugin {
               return;
             }
 
-            if (module.layer === webpackRscLayerName) {
-              if (isClientModule) {
-                void includeModule(compilation, resource).catch(() => {
-                  this.clientReferencesMap.delete(resource);
-                });
-              }
-
-              if (isServerModule && !hasServerReferenceDependency(module)) {
-                module.addDependency(new ServerReferenceDependency());
-              }
+            if (
+              module.layer === webpackRscLayerName &&
+              isServerModule &&
+              !hasServerReferenceDependency(module)
+            ) {
+              module.addDependency(new ServerReferenceDependency());
             }
           });
 
@@ -225,6 +236,11 @@ export class WebpackRscServerPlugin {
         normalModuleFactory.hooks.parser
           .for(`javascript/esm`)
           .tap(`HarmonyModulesPlugin`, onNormalModuleFactoryParser);
+
+        compilation.hooks.needAdditionalPass.tap(
+          WebpackRscServerPlugin.name,
+          () => !(needsAdditionalPass = !needsAdditionalPass),
+        );
 
         compilation.hooks.afterOptimizeModuleIds.tap(
           WebpackRscServerPlugin.name,
