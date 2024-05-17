@@ -1,5 +1,11 @@
 # @mfng/webpack-rsc
 
+## 4.2.1
+
+### Patch Changes
+
+- 247f98c: Prevent race conditions during webpack compilation
+
 ## 4.2.0
 
 ### Minor Changes
