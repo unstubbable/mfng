@@ -1,14 +1,14 @@
 import type {RouterLocation} from '../../use-router-location.js';
-import {routerLocationAsyncLocalStorage} from './router-location-async-local-storage.js';
+import {requestContextAsyncLocalStorage} from './request-context-async-local-storage.js';
 
 export function useRouterLocation(): RouterLocation {
-  const routerLocation = routerLocationAsyncLocalStorage.getStore();
+  const requestContext = requestContextAsyncLocalStorage.getStore();
 
-  if (!routerLocation) {
+  if (!requestContext) {
     throw new Error(
-      `useRouterLocation was called outside of an asynchronous context initialized by calling routerLocationAsyncLocalStorage.run()`,
+      `useRouterLocation() was called outside of an asynchronous context initialized by calling requestContextAsyncLocalStorage.run()`,
     );
   }
 
-  return routerLocation;
+  return requestContext.routerLocation;
 }

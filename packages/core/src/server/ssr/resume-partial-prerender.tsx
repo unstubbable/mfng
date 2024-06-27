@@ -28,6 +28,7 @@ export async function resumePartialPrerender(
 
   let cachedRootPromise: Promise<React.ReactNode> | undefined;
 
+  // TODO: Extract server root logic to share with createHtmlStream module.
   const getRoot = async () => {
     const {root} =
       await ReactServerDOMClient.createFromReadableStream<RscAppResult>(

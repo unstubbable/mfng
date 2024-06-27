@@ -34,9 +34,9 @@
       "node": "./lib/server/shared/use-router-location.js",
       "default": "./lib/client/use-router-location.js"
     },
-    "./router-location-async-local-storage": {
-      "@mfng:internal": "./src/server/shared/router-location-async-local-storage.ts",
-      "default": "./lib/server/shared/router-location-async-local-storage.js"
+    "./request-context-async-local-storage": {
+      "@mfng:internal": "./src/server/shared/request-context-async-local-storage.ts",
+      "default": "./lib/server/shared/request-context-async-local-storage.js"
     }
   },
   "files": [

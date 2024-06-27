@@ -1,4 +1,4 @@
-import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
+import {requestContextAsyncLocalStorage} from '@mfng/core/request-context-async-local-storage';
 import {
   createRscActionStream,
   createRscAppStream,
@@ -38,35 +38,38 @@ async function renderApp(
 ): Promise<Response> {
   const {pathname, search} = new URL(request.url);
 
-  return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
-    const rscAppStream = createRscAppStream(<App />, {
-      reactClientManifest,
-      mainCssHref: cssManifest[`main.css`]!,
-      formState,
-    });
+  return requestContextAsyncLocalStorage.run(
+    {routerLocation: {pathname, search}},
+    async () => {
+      const rscAppStream = createRscAppStream(<App />, {
+        reactClientManifest,
+        mainCssHref: cssManifest[`main.css`]!,
+        formState,
+      });
 
-    if (request.headers.get(`accept`) === `text/x-component`) {
-      return new Response(rscAppStream, {
+      if (request.headers.get(`accept`) === `text/x-component`) {
+        return new Response(rscAppStream, {
+          headers: {
+            'Content-Type': `text/x-component; charset=utf-8`,
+            'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
+          },
+        });
+      }
+
+      const htmlStream = await createHtmlStream(rscAppStream, {
+        reactSsrManifest,
+        bootstrapScripts: [jsManifest[`main.js`]!],
+        formState,
+      });
+
+      return new Response(htmlStream, {
         headers: {
-          'Content-Type': `text/x-component; charset=utf-8`,
+          'Content-Type': `text/html; charset=utf-8`,
           'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
         },
       });
-    }
-
-    const htmlStream = await createHtmlStream(rscAppStream, {
-      reactSsrManifest,
-      bootstrapScripts: [jsManifest[`main.js`]!],
-      formState,
-    });
-
-    return new Response(htmlStream, {
-      headers: {
-        'Content-Type': `text/html; charset=utf-8`,
-        'Cache-Control': `s-maxage=60, stale-while-revalidate=${oneDay}`,
-      },
-    });
-  });
+    },
+  );
 }
 
 async function handleGet(request: Request): Promise<Response> {

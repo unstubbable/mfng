@@ -1,3 +1,4 @@
+import {usePostpone} from '@mfng/core/server/rsc';
 import * as React from 'react';
 import 'server-only';
 import {Markdown} from './markdown.js';
@@ -9,12 +10,8 @@ async function fetchContent(): Promise<string> {
   return `This is a postponed server component.`;
 }
 
-let count = 0;
-
 export async function Postponed(): Promise<React.ReactElement> {
-  if (count++ % 2 === 0) {
-    React.unstable_postpone();
-  }
+  usePostpone();
 
   const content = await fetchContent();
 

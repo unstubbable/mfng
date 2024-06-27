@@ -40,14 +40,15 @@ npm install @mfng/core react@canary react-dom@canary react-server-dom-webpack@ca
 - `createRscAppStream`
 - `createRscActionStream`
 - `createRscFormState`
+- `usePostpone`
 
 #### `@mfng/core/server/ssr`
 
 - `createHtmlStream`
 
-#### `@mfng/core/router-location-async-local-storage`
+#### `@mfng/core/request-context-async-local-storage`
 
-- `routerLocationAsyncLocalStorage`
+- `requestContextAsyncLocalStorage`
 
 ### Client
 

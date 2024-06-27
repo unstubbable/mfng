@@ -1,18 +1,18 @@
 import type {Request} from '@cloudflare/workers-types';
-import {routerLocationAsyncLocalStorage} from '@mfng/core/router-location-async-local-storage';
+import {requestContextAsyncLocalStorage} from '@mfng/core/request-context-async-local-storage';
 import {
   createRscActionStream,
   createRscAppStream,
   createRscFormState,
 } from '@mfng/core/server/rsc';
 import {
-  type PartialPrerenderResult,
-  createHtmlStream,
-  partiallyPrerender,
+  type PrerenderResult,
+  prerender,
   resumePartialPrerender,
 } from '@mfng/core/server/ssr';
+import type {RouterLocation} from '@mfng/core/use-router-location';
 import * as React from 'react';
-import type {PostponedState, ReactFormState} from 'react-dom/server';
+import type {ReactFormState} from 'react-dom/server';
 import {App} from './app.js';
 import {
   cssManifest,
@@ -23,8 +23,8 @@ import {
 } from './manifests.js';
 
 interface PrerenderCache {
-  get(url: string): PartialPrerenderResult | undefined;
-  set(url: string, result: PartialPrerenderResult): void;
+  get(url: string): PrerenderResult | undefined;
+  set(url: string, result: PrerenderResult): void;
 }
 
 // TODO: Use a persistent cache; honor cache control headers.
@@ -69,69 +69,71 @@ async function renderApp(
   formState?: ReactFormState,
 ): Promise<Response> {
   const {pathname, search} = new URL(request.url);
+  const routerLocation: RouterLocation = {pathname, search};
 
-  // TODO: Refactor to requestAsyncLocalStorage that contains location and
-  // prerender/postpone status.
-  return routerLocationAsyncLocalStorage.run({pathname, search}, async () => {
-    const rscStream = createRscAppStream(<App />, {
-      reactClientManifest,
-      mainCssHref: cssManifest[`main.css`]!,
-      formState,
-    });
+  if (request.headers.get(`accept`) === `text/x-component`) {
+    return requestContextAsyncLocalStorage.run(
+      {routerLocation, isPrerender: false},
+      () =>
+        new Response(
+          createRscAppStream(<App />, {
+            reactClientManifest,
+            mainCssHref: cssManifest[`main.css`]!,
+            formState,
+          }),
+          {headers: {'Content-Type': `text/x-component; charset=utf-8`}},
+        ),
+    );
+  }
 
-    const [prerenderRscStream, finalRscStream] = rscStream.tee();
+  const prerenderResult =
+    prerenderCache.get(request.url) ??
+    (await requestContextAsyncLocalStorage.run(
+      {routerLocation, isPrerender: true},
+      async () => {
+        const prerenderRscStream = createRscAppStream(<App />, {
+          reactClientManifest,
+          mainCssHref: cssManifest[`main.css`]!,
+          formState,
+        });
 
-    // TODO: Client-side navigation request should not get prerender stream
-    // (with postponed elements).
-    if (request.headers.get(`accept`) === `text/x-component`) {
-      return new Response(prerenderRscStream, {
-        headers: {'Content-Type': `text/x-component; charset=utf-8`},
-      });
-    }
+        const result = await prerender(prerenderRscStream, {
+          reactSsrManifest,
+          bootstrapScripts: [jsManifest[`main.js`]!],
+          formState,
+        });
 
-    let cachedResult = prerenderCache.get(request.url);
+        prerenderCache.set(request.url, result);
 
-    if (!cachedResult) {
-      cachedResult = await partiallyPrerender(prerenderRscStream, {
-        reactSsrManifest,
-        bootstrapScripts: [jsManifest[`main.js`]!],
-        formState,
-      });
+        return result;
+      },
+    ));
 
-      prerenderCache.set(request.url, cachedResult);
-    }
+  if (prerenderResult.didPostpone) {
+    const resumedHtmlStream = await requestContextAsyncLocalStorage.run(
+      {routerLocation, isPrerender: false},
+      async () => {
+        const resumedRscStream = createRscAppStream(<App />, {
+          reactClientManifest,
+          mainCssHref: cssManifest[`main.css`]!,
+          formState,
+        });
 
-    const postponedState: PostponedState | null = JSON.parse(
-      cachedResult.postponed,
+        return resumePartialPrerender(resumedRscStream, {
+          postponedState: prerenderResult.postponedState,
+          reactSsrManifest,
+        });
+      },
     );
 
-    if (postponedState) {
-      const resumedRscStream = createRscAppStream(<App />, {
-        reactClientManifest,
-        mainCssHref: cssManifest[`main.css`]!,
-        formState,
-      });
+    return new Response(
+      prependString(resumedHtmlStream, prerenderResult.prelude),
+      {headers: {'Content-Type': `text/html; charset=utf-8`}},
+    );
+  }
 
-      const resumedHtmlStream = await resumePartialPrerender(resumedRscStream, {
-        postponedState: JSON.parse(cachedResult.postponed),
-        reactSsrManifest,
-      });
-
-      return new Response(
-        prependString(resumedHtmlStream, cachedResult.prelude),
-        {headers: {'Content-Type': `text/html; charset=utf-8`}},
-      );
-    }
-
-    const htmlStream = await createHtmlStream(finalRscStream, {
-      reactSsrManifest,
-      bootstrapScripts: [jsManifest[`main.js`]!],
-      formState,
-    });
-
-    return new Response(htmlStream, {
-      headers: {'Content-Type': `text/html; charset=utf-8`},
-    });
+  return new Response(prerenderResult.html, {
+    headers: {'Content-Type': `text/html; charset=utf-8`},
   });
 }
 

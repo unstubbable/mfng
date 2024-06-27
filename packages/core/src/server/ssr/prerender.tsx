@@ -2,37 +2,49 @@
 import './node-compat-environment.js';
 
 import * as React from 'react';
-import type {ReactFormState} from 'react-dom/server';
+import type {PostponedState, ReactFormState} from 'react-dom/server';
 import ReactDOMStatic from 'react-dom/static.edge';
 import type {SSRManifest} from 'react-server-dom-webpack';
 import ReactServerDOMClient from 'react-server-dom-webpack/client.edge';
 import type {RscAppResult} from '../rsc/create-rsc-app-stream.js';
+import {createInitialRscResponseTransformStream} from './create-initial-rsc-response-transform-stream.js';
 
-export interface PartiallyPrerenderOptions {
+export interface PrerenderOptions {
   readonly reactSsrManifest: SSRManifest;
   readonly bootstrapScripts?: string[];
   readonly formState?: ReactFormState;
 }
 
 export interface PartialPrerenderResult {
+  readonly didPostpone: true;
   readonly prelude: string;
-  readonly postponed: string;
+  readonly postponedState: PostponedState;
 }
 
+export interface CompletePrerenderResult {
+  readonly didPostpone: false;
+  readonly html: string;
+}
+
+export type PrerenderResult = PartialPrerenderResult | CompletePrerenderResult;
+
+// TODO: Share with createHtmlStream module.
 const rscResponseStreamBootstrapScriptContent = `(()=>{const t=new TransformStream(),w=t.writable.getWriter(),e=new TextEncoder();self.initialRscResponseStream=t.readable;self.addInitialRscResponseChunk=(text)=>w.write(e.encode(text))})()`;
 
-export async function partiallyPrerender(
+export async function prerender(
   rscStream: ReadableStream<Uint8Array>,
-  options: PartiallyPrerenderOptions,
-): Promise<PartialPrerenderResult> {
+  options: PrerenderOptions,
+): Promise<PrerenderResult> {
   const {reactSsrManifest, bootstrapScripts, formState} = options;
 
   let cachedRootPromise: Promise<React.ReactNode> | undefined;
+  const [rscStream1, rscStream2] = rscStream.tee();
 
+  // TODO: Extract server root logic to share with createHtmlStream module.
   const getRoot = async () => {
     const {root} =
       await ReactServerDOMClient.createFromReadableStream<RscAppResult>(
-        rscStream,
+        rscStream1,
         {ssrManifest: reactSsrManifest},
       );
 
@@ -53,9 +65,23 @@ export async function partiallyPrerender(
     formState,
   });
 
+  if (postponed) {
+    return {
+      didPostpone: true,
+      prelude: await streamToString(
+        prelude.pipeThrough(new TextDecoderStream()),
+      ),
+      postponedState: postponed,
+    };
+  }
+
   return {
-    prelude: await streamToString(prelude.pipeThrough(new TextDecoderStream())),
-    postponed: JSON.stringify(postponed),
+    didPostpone: false,
+    html: await streamToString(
+      prelude
+        .pipeThrough(createInitialRscResponseTransformStream(rscStream2))
+        .pipeThrough(new TextDecoderStream()),
+    ),
   };
 }
 
