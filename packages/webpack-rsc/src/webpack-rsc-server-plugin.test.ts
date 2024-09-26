@@ -302,61 +302,49 @@ async function serverFunctionPassedFromServer() {
 
       expect(pretty(outputFile)).toMatch(
         `
-    799: (e, t, r) => {
-      r.r(t),
-        r.d(t, { Main: () => c, serverFunctionWithInlineDirective: () => u });
-      var n = r(324),
-        o = r(240);
-      const i = (0, n.registerClientReference)(
-        ((s = "ClientComponentWithServerAction"),
+    799: (e, t, n) => {
+      n.r(t),
+        n.d(t, { Main: () => l, serverFunctionWithInlineDirective: () => u });
+      var r = n(324),
+        o = n(240);
+      const i = (0, r.ar)(
+        ((a = "ClientComponentWithServerAction"),
         () => {
           throw new Error(
-            \`Attempted to call \${s}() from the server but \${s} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`
+            \`Attempted to call $\{a}() from the server but $\{a} is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.\`
           );
         }),
         "src/__fixtures__/client-component-with-server-action.js#ClientComponentWithServerAction",
         "ClientComponentWithServerAction"
       );
-      var s,
-        a = r(871);
+      var a,
+        s = n(871);
       async function u() {
         return Promise.resolve("server-function-with-inline-directive");
       }
-      function c() {
+      function l() {
         return o.createElement(i, {
-          action1: a.serverFunctionPassedFromServer,
+          action1: s.serverFunctionPassedFromServer,
           action2: u,
         });
       }
-      (0, n.registerServerReference)(
-        u,
-        e.id,
-        "serverFunctionWithInlineDirective"
-      );
+      (0, r.jF)(u, e.id, "serverFunctionWithInlineDirective");
     },
-    839: (e, t, r) => {
-      async function n() {
+    839: (e, t, n) => {
+      async function r() {
         return Promise.resolve("server-function-imported-from-client");
       }
-      r.r(t),
-        r.d(t, { serverFunctionImportedFromClient: () => n }),
-        (0, r(324).registerServerReference)(
-          n,
-          e.id,
-          "serverFunctionImportedFromClient"
-        );
+      n.r(t),
+        n.d(t, { serverFunctionImportedFromClient: () => r }),
+        (0, n(324).jF)(r, e.id, "serverFunctionImportedFromClient");
     },
-    871: (e, t, r) => {
-      async function n() {
+    871: (e, t, n) => {
+      async function r() {
         return Promise.resolve("server-function-passed-from-server");
       }
-      r.r(t),
-        r.d(t, { serverFunctionPassedFromServer: () => n }),
-        (0, r(324).registerServerReference)(
-          n,
-          e.id,
-          "serverFunctionPassedFromServer"
-        );
+      n.r(t),
+        n.d(t, { serverFunctionPassedFromServer: () => r }),
+        (0, n(324).jF)(r, e.id, "serverFunctionPassedFromServer");
     },`,
       );
     });
