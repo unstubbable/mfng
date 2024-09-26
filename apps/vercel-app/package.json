@@ -22,8 +22,8 @@
     "@mfng/core": "*",
     "@mfng/shared-app": "*",
     "@vercel/analytics": "^0.1.11",
-    "react": "0.0.0-experimental-04b058868c-20240508",
-    "react-dom": "0.0.0-experimental-04b058868c-20240508",
+    "react": "0.0.0-experimental-778e1ed2-20240926",
+    "react-dom": "0.0.0-experimental-778e1ed2-20240926",
     "web-vitals": "^3.3.1"
   },
   "devDependencies": {

@@ -18,8 +18,8 @@
   "dependencies": {
     "@mfng/core": "*",
     "@mfng/shared-app": "*",
-    "react": "0.0.0-experimental-04b058868c-20240508",
-    "react-dom": "0.0.0-experimental-04b058868c-20240508"
+    "react": "0.0.0-experimental-778e1ed2-20240926",
+    "react-dom": "0.0.0-experimental-778e1ed2-20240926"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240222.0",
@@ -38,7 +38,7 @@
     "mini-css-extract-plugin": "^2.7.5",
     "postcss": "^8.4.21",
     "postcss-loader": "^7.0.2",
-    "react-server-dom-webpack": "0.0.0-experimental-04b058868c-20240508",
+    "react-server-dom-webpack": "0.0.0-experimental-778e1ed2-20240926",
     "resolve-typescript-plugin": "^2.0.0",
     "source-map-loader": "^4.0.1",
     "swc-loader": "^0.2.3",

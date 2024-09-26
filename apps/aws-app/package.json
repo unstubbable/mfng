@@ -18,8 +18,8 @@
   "dependencies": {
     "@mfng/core": "*",
     "@mfng/shared-app": "*",
-    "react": "0.0.0-experimental-04b058868c-20240508",
-    "react-dom": "0.0.0-experimental-04b058868c-20240508"
+    "react": "0.0.0-experimental-778e1ed2-20240926",
+    "react-dom": "0.0.0-experimental-778e1ed2-20240926"
   },
   "devDependencies": {
     "@hono/node-server": "^1.8.2",

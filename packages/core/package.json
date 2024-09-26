@@ -49,9 +49,9 @@
     "@types/htmlescape": "^1.1.1",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
-    "react": "0.0.0-experimental-04b058868c-20240508",
-    "react-dom": "0.0.0-experimental-04b058868c-20240508",
-    "react-server-dom-webpack": "0.0.0-experimental-04b058868c-20240508"
+    "react": "0.0.0-experimental-778e1ed2-20240926",
+    "react-dom": "0.0.0-experimental-778e1ed2-20240926",
+    "react-server-dom-webpack": "0.0.0-experimental-778e1ed2-20240926"
   },
   "peerDependencies": {
     "react": "*",

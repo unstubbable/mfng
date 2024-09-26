@@ -46,7 +46,7 @@
     "eslint-plugin-markdown": "^3.0.1",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.4",
-    "react-dom": "0.0.0-experimental-04b058868c-20240508",
+    "react-dom": "0.0.0-experimental-778e1ed2-20240926",
     "rimraf": "^4.4.1",
     "turbo": "^1.8.8",
     "typescript": "^5.4.5"
