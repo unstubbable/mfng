@@ -11,6 +11,11 @@ namespace webpackRscSsrLoader {
   }
 }
 
+interface FunctionInfo {
+  readonly exportName: string;
+  readonly loc: t.SourceLocation | null | undefined;
+}
+
 const webpackRscSsrLoader: webpack.LoaderDefinitionFunction<webpackRscSsrLoader.WebpackRscSsrLoaderOptions> =
   function (source, sourceMap) {
     this.cacheable(true);
@@ -47,12 +52,12 @@ const webpackRscSsrLoader: webpack.LoaderDefinitionFunction<webpackRscSsrLoader.
           return;
         }
 
-        const exportName = getFunctionExportName(node);
+        const functionInfo = getFunctionInfo(node);
 
-        if (exportName) {
-          path.replaceWith(createExportedServerReferenceStub(exportName));
+        if (functionInfo) {
+          path.replaceWith(createExportedServerReferenceStub(functionInfo));
           path.skip();
-          serverReferenceExportNames.push(exportName);
+          serverReferenceExportNames.push(functionInfo.exportName);
         } else {
           path.remove();
         }
@@ -90,13 +95,15 @@ function isUseServerDirective(directive: t.Directive): boolean {
   );
 }
 
-function getFunctionExportName(node: t.Node): string | undefined {
+function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
+  let localName: string | undefined;
+  let loc: t.SourceLocation | null | undefined;
+
   if (t.isExportNamedDeclaration(node)) {
     if (t.isFunctionDeclaration(node.declaration)) {
-      return node.declaration.id?.name;
-    }
-
-    if (t.isVariableDeclaration(node.declaration)) {
+      localName = node.declaration.id?.name;
+      loc = node.declaration.id?.loc;
+    } else if (t.isVariableDeclaration(node.declaration)) {
       const declarator = node.declaration.declarations[0];
 
       if (!declarator) {
@@ -104,23 +111,29 @@ function getFunctionExportName(node: t.Node): string | undefined {
       }
 
       if (
-        t.isFunctionExpression(declarator.init) ||
-        t.isArrowFunctionExpression(declarator.init)
+        (t.isFunctionExpression(declarator.init) ||
+          t.isArrowFunctionExpression(declarator.init)) &&
+        t.isIdentifier(declarator.id)
       ) {
-        return t.isIdentifier(declarator.id) ? declarator.id.name : undefined;
+        localName = declarator.id.name;
+        loc = declarator.id.loc;
       }
     }
   }
 
-  return undefined;
+  return localName ? {exportName: localName, loc} : undefined;
 }
 
 function createExportedServerReferenceStub(
-  exportName: string,
+  functionInfo: FunctionInfo,
 ): t.ExportNamedDeclaration {
+  const identifier = t.identifier(functionInfo.exportName);
+
+  identifier.loc = functionInfo.loc;
+
   return t.exportNamedDeclaration(
     t.functionDeclaration(
-      t.identifier(exportName),
+      identifier,
       [],
       t.blockStatement([
         t.throwStatement(

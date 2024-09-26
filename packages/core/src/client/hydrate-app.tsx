@@ -12,11 +12,19 @@ export interface RscAppResult {
   readonly formState?: ReactFormState;
 }
 
+const originRegExp = new RegExp(`^${document.location.origin}`);
+
+export function findSourceMapUrl(filename: string): string | null {
+  return `${document.location.origin}/source-maps?filename=${encodeURIComponent(
+    filename.replace(originRegExp, ``),
+  )}`;
+}
+
 export async function hydrateApp(): Promise<void> {
   const {root: initialRoot, formState} =
     await ReactServerDOMClient.createFromReadableStream<RscAppResult>(
       self.initialRscResponseStream,
-      {callServer},
+      {callServer, findSourceMapURL: findSourceMapUrl},
     );
 
   const initialUrlPath = createUrlPath(document.location);
@@ -25,7 +33,7 @@ export async function hydrateApp(): Promise<void> {
     async function fetchRoot(urlPath: string): Promise<React.ReactElement> {
       const {root} = await ReactServerDOMClient.createFromFetch<RscAppResult>(
         fetch(urlPath, {headers: {accept: `text/x-component`}}),
-        {callServer},
+        {callServer, findSourceMapURL: findSourceMapUrl},
       );
 
       return root;

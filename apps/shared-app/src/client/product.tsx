@@ -3,6 +3,7 @@
 import {clsx} from 'clsx';
 import * as React from 'react';
 import type {BuyResult} from '../server/buy.js';
+import {trackClick} from '../server/track-click.js';
 import {Notification} from '../shared/notification.js';
 import {Button} from './button.js';
 
@@ -43,7 +44,9 @@ export function Product({buy}: ProductProps): React.ReactNode {
         )}
       />
       {` `}
-      <Button disabled={isPending}>Buy now</Button>
+      <Button disabled={isPending} trackClick={trackClick}>
+        Buy now
+      </Button>
       {result && (
         <Notification status={result.status}>
           {result.status === `success` ? (

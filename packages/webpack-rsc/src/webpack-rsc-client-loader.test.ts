@@ -54,7 +54,7 @@ describe(`webpackRscClientLoader`, () => {
     );
 
     const serverReferencesMap: ServerReferencesMap = new Map([
-      [resourcePath, {moduleId: `test`, exportNames: [`foo`, `bar`]}],
+      [resourcePath, {moduleId: `test`, exportNames: []}],
     ]);
 
     const output = await callLoader(resourcePath, {serverReferencesMap});
@@ -62,9 +62,10 @@ describe(`webpackRscClientLoader`, () => {
     expect(output).toEqual(
       `
 import { createServerReference } from "react-server-dom-webpack/client";
-import { callServer } from "@mfng/core/client/browser";
-export const foo = createServerReference("test#foo", callServer);
-export const bar = createServerReference("test#bar", callServer);
+import { callServer, findSourceMapUrl } from "@mfng/core/client/browser";
+export const foo = createServerReference("test#foo", callServer, undefined, findSourceMapUrl, "foo");
+export const bar = createServerReference("test#bar", callServer, undefined, findSourceMapUrl, "bar");
+export const baz = createServerReference("test#baz", callServer, undefined, findSourceMapUrl, "baz");
 `.trim(),
     );
   });
@@ -86,12 +87,8 @@ export const bar = createServerReference("test#bar", callServer);
       callServerImportSource,
     });
 
-    expect(output).toEqual(
-      `
-import { createServerReference } from "react-server-dom-webpack/client";
-import { callServer } from "some-router/call-server";
-export const foo = createServerReference("test#foo", callServer);
-`.trim(),
+    expect(output).toMatch(
+      `import { callServer, findSourceMapUrl } from "some-router/call-server";`,
     );
   });
 

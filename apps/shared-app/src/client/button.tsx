@@ -1,13 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import {trackClick} from '../server/track-click.js';
 
 export type ButtonProps = React.PropsWithChildren<{
   readonly disabled?: boolean;
+  readonly trackClick: () => Promise<number>;
 }>;
 
-export function Button({children, disabled}: ButtonProps): React.ReactNode {
+export function Button({
+  children,
+  disabled,
+  trackClick,
+}: ButtonProps): React.ReactNode {
   return (
     <button
       onClick={() => void trackClick()}
