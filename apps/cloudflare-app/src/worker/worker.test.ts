@@ -13,7 +13,7 @@ describe(`worker`, () => {
 
   beforeAll(async () => {
     worker = await unstable_dev(
-      path.resolve(currentDirname, `../../dist/worker.js`),
+      path.resolve(currentDirname, `../../dist/worker/index.js`),
       {
         config: path.resolve(currentDirname, `./wrangler.toml`),
         experimental: {disableExperimentalWarning: true},
