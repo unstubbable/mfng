@@ -1,5 +1,6 @@
 import {createRequire} from 'module';
 import path from 'path';
+import url from 'url';
 import {
   WebpackRscClientPlugin,
   WebpackRscServerPlugin,
@@ -13,8 +14,30 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ResolveTypeScriptPlugin from 'resolve-typescript-plugin';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
 
+const currentDirname = path.dirname(url.fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
+const outputDirname = path.join(currentDirname, `dist`);
+const outputWorkerDirname = path.join(outputDirname, `worker`);
+
+const reactServerManifestFilename = path.join(
+  outputWorkerDirname,
+  `react-server-manifest.json`,
+);
+
+const reactClientManifestFilename = path.join(
+  outputWorkerDirname,
+  `react-client-manifest.json`,
+);
+
+const reactSsrManifestFilename = path.join(
+  outputWorkerDirname,
+  `react-ssr-manifest.json`,
+);
+
+const jsManifestFilename = path.join(outputWorkerDirname, `js-manifest.json`);
+
+const cssManifestFilename = path.join(outputWorkerDirname, `css-manifest.json`);
 /**
  * @param {unknown} _env
  * @param {{readonly mode?: import('webpack').Configuration['mode']}} argv
@@ -101,8 +124,8 @@ export default function createConfigs(_env, argv) {
     entry: `./src/worker/index.tsx`,
     target: `webworker`,
     output: {
-      filename: `worker.js`,
-      path: path.join(process.cwd(), `dist`),
+      filename: `index.js`,
+      path: outputWorkerDirname,
       libraryTarget: `module`,
       chunkFormat: `module`,
       devtoolModuleFilenameTemplate: (
@@ -152,7 +175,14 @@ export default function createConfigs(_env, argv) {
     },
     plugins: [
       new MiniCssExtractPlugin({filename: `server-main.css`, runtime: false}),
-      new WebpackRscServerPlugin({clientReferencesMap, serverReferencesMap}),
+      new WebpackRscServerPlugin({
+        clientReferencesMap,
+        serverReferencesMap,
+        serverManifestFilename: path.relative(
+          outputWorkerDirname,
+          reactServerManifestFilename,
+        ),
+      }),
     ],
     experiments: {outputModule: true, layers: true},
     performance: {maxAssetSize: 1_000_000, maxEntrypointSize: 1_000_000},
@@ -161,6 +191,9 @@ export default function createConfigs(_env, argv) {
     mode,
     stats,
   };
+
+  const staticDirname = path.join(currentDirname, `dist/static`);
+  const clientOutputDirname = path.join(staticDirname, `client`);
 
   /**
    * @type {import('webpack').Configuration}
@@ -171,7 +204,7 @@ export default function createConfigs(_env, argv) {
     entry: `./src/client.tsx`,
     output: {
       filename: dev ? `main.js` : `main.[contenthash:8].js`,
-      path: path.join(process.cwd(), `dist/client`),
+      path: clientOutputDirname,
       clean: !dev,
       publicPath: `/client/`,
     },
@@ -206,16 +239,26 @@ export default function createConfigs(_env, argv) {
         runtime: false,
       }),
       new WebpackManifestPlugin({
-        fileName: `css-manifest.json`,
+        fileName: cssManifestFilename,
         publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.css`),
       }),
       new WebpackManifestPlugin({
-        fileName: `js-manifest.json`,
+        fileName: jsManifestFilename,
         publicPath: `/client/`,
         filter: (file) => file.path.endsWith(`.js`),
       }),
-      new WebpackRscClientPlugin({clientReferencesMap}),
+      new WebpackRscClientPlugin({
+        clientReferencesMap,
+        clientManifestFilename: path.relative(
+          clientOutputDirname,
+          reactClientManifestFilename,
+        ),
+        ssrManifestFilename: path.relative(
+          clientOutputDirname,
+          reactSsrManifestFilename,
+        ),
+      }),
     ],
     devtool: `source-map`,
     mode,

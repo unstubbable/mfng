@@ -1,5 +1,5 @@
 name = "mfng"
-main = "../../dist/worker.js"
+main = "../../dist/worker/index.js"
 compatibility_date = "2024-03-04"
 compatibility_flags = ["nodejs_als"]
 
@@ -13,7 +13,5 @@ command = ""
 watch_dir = []
 
 [assets]
-bucket = "../../dist"
-include = ["client"]
-exclude = []
+bucket = "../../dist/static"
 serve_single_page_app = true

@@ -6,7 +6,7 @@
 // been created, at which point webpack has already emitted the server bundle.
 
 export const reactServerManifest = require(/* webpackIgnore: true */ `./react-server-manifest.json`);
-export const reactClientManifest = require(/* webpackIgnore: true */ `./client/react-client-manifest.json`);
-export const reactSsrManifest = require(/* webpackIgnore: true */ `./client/react-ssr-manifest.json`);
-export const cssManifest = require(/* webpackIgnore: true */ `./client/css-manifest.json`);
-export const jsManifest = require(/* webpackIgnore: true */ `./client/js-manifest.json`);
+export const reactClientManifest = require(/* webpackIgnore: true */ `./react-client-manifest.json`);
+export const reactSsrManifest = require(/* webpackIgnore: true */ `./react-ssr-manifest.json`);
+export const cssManifest = require(/* webpackIgnore: true */ `./css-manifest.json`);
+export const jsManifest = require(/* webpackIgnore: true */ `./js-manifest.json`);
