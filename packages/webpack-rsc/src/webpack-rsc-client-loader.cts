@@ -14,6 +14,11 @@ namespace webpackRscClientLoader {
 
 type SourceMap = Parameters<LoaderDefinitionFunction>[1];
 
+interface FunctionInfo {
+  readonly exportName: string;
+  readonly loc: t.SourceLocation | null | undefined;
+}
+
 function webpackRscClientLoader(
   this: LoaderContext<webpackRscClientLoader.WebpackRscClientLoaderOptions>,
   source: string,
@@ -35,80 +40,101 @@ function webpackRscClientLoader(
     plugins: [`importAssertions`],
   });
 
+  let moduleId: string | number | undefined;
   let hasUseServerDirective = false;
+  let addedRegisterServerReferenceCall = false;
+  const importNodes = new Set<t.Node>();
 
   traverse.default(ast, {
-    Program(path) {
+    enter(path) {
       const {node} = path;
 
-      if (!node.directives.some(isUseServerDirective)) {
-        return;
-      }
+      if (t.isProgram(node)) {
+        if (node.directives.some(isUseServerDirective)) {
+          hasUseServerDirective = true;
 
-      hasUseServerDirective = true;
+          const moduleInfo = serverReferencesMap.get(resourcePath);
 
-      const moduleInfo = serverReferencesMap.get(resourcePath);
-
-      if (!moduleInfo) {
-        loaderContext.emitError(
-          new Error(
-            `Could not find server references module info in \`serverReferencesMap\` for ${resourcePath}.`,
-          ),
-        );
-
-        path.replaceWith(t.program([]));
-
-        return;
-      }
-
-      const {moduleId, exportNames} = moduleInfo;
-
-      if (!moduleId) {
-        loaderContext.emitError(
-          new Error(
-            `Could not find server references module ID in \`serverReferencesMap\` for ${resourcePath}.`,
-          ),
-        );
-
-        path.replaceWith(t.program([]));
-
-        return;
-      }
-
-      path.replaceWith(
-        t.program([
-          t.importDeclaration(
-            [
-              t.importSpecifier(
-                t.identifier(`createServerReference`),
-                t.identifier(`createServerReference`),
+          if (!moduleInfo) {
+            loaderContext.emitError(
+              new Error(
+                `Could not find server references module info in \`serverReferencesMap\` for ${resourcePath}.`,
               ),
-            ],
-            t.stringLiteral(`react-server-dom-webpack/client`),
-          ),
-          t.importDeclaration(
-            [
-              t.importSpecifier(
-                t.identifier(`callServer`),
-                t.identifier(`callServer`),
+            );
+
+            path.replaceWith(t.program([]));
+          } else if (!moduleInfo.moduleId) {
+            loaderContext.emitError(
+              new Error(
+                `Could not find server references module ID in \`serverReferencesMap\` for ${resourcePath}.`,
               ),
-            ],
-            t.stringLiteral(callServerImportSource),
-          ),
-          ...exportNames.map((exportName) =>
-            t.exportNamedDeclaration(
-              t.variableDeclaration(`const`, [
-                t.variableDeclarator(
-                  t.identifier(exportName),
-                  t.callExpression(t.identifier(`createServerReference`), [
-                    t.stringLiteral(`${moduleId}#${exportName}`),
-                    t.identifier(`callServer`),
-                  ]),
-                ),
-              ]),
+            );
+
+            path.replaceWith(t.program([]));
+          } else {
+            moduleId = moduleInfo.moduleId;
+          }
+        } else {
+          path.skip();
+        }
+
+        return;
+      }
+
+      if (importNodes.has(node)) {
+        return path.skip();
+      }
+
+      const functionInfo = getFunctionInfo(node);
+
+      if (moduleId && functionInfo) {
+        path.replaceWith(
+          createNamedExportedServerReference(functionInfo, moduleId),
+        );
+        path.skip();
+        addedRegisterServerReferenceCall = true;
+      } else {
+        path.remove();
+      }
+    },
+    exit(path) {
+      if (!t.isProgram(path.node) || !addedRegisterServerReferenceCall) {
+        path.skip();
+
+        return;
+      }
+
+      importNodes.add(
+        t.importDeclaration(
+          [
+            t.importSpecifier(
+              t.identifier(`createServerReference`),
+              t.identifier(`createServerReference`),
             ),
-          ),
-        ]),
+          ],
+          t.stringLiteral(`react-server-dom-webpack/client`),
+        ),
+      );
+
+      importNodes.add(
+        t.importDeclaration(
+          [
+            t.importSpecifier(
+              t.identifier(`callServer`),
+              t.identifier(`callServer`),
+            ),
+            t.importSpecifier(
+              t.identifier(`findSourceMapUrl`),
+              t.identifier(`findSourceMapUrl`),
+            ),
+          ],
+          t.stringLiteral(callServerImportSource),
+        ),
+      );
+
+      (path as traverse.NodePath<t.Program>).unshiftContainer(
+        `body`,
+        Array.from(importNodes),
       );
     },
   });
@@ -117,11 +143,43 @@ function webpackRscClientLoader(
     return this.callback(null, source, sourceMap);
   }
 
-  // TODO: Handle source maps.
+  const {code, map} = generate.default(
+    ast,
+    {
+      sourceFileName: this.resourcePath,
+      sourceMaps: this.sourceMap,
+      // @ts-expect-error
+      inputSourceMap: sourceMap,
+    },
+    source,
+  );
 
-  const {code} = generate.default(ast, {sourceFileName: this.resourcePath});
+  this.callback(null, code, map ?? sourceMap);
+}
 
-  this.callback(null, code);
+function createNamedExportedServerReference(
+  functionInfo: FunctionInfo,
+  moduleId: string | number,
+) {
+  const {exportName, loc} = functionInfo;
+  const exportIdentifier = t.identifier(exportName);
+
+  exportIdentifier.loc = loc;
+
+  return t.exportNamedDeclaration(
+    t.variableDeclaration(`const`, [
+      t.variableDeclarator(
+        exportIdentifier,
+        t.callExpression(t.identifier(`createServerReference`), [
+          t.stringLiteral(`${moduleId}#${exportName}`),
+          t.identifier(`callServer`),
+          t.identifier(`undefined`), // encodeFormAction
+          t.identifier(`findSourceMapUrl`),
+          t.stringLiteral(exportName),
+        ]),
+      ),
+    ]),
+  );
 }
 
 function isUseServerDirective(directive: t.Directive): boolean {
@@ -129,6 +187,35 @@ function isUseServerDirective(directive: t.Directive): boolean {
     t.isDirectiveLiteral(directive.value) &&
     directive.value.value === `use server`
   );
+}
+
+function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
+  let exportName: string | undefined;
+  let loc: t.SourceLocation | null | undefined;
+
+  if (t.isExportNamedDeclaration(node)) {
+    if (t.isFunctionDeclaration(node.declaration)) {
+      exportName = node.declaration.id?.name;
+      loc = node.declaration.id?.loc;
+    } else if (t.isVariableDeclaration(node.declaration)) {
+      const declarator = node.declaration.declarations[0];
+
+      if (!declarator) {
+        return undefined;
+      }
+
+      if (
+        (t.isFunctionExpression(declarator.init) ||
+          t.isArrowFunctionExpression(declarator.init)) &&
+        t.isIdentifier(declarator.id)
+      ) {
+        exportName = declarator.id.name;
+        loc = declarator.id.loc;
+      }
+    }
+  }
+
+  return exportName ? {exportName, loc} : undefined;
 }
 
 export = webpackRscClientLoader;

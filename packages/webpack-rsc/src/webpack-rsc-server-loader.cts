@@ -32,6 +32,7 @@ type RegisterReferenceType = 'Server' | 'Client';
 interface FunctionInfo {
   readonly localName: string;
   readonly hasUseServerDirective: boolean;
+  readonly loc: t.SourceLocation | null | undefined;
 }
 
 interface ExtendedFunctionInfo extends FunctionInfo {
@@ -274,6 +275,7 @@ function getExtendedFunctionInfo(
         localName: functionInfo.localName,
         exportName: functionInfo.localName,
         hasUseServerDirective: functionInfo.hasUseServerDirective,
+        loc: functionInfo.loc,
       };
     }
   } else {
@@ -286,6 +288,7 @@ function getExtendedFunctionInfo(
         localName: functionInfo.localName,
         exportName,
         hasUseServerDirective: functionInfo.hasUseServerDirective,
+        loc: functionInfo.loc,
       };
     }
   }
@@ -296,9 +299,11 @@ function getExtendedFunctionInfo(
 function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
   let localName: string | undefined;
   let hasUseServerDirective = false;
+  let loc: t.SourceLocation | null | undefined;
 
   if (t.isFunctionDeclaration(node)) {
     localName = node.id?.name;
+    loc = node.id?.loc;
 
     hasUseServerDirective = node.body.directives.some(
       isDirective(`use server`),
@@ -314,6 +319,7 @@ function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
         (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))
       ) {
         localName = id.name;
+        loc = id.loc;
 
         if (t.isBlockStatement(init.body)) {
           hasUseServerDirective = init.body.directives.some(
@@ -324,7 +330,7 @@ function getFunctionInfo(node: t.Node): FunctionInfo | undefined {
     }
   }
 
-  return localName ? {localName, hasUseServerDirective} : undefined;
+  return localName ? {localName, hasUseServerDirective, loc} : undefined;
 }
 
 function createNamedExportedClientReference(
@@ -407,13 +413,17 @@ function createClientReferenceProxyImplementation(): t.FunctionDeclaration {
 function createRegisterServerReference(
   functionInfo: ExtendedFunctionInfo,
 ): t.ExpressionStatement {
-  return t.expressionStatement(
+  const node = t.expressionStatement(
     t.callExpression(t.identifier(`registerServerReference`), [
       t.identifier(functionInfo.localName),
       t.identifier(webpack.RuntimeGlobals.moduleId),
       t.stringLiteral(functionInfo.exportName ?? functionInfo.localName),
     ]),
   );
+
+  node.loc = functionInfo.loc;
+
+  return node;
 }
 
 function createRegisterReferenceImport(
